@@ -13,11 +13,31 @@ public final class R {
     public static final class drawable {
         public static final int icon=0x7f020000;
     }
+    public static final class id {
+        public static final int button1=0x7f050009;
+        public static final int digitalClock1=0x7f050004;
+        public static final int editText1=0x7f050006;
+        public static final int editText2=0x7f050008;
+        public static final int linearLayout1=0x7f050000;
+        public static final int linearLayout2=0x7f050001;
+        public static final int linearLayout3=0x7f050003;
+        public static final int textView1=0x7f050002;
+        public static final int textView2=0x7f050005;
+        public static final int textView3=0x7f050007;
+    }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int add_destination=0x7f030000;
+        public static final int main=0x7f030001;
     }
     public static final class string {
-        public static final int app_name=0x7f040001;
-        public static final int hello=0x7f040000;
+        public static final int add_destination_title=0x7f040002;
+        public static final int address_title=0x7f040006;
+        public static final int app_name=0x7f040000;
+        public static final int arrival_title=0x7f040007;
+        public static final int departure_title=0x7f040008;
+        public static final int itenerary_title=0x7f040003;
+        public static final int name_title=0x7f040004;
+        public static final int overview_title=0x7f040001;
+        public static final int stay_title=0x7f040005;
     }
 }

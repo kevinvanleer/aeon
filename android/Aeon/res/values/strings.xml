@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, AeonActivity!</string>
     <string name="app_name">Aeon</string>
+    <string name="overview_title">Overview</string>
+    <string name="add_destination_title">Add Destination</string>
+    <string name="itenerary_title">Itenerary</string>
+    <string name="name_title">Name</string>
+    <string name="stay_title">Stay</string>
+    <string name="address_title">Address</string>
+    <string name="arrival_title">Arrival</string>
+    <string name="departure_title">Departure</string>
 </resources>
