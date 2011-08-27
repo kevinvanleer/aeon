@@ -1,0 +1,13 @@
+maps api key: 05ROLZYDGmf9ppwZ7uY9DuHs5bl_RorExjqOeqw
+
+only works with
+ fingerprint: FB:A1:7F:D1:33:A4:8E:71:BB:F8:C5:42:61:5D:74:36
+
+example code:
+
+<com.google.android.maps.MapView
+   android:layout_width="fill_parent"
+   android:layout_height="fill_parent"
+   android:apiKey="05ROLZYDGmf9ppwZ7uY9DuHs5bl_RorExjqOeqw"
+   />
+
