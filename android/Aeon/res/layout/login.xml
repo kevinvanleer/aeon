@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:orientation="vertical" android:layout_weight="0.25">
+    </LinearLayout>
+    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/textView1" android:layout_gravity="center_horizontal" android:text="@string/login_header" android:gravity="center" android:layout_margin="5dp"></TextView>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:layout_width="match_parent" android:orientation="vertical" android:layout_weight=".5"></LinearLayout>
+    <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/textView2" android:text="@string/username_label" android:layout_margin="5dp"></TextView>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/editText1" android:layout_margin="5dp">
+        <requestFocus></requestFocus>
+    </EditText>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout4" android:layout_width="match_parent" android:orientation="vertical" android:layout_weight="0.25"></LinearLayout>
+    <TextView android:id="@+id/textView3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/password_label" android:layout_margin="5dp"></TextView>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/editText2" android:inputType="textPassword" android:layout_margin="5dp"></EditText>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout5" android:layout_width="match_parent" android:orientation="vertical" android:layout_weight="0.5"></LinearLayout>
+    <Button android:layout_height="wrap_content" android:id="@+id/button1" android:layout_weight=".25" android:layout_gravity="center_horizontal" android:layout_width="fill_parent" android:text="@string/login_label" android:layout_margin="5dp"></Button>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="match_parent" android:layout_weight="0.25" android:orientation="vertical"></LinearLayout>
+    
+</LinearLayout>
