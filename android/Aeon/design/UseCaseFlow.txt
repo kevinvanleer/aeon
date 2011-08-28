@@ -13,3 +13,8 @@ Order destinations
 Set hard times (times that user must arrive at or depart from destinations)
 Set departing mode of transportation if differs for default
 Set pit stops (stops that are not destinations, do not have a specific location, rest area, gas up, etc)
+
+Setting a destination:
+Choose favorites or search
+enter favorite or search
+display results or destination info
