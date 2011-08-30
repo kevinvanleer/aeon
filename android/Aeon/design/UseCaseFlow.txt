@@ -1,7 +1,7 @@
 Aeon use cases and thought flow
 
 preferences:
-average vehicle gas milage
+average vehicle gas mileage
 starting fuel level
 default mode of transportation (walk, bike, drive, fly)
 
@@ -20,3 +20,5 @@ enter favorite or search
 display results or destination info
 
 sync Aeon with calendar
+
+Make Itinerary into a drag-n-drop list; will have to determine how best to prevent user from accidentally reordering

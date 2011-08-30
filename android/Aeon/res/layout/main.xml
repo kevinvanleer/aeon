@@ -7,14 +7,14 @@
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:orientation="vertical" android:layout_weight="1"></LinearLayout>
     <TableLayout android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/tableLayout1" android:layout_weight="0">
         <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content">
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="match_parent" android:text="Plan" android:id="@+id/button_plan"></Button>
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button2" android:text="Load"></Button>
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button3" android:text="Login"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="match_parent" android:id="@+id/button_plan" android:text="Plan"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button_load" android:text="Load"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button_login" android:text="Login"></Button>
         </TableRow>
         <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button4" android:text="Save"></Button>
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button5" android:text="Update"></Button>
-            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button6" android:text="Button"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button_save" android:text="Save"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button_update" android:text="Update"></Button>
+            <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button_sync" android:text="Sync"></Button>
         </TableRow>
         <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <Button android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" android:id="@+id/button7" android:text="Button"></Button>
