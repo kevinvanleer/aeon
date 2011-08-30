@@ -1,23 +1,43 @@
+
 package vanleer.android.aeon;
 
-import android.content.Context;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public final class Itinerary extends ListView{
+public final class Itinerary extends Activity implements  OnItemLongClickListener{
 
-	int id = R.id.listView_itinerary;
-	ListView iteneraryListView;
-	ArrayAdapter<String> iteneraryItems;
+	private int listViewId = R.id.listView_itinerary;
+	private ListView iteneraryListView;
+	private ArrayAdapter<String> itineraryItems;
 	
-	public Itinerary(Context context) {
-		super(context);
-				
-		iteneraryItems = new ArrayAdapter<String>(context, R.layout.itinerary);
-		iteneraryItems.add("Add Destination");
+	public void onCreate(Bundle savedInstanceState){
 		
-		iteneraryListView = (ListView) findViewById(id);		
-		iteneraryListView.setAdapter(iteneraryItems);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.itinerary);
+		
+		itineraryItems = new ArrayAdapter<String>(this, R.layout.itinerary_item);
+        itineraryItems.add("Add Destination");
+		
+		//iteneraryListView = new ListView(this);		
+    	iteneraryListView = (ListView) findViewById(listViewId);
+    	iteneraryListView.setAdapter(itineraryItems);
+        
+    	iteneraryListView.setOnItemLongClickListener(this);
 	}
 
+	/*public void onClick(View v) {
+		
+		
+	}*/
+
+	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+		setContentView(R.layout.add_destination);
+		return true;
+	}
 }

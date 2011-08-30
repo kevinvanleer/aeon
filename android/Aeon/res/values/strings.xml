@@ -9,4 +9,10 @@
     <string name="address_title">Address</string>
     <string name="arrival_title">Arrival</string>
     <string name="departure_title">Departure</string>
+    <string name="google_search_title">Google Search</string>
+    <string name="favorite_label">Pick Favorite</string>
+    <string name="login_header">Login to Google Maps to access your bookmarks</string>
+    <string name="username_label">Username</string>
+    <string name="password_label">Password</string>
+    <string name="login_label">Login</string>
 </resources>

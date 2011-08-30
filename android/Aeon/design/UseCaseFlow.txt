@@ -18,3 +18,5 @@ Setting a destination:
 Choose favorites or search
 enter favorite or search
 display results or destination info
+
+sync Aeon with calendar
