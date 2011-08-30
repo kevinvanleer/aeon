@@ -14,6 +14,7 @@ public final class Itinerary extends Activity implements  OnItemLongClickListene
 	private int listViewId = R.id.listView_itinerary;
 	private ListView iteneraryListView;
 	private ArrayAdapter<String> itineraryItems;
+	private static String ADD_DESTINATION = "Add Destination";
 	
 	public void onCreate(Bundle savedInstanceState){
 		
@@ -21,23 +22,30 @@ public final class Itinerary extends Activity implements  OnItemLongClickListene
 		setContentView(R.layout.itinerary);
 		
 		itineraryItems = new ArrayAdapter<String>(this, R.layout.itinerary_item);
-        itineraryItems.add("Add Destination");
+        itineraryItems.add(ADD_DESTINATION);
 		
-		//iteneraryListView = new ListView(this);		
     	iteneraryListView = (ListView) findViewById(listViewId);
     	iteneraryListView.setAdapter(itineraryItems);
         
     	iteneraryListView.setOnItemLongClickListener(this);
 	}
 
-	/*public void onClick(View v) {
+	public boolean onItemLongClick(AdapterView<?> parentView, View textView, int position, long id) {
 		
+		if(itineraryItems.getItem(position) == ADD_DESTINATION){
+			
+			setContentView(R.layout.add_destination);
+			//TODO: create an intent and start a new activity for adding a destination
+			/*
+			 * consider consolidating menus to avoid creating so many activities
+			 * explore the possibility of pop-up dialogs or something similar 
+			 */
+		}
+		else{
+			
+			//TODO: edit the selected destination
+		}
 		
-	}*/
-
-	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
-		setContentView(R.layout.add_destination);
 		return true;
 	}
 }
