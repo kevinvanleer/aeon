@@ -15,4 +15,5 @@
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="login_label">Login</string>
+    <string name="places_search_title">Places Search</string>
 </resources>
