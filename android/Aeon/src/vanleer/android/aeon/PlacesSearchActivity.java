@@ -5,18 +5,19 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public final class PlacesSearchActivity extends Activity implements OnClickListener{
 	private ArrayAdapter<String> searchResults;
@@ -25,17 +26,30 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
     private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 	private Location currentLocation;
 	private String query;
-	private Button searchButton;
+	private ImageButton searchButton;
 	private GooglePlacesSearch googleSearch;
-    
+	private LocationManager locationManager;
+	private ProgressDialog waitSpinner = null; 
+	private EditText searchText;
+	private boolean waitingForGps = false; 
+   
+	//lat=38.742652
+	//long=-90.098394
+	
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search_destination);
 		googleSearch = new GooglePlacesSearch(apiKey, "");
-	    searchButton = (Button) findViewById(R.id.imageButton_search);
+	    searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 	    searchButton.setOnClickListener(this);
-		// Acquire a reference to the system Location Manager
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	    searchText = (EditText) findViewById(R.id.editText_searchQuery);
+	    //TODO: Make custom adapter
+	    searchResults = new ArrayAdapter<String>(this, R.layout.itinerary_item);
+		searchResultsListView = (ListView) findViewById(listViewId);
+		searchResultsListView.setAdapter(searchResults);
+		// Acquire a reference to the system Location Manager	    
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	
 		// Define a listener that responds to location updates
 		LocationListener locationListener = new LocationListener() {
@@ -56,27 +70,68 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	protected void makeUseOfNewLocation(Location location) {
-		// TODO Auto-generated method stub
 		currentLocation = location;
+		TextView locationText = (TextView) findViewById(R.id.textView_currentLocation);
+		//TODO: Convert lat/long to city/state
+		locationText.setText(Double.toString(currentLocation.getLatitude()) +
+				" ," + Double.toString(currentLocation.getLongitude()));
+		if(waitingForGps) {
+			waitingForGps  = false;
+			onClick(searchButton);
+		}
 	}
 
 	public void onClick(View v) {
-		try {
-			EditText searchText = (EditText) findViewById(R.id.editText_searchQuery);
-			googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(), 10000, searchText.getText().toString(), true);
-			searchResults = new ArrayAdapter<String>(this, R.layout.itinerary_item);
-			for(int i = 0; i < googleSearch.GetResultCount(); ++i)
-			{
+		if(currentLocation == null) {
+			waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
+					"", "waiting for GPS...", true);
+			waitingForGps = true;
+			new Thread() {
+				public void run() {
+					while(currentLocation == null) {
+						try {
+							sleep(1);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					waitSpinner.dismiss();
+				}
+			}.start();
+		} else {
+			searchResults.clear();
+			searchResultsListView.clearChoices();
+			waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
+					"", "searching...", true);
+			new Thread() {
+				public void run() {
+					//TODO:  Figure out how to signal thread to finish 
+					while(googleSearch.GetResultCount() == 0) {
+						try {
+							sleep(1);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					waitSpinner.dismiss();
+				}
+			}.start();
+			try {
+				googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
+						10000, searchText.getText().toString(), true);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
+				//TODO: use custom list view item and display more information
 				searchResults.add(googleSearch.GetPlaceField(i, "name"));
 			}
-			searchResultsListView = (ListView) findViewById(listViewId);
-			searchResultsListView.setAdapter(searchResults);
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }

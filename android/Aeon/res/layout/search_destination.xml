@@ -17,9 +17,10 @@
         <ImageView android:id="@+id/imageView1" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom"></ImageView>
     </LinearLayout>
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:layout_width="match_parent" android:baselineAligned="false">
-        <EditText android:layout_marginLeft="15dp" android:inputType="textPostalAddress" android:layout_weight="1" android:layout_height="wrap_content" android:id="@+id/editText_searchQuery" android:layout_width="match_parent"></EditText>
-        <ImageButton android:layout_weight="1" android:layout_height="wrap_content" android:src="@drawable/search_icon" android:layout_width="wrap_content" android:id="@+id/imageButton_search"></ImageButton>
+        <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/editText_searchQuery" android:layout_marginLeft="15dp" android:layout_weight="1" android:inputType="textPostalAddress"></EditText>
+        <ImageButton android:id="@+id/imageButton_search" android:layout_height="match_parent" android:layout_width="match_parent" android:src="@android:drawable/ic_menu_search" android:layout_weight="5"></ImageButton>
     </LinearLayout>
+    <TextView android:layout_height="wrap_content" android:id="@+id/textView_currentLocation" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:text="TextView"></TextView>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/listView_searchResults"></ListView>
     
 </LinearLayout>

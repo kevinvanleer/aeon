@@ -15,6 +15,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import android.net.Uri;
+
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json"; 
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"; 
@@ -70,21 +72,24 @@ public final class GooglePlacesSearch {
 	    url += "&radius=" + radius;
 	    
 	    if(types != null) {	    	
+	       String typesString = "";
    	       url += "&types=";
    	       for(int i = 0; i < types.length; ++i) {
    	    	   if(i > 0) {
-   	    		   url += "|";
+   	    		   typesString += "|";
    	    	   }
    	    		   
-   	    	   url += types[i];
-   	       }   	       
-   	   	}
+   	    	   typesString += types[i];
+   	       }
+   	       
+   	       url += Uri.encode(typesString);
+   	   	}	    
 	    
 	    if(name != "") {
 	    	if(autocomplete) {
-	    		url += "&name=" + name;
+	    		url += "&input=" + Uri.encode(name);
 	    	} else {
-	    		url += "&input=" + name;
+	    		url += "&name=" + Uri.encode(name);
 	    	}
 	    }
 	    
@@ -103,7 +108,13 @@ public final class GooglePlacesSearch {
 	}
 
 	public int GetResultCount() {
-		JSONArray resultArray = (JSONArray) places.get("results");
-		return resultArray.size();
+		int resultCount = 0;
+		if(places != null) {			
+			JSONArray resultArray = (JSONArray) places.get("results");
+			if(resultArray != null) {
+				resultCount = resultArray.size();
+			}
+		}
+		return resultCount;
 	}
 }

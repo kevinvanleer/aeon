@@ -71,7 +71,6 @@ public final class Itinerary extends Activity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		String menuItemName = (String) item.getTitle();
-
 		if (menuItemName == STARRED_LOCATIONS) {
 			if (!loggedIntoGoogle) {
 				// TODO: Login to Google account
