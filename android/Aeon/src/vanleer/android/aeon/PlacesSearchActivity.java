@@ -1,6 +1,7 @@
 package vanleer.android.aeon;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 
@@ -20,12 +21,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public final class PlacesSearchActivity extends Activity implements OnClickListener{
-	private ArrayAdapter<String> searchResults;
+	private ArrayList<ItineraryItem> searchResultsList;
+	private ArrayAdapter<ItineraryItem> searchResults;
 	private ListView searchResultsListView;
 	private int listViewId = R.id.listView_searchResults;
     private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 	private Location currentLocation;
-	private String query;
 	private ImageButton searchButton;
 	private GooglePlacesSearch googleSearch;
 	private LocationManager locationManager;
@@ -45,7 +46,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	    searchButton.setOnClickListener(this);
 	    searchText = (EditText) findViewById(R.id.editText_searchQuery);
 	    //TODO: Make custom adapter
-	    searchResults = new ArrayAdapter<String>(this, R.layout.itinerary_item);
+	    searchResultsList = new ArrayList<ItineraryItem>();
+	    searchResults = new ItineraryItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    
@@ -100,8 +102,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				}
 			}.start();
 		} else {
-			searchResults.clear();
-			searchResultsListView.clearChoices();
 			waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
 					"", "searching...", true);
 			new Thread() {
@@ -118,6 +118,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					waitSpinner.dismiss();
 				}
 			}.start();
+			searchResultsList.clear();
+			searchResults.clear();
+			searchResultsListView.clearChoices();
 			try {
 				googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
 						10000, searchText.getText().toString(), true);
@@ -130,7 +133,12 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			}
 			for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
 				//TODO: use custom list view item and display more information
-				searchResults.add(googleSearch.GetPlaceField(i, "name"));
+				ItineraryItem newItem = googleSearch.GetPlaceField(i);
+				if(newItem != null) {
+					newItem.SetDistance(currentLocation);
+					searchResultsList.add(newItem);
+					searchResults.add(searchResultsList.get(i));
+				}
 			}
 		}
 	}

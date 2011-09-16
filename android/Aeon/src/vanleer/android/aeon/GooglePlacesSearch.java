@@ -21,13 +21,11 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json"; 
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"; 
     private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
-    private String clientId = "";
-	private boolean autocomplete = false;	
+    private boolean autocomplete = false;	
 	private JSONObject places;
     
     GooglePlacesSearch(String userApiKey, String userClientId) {
     	apiKey = userApiKey;
-    	clientId = userClientId;
     }
     
 	void PerformSearch(double latitude, double longitude,
@@ -101,10 +99,20 @@ public final class GooglePlacesSearch {
 		return url;
 	} 
 	
-	public String GetPlaceField(final int index, final String field) {
-		JSONArray resultArray = (JSONArray) places.get("results");
-		JSONObject place = (JSONObject) resultArray.get(index);
-		return (String) place.get(field);
+	public ItineraryItem GetPlaceField(final int index) {
+		ItineraryItem item = null;
+		if(places != null) {
+			JSONArray resultArray = (JSONArray) places.get("results");
+			if(resultArray != null) {
+				JSONObject place = (JSONObject) resultArray.get(index);
+				if(place != null) {
+					//field = (String) place.get(field);
+				    item = new ItineraryItem(place);	
+				}
+			}
+		}
+		
+		return item;
 	}
 
 	public int GetResultCount() {
