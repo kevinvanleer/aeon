@@ -52,9 +52,9 @@ public final class R {
         public static final int textView2=0x7f05000b;
         public static final int textView3=0x7f05000d;
         public static final int textView_currentLocation=0x7f050020;
-        public static final int textView_distance=0x7f050023;
+        public static final int textView_distance=0x7f050024;
         public static final int textView_name=0x7f050022;
-        public static final int textView_vicinity=0x7f050024;
+        public static final int textView_vicinity=0x7f050023;
     }
     public static final class layout {
         public static final int add_destination=0x7f030000;

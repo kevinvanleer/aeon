@@ -61,12 +61,17 @@ public final class ItineraryItem {
 	}
 	
 	private String ReducePrecision(double value) {
-		return ReducePrecision(value, 2);
+		return ReducePrecision(value, 1);
 	}
 	private String ReducePrecision(double value, int precision) {
+		if(precision > 0) {
+			++precision;
+		}
+		
 		String stringRep = Double.toString(value);
 		int pointIdx = stringRep.indexOf(".");
-		
+
+		//TODO: Add chars necessary to provide desired precision
 		if(pointIdx >= stringRep.length()) {
 			stringRep.concat("00");
 		} else if(pointIdx < 0) {

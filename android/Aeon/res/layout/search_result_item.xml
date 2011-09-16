@@ -4,10 +4,11 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent" android:orientation="vertical">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent">
-        <TextView android:id="@+id/textView_name" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content"></TextView>
-        <LinearLayout android:id="@+id/linearLayout2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></LinearLayout>
-        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content" android:id="@+id/textView_distance"></TextView>
+        <TextView android:id="@+id/textView_name" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:text="Name of Place" android:layout_width="match_parent"></TextView>
     </LinearLayout>
-    <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content" android:id="@+id/textView_vicinity"></TextView>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="match_parent">
+        <TextView android:id="@+id/textView_vicinity" android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="wrap_content" android:layout_weight="1" android:lines="1" android:marqueeRepeatLimit="marquee_forever" android:text="Philadelphia, Pennsylvania"></TextView>
+        <TextView android:id="@+id/textView_distance" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:text="00000.00"></TextView>
+    </LinearLayout>
     
 </LinearLayout>

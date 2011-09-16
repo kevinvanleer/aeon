@@ -45,7 +45,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	    searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 	    searchButton.setOnClickListener(this);
 	    searchText = (EditText) findViewById(R.id.editText_searchQuery);
-	    //TODO: Make custom adapter
 	    searchResultsList = new ArrayList<ItineraryItem>();
 	    searchResults = new ItineraryItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
@@ -75,8 +74,17 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		currentLocation = location;
 		TextView locationText = (TextView) findViewById(R.id.textView_currentLocation);
 		//TODO: Convert lat/long to city/state
-		locationText.setText(Double.toString(currentLocation.getLatitude()) +
-				" ," + Double.toString(currentLocation.getLongitude()));
+		//locationText.setText(Double.toString(currentLocation.getLatitude()) +
+		//		" ," + Double.toString(currentLocation.getLongitude()));
+		try {
+			locationText.setText(GooglePlacesSearch.ReverseGeocode(currentLocation, true));
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(waitingForGps) {
 			waitingForGps  = false;
 			onClick(searchButton);
@@ -132,8 +140,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				e.printStackTrace();
 			}
 			for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
-				//TODO: use custom list view item and display more information
-				ItineraryItem newItem = googleSearch.GetPlaceField(i);
+				ItineraryItem newItem = googleSearch.GetPlace(i);
 				if(newItem != null) {
 					newItem.SetDistance(currentLocation);
 					searchResultsList.add(newItem);
