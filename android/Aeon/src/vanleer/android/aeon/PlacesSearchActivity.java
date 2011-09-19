@@ -12,11 +12,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,15 +28,17 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private ArrayAdapter<ItineraryItem> searchResults;
 	private ListView searchResultsListView;
 	private int listViewId = R.id.listView_searchResults;
-    private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
+	private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 	private Location currentLocation;
 	private ImageButton searchButton;
+	private TextView locationText;
+	private ImageView locationSensorImage;
 	private GooglePlacesSearch googleSearch;
 	private LocationManager locationManager;
 	private ProgressDialog waitSpinner = null; 
 	private EditText searchText;
 	private boolean waitingForGps = false; 
-   
+	
 	//lat=38.742652
 	//long=-90.098394
 	
@@ -41,7 +46,10 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search_destination);
+		locationSensorImage = (ImageView) findViewById(R.id.imageView_currentLocation);
+		locationSensorImage.setVisibility(View.INVISIBLE);
 		googleSearch = new GooglePlacesSearch(apiKey, "");
+		locationText = (TextView) findViewById(R.id.textView_currentLocation);
 	    searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 	    searchButton.setOnClickListener(this);
 	    searchText = (EditText) findViewById(R.id.editText_searchQuery);
@@ -72,24 +80,35 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
-		TextView locationText = (TextView) findViewById(R.id.textView_currentLocation);
-		//TODO: Convert lat/long to city/state
-		//locationText.setText(Double.toString(currentLocation.getLatitude()) +
-		//		" ," + Double.toString(currentLocation.getLongitude()));
-		try {
-			locationText.setText(GooglePlacesSearch.ReverseGeocode(currentLocation, true));
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		locationSensorImage.setVisibility(View.VISIBLE);
+		new Thread() {
+			public void run() {
+				try {
+					//TODO: Figure out how to set the location text view from separate thread
+					//locationText.setText(GooglePlacesSearch.ReverseGeocode(currentLocation, true));
+					Message msg = updateCurrentLocationTextHandler.obtainMessage();
+	                msg.obj = GooglePlacesSearch.ReverseGeocode(currentLocation, true);
+	                updateCurrentLocationTextHandler.sendMessage(msg);
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}.start();
 		if(waitingForGps) {
 			waitingForGps  = false;
 			onClick(searchButton);
 		}
 	}
+	
+	final Handler updateCurrentLocationTextHandler = new Handler() {
+        public void handleMessage(Message msg) {
+        	locationText.setText((String) msg.obj);
+        }
+    };
 
 	public void onClick(View v) {
 		if(currentLocation == null) {

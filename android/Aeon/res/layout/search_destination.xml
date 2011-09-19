@@ -6,21 +6,22 @@
   android:layout_height="match_parent" android:weightSum="1" android:layout_margin="5dp">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:orientation="vertical">
         <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:layout_width="match_parent" android:baselineAligned="true">
-            <TextView android:id="@+id/textView1" android:textAppearance="?android:attr/textAppearanceMedium" android:text="@string/add_destination_title" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center_vertical"></TextView>
             <LinearLayout android:layout_height="match_parent" android:id="@+id/linearLayout3" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
-            <DigitalClock android:id="@+id/digitalClock1" android:text="DigitalClock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_vertical"></DigitalClock>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout android:id="@+id/linearLayout4" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:text="Places Search" android:id="@+id/textView3" android:layout_height="wrap_content"></TextView>
         <LinearLayout android:id="@+id/linearLayout5" android:layout_height="match_parent" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
-        <ImageView android:id="@+id/imageView1" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom"></ImageView>
+        <ImageView android:id="@+id/imageView_poweredByGoogle" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom"></ImageView>
     </LinearLayout>
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:layout_width="match_parent" android:baselineAligned="false">
         <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/editText_searchQuery" android:layout_marginLeft="15dp" android:layout_weight="1" android:inputType="textPostalAddress"></EditText>
         <ImageButton android:id="@+id/imageButton_search" android:layout_height="match_parent" android:layout_width="match_parent" android:src="@android:drawable/ic_menu_search" android:layout_weight="5"></ImageButton>
     </LinearLayout>
-    <TextView android:layout_height="wrap_content" android:id="@+id/textView_currentLocation" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:text="TextView"></TextView>
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout7" android:layout_width="match_parent">
+        <TextView android:id="@+id/textView_currentLocation" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:text="My location" android:layout_weight="1" android:lines="1" android:marqueeRepeatLimit="marquee_forever"></TextView>
+        <ImageView android:src="@android:drawable/ic_menu_mylocation" android:layout_height="fill_parent" android:layout_width="wrap_content" android:id="@+id/imageView_currentLocation"></ImageView>
+    </LinearLayout>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/listView_searchResults"></ListView>
     
 </LinearLayout>

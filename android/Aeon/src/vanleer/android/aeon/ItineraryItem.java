@@ -6,8 +6,10 @@ import android.location.Location;
 
 public final class ItineraryItem {
 	private JSONObject googlePlaceResult;
+	private JSONObject googleDistanceMatrixResult;
 	private Location location;
-	private double distance;
+	private Long duration;
+	private Long distance;
 	public String iconUrl;
 	private static final double MILES_PER_METER = 0.00062137119;
 	
@@ -22,6 +24,22 @@ public final class ItineraryItem {
 	
 	String GetVicinity() {
 		return (String) googlePlaceResult.get("vicinity");			
+	}
+	
+	void SetDistance(JSONObject distanceMatrixData) {
+		if(distanceMatrixData != null) {
+			googleDistanceMatrixResult = distanceMatrixData;
+			
+			JSONObject distanceObject = (JSONObject) googleDistanceMatrixResult.get("distance");
+			if(distanceObject != null) {
+				distance = (Long) distanceObject.get("value");
+			}
+			
+			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
+			if(durationObject != null) {
+				duration = (Long) durationObject.get("value");
+			}
+		}
 	}
 	
 	Location GetLocation() {
@@ -42,10 +60,12 @@ public final class ItineraryItem {
 	}
 	
 	void SetDistance(final Location origin) {
-		distance = location.distanceTo(origin);
+		distance = (long) location.distanceTo(origin);
+		duration = (long) 0;
+		googleDistanceMatrixResult = null;
 	}
 	
-	public double GetDistance() {
+	public Long GetDistance() {
 		return distance;
 	}
 	
@@ -58,6 +78,16 @@ public final class ItineraryItem {
 	}
 	public String GetDistanceKilometers() {
 		return ReducePrecision(distance / 1000.) + " km";
+	}
+	
+	public Long GetDuration() {
+		return duration;
+	}
+	
+	public String GetDurationClockFormat() {
+		long minutes = duration / 60;
+		long seconds = duration - minutes;		
+		return minutes + ":" + seconds;
 	}
 	
 	private String ReducePrecision(double value) {
