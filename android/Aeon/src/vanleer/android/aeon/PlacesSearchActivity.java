@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -38,10 +39,10 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private ProgressDialog waitSpinner = null; 
 	private EditText searchText;
 	private boolean waitingForGps = false; 
-	
+
 	//lat=38.742652
 	//long=-90.098394
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,30 +51,30 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationSensorImage.setVisibility(View.INVISIBLE);
 		googleSearch = new GooglePlacesSearch(apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
-	    searchButton = (ImageButton) findViewById(R.id.imageButton_search);
-	    searchButton.setOnClickListener(this);
-	    searchText = (EditText) findViewById(R.id.editText_searchQuery);
-	    searchResultsList = new ArrayList<ItineraryItem>();
-	    searchResults = new ItineraryItemAdapter(this, R.layout.search_result_item, searchResultsList);
+		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
+		searchButton.setOnClickListener(this);
+		searchText = (EditText) findViewById(R.id.editText_searchQuery);
+		searchResultsList = new ArrayList<ItineraryItem>();
+		searchResults = new ItineraryItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-	
+
 		// Define a listener that responds to location updates
 		LocationListener locationListener = new LocationListener() {
-		    public void onLocationChanged(Location location) {
-		      // Called when a new location is found by the network location provider.
-		      makeUseOfNewLocation(location);
-		    }
-	
-		    public void onStatusChanged(String provider, int status, Bundle extras) {}
-	
-		    public void onProviderEnabled(String provider) {}
-	
-		    public void onProviderDisabled(String provider) {}
-		  };
-	
+			public void onLocationChanged(Location location) {
+				// Called when a new location is found by the network location provider.
+				makeUseOfNewLocation(location);
+			}
+
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+			public void onProviderEnabled(String provider) {}
+
+			public void onProviderDisabled(String provider) {}
+		};
+
 		// Register the listener with the Location Manager to receive location updates
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
@@ -81,14 +82,15 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
 		locationSensorImage.setVisibility(View.VISIBLE);
+		//make the image view square
+		MakeImageViewSquare(locationSensorImage);
+		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
 		new Thread() {
 			public void run() {
 				try {
-					//TODO: Figure out how to set the location text view from separate thread
-					//locationText.setText(GooglePlacesSearch.ReverseGeocode(currentLocation, true));
 					Message msg = updateCurrentLocationTextHandler.obtainMessage();
-	                msg.obj = GooglePlacesSearch.ReverseGeocode(currentLocation, true);
-	                updateCurrentLocationTextHandler.sendMessage(msg);
+					msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
+					updateCurrentLocationTextHandler.sendMessage(msg);
 				} catch (ClientProtocolException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -103,12 +105,12 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			onClick(searchButton);
 		}
 	}
-	
+
 	final Handler updateCurrentLocationTextHandler = new Handler() {
-        public void handleMessage(Message msg) {
-        	locationText.setText((String) msg.obj);
-        }
-    };
+		public void handleMessage(Message msg) {
+			locationText.setText((String) msg.obj);
+		}
+	};
 
 	public void onClick(View v) {
 		if(currentLocation == null) {
@@ -133,7 +135,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					"", "searching...", true);
 			new Thread() {
 				public void run() {
-					//TODO:  Figure out how to signal thread to finish 
 					while(googleSearch.GetResultCount() == 0) {
 						try {
 							sleep(1);
@@ -167,5 +168,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				}
 			}
 		}
+	}
+
+	private static void MakeImageViewSquare(ImageView image) {
+		LayoutParams params = image.getLayoutParams();
+		params.width = image.getHeight();
+		image.setLayoutParams(params);
 	}
 }

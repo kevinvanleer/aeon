@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.lang.Math;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -25,7 +27,8 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"; 
 	private static final String GOOGLE_REVERSE_GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-    private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
+    private String apiKey;
+    private HttpClient httpClient;
     private boolean autocomplete = false;
 	private JSONObject searchResults;
 	private ArrayList<ItineraryItem> places;
@@ -33,6 +36,7 @@ public final class GooglePlacesSearch {
     GooglePlacesSearch(String userApiKey, String userClientId) {
     	apiKey = userApiKey;
     	places = new ArrayList<ItineraryItem>();
+		httpClient = new DefaultHttpClient();
     }
     
 	void PerformSearch(double latitude, double longitude,
@@ -47,7 +51,6 @@ public final class GooglePlacesSearch {
 	
 	void PerformSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) throws ClientProtocolException, IOException {
-		HttpClient httpClient = new DefaultHttpClient();
 		String url = BuildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
 		HttpResponse response = httpClient.execute(new HttpGet(url));
 		StatusLine statusLine = response.getStatusLine();
@@ -55,7 +58,10 @@ public final class GooglePlacesSearch {
 		    InputStream inStream = response.getEntity().getContent();
 		    BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
 		    searchResults = (JSONObject)JSONValue.parse(reader);
-		    GetDistances(httpClient, latitude, longitude, sensor);
+		    if(GetResultCount() != 0)
+		    {
+		    	GetDistances(httpClient, latitude, longitude, sensor);
+		    }
 		} else {
 		    //Closes the connection.
 		    response.getEntity().getContent().close();
@@ -166,18 +172,6 @@ public final class GooglePlacesSearch {
 	} 
 
 	public ItineraryItem GetPlace(final int index) {
-		/*ItineraryItem item = null;
-		if(searchResults != null) {
-			JSONArray resultArray = (JSONArray) searchResults.get("results");
-			if(resultArray != null) {
-				JSONObject place = (JSONObject) resultArray.get(index);
-				if(place != null) {
-				    item = new ItineraryItem(place);	
-				}
-			}
-		}
-		
-		return item;*/
 		return places.get(index);
 	}
 
@@ -192,14 +186,13 @@ public final class GooglePlacesSearch {
 		return resultCount;
 	}
 	
-	static public String ReverseGeocode(final Location location, Boolean sensor) throws ClientProtocolException, IOException {
+	public String ReverseGeocode(final Location location, Boolean sensor) throws ClientProtocolException, IOException {
 		String bestDescription = "";
-		HttpClient httpclient = new DefaultHttpClient();
 		String url = (GOOGLE_REVERSE_GEOCODE_URL + "?latlng=" + Double.toString(location.getLatitude()) +
 				"," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
-		HttpResponse response = httpclient.execute(new HttpGet(url));
+		HttpResponse response = httpClient.execute(new HttpGet(url));
 		StatusLine statusLine = response.getStatusLine();
-		if(statusLine.getStatusCode() == HttpStatus.SC_OK) {			 
+		if(statusLine.getStatusCode() == HttpStatus.SC_OK) {
 		    InputStream inStream = response.getEntity().getContent();
 		    BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
 		    JSONObject placemarks  = (JSONObject)JSONValue.parse(reader);
@@ -219,5 +212,22 @@ public final class GooglePlacesSearch {
 		}
 		
 		return bestDescription;
+	}
+	
+	static String GetGeodeticString(Location location) {
+		String latSuffix = "° N";
+		String lngSuffix = "° E";
+		if(location.getLatitude() < 0) {
+			latSuffix = "° S";	
+		}
+		if(location.getLongitude() < 0) {
+			lngSuffix = "° W";	
+		}
+	
+		String latString = String.format("%1$.4f", Math.abs(location.getLatitude()));
+		String lngString = String.format("%1$.4f", Math.abs(location.getLongitude()));
+		
+		return (latString + latSuffix + ", " + lngString + lngSuffix);
+		
 	}
 }
