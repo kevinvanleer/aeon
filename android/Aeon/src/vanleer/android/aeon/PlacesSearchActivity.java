@@ -1,9 +1,6 @@
 package vanleer.android.aeon;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -39,9 +36,10 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private ProgressDialog waitSpinner = null; 
 	private EditText searchText;
 	private boolean waitingForGps = false; 
+	private boolean searching = false;
 
-	//lat=38.742652
-	//long=-90.098394
+	//lat=38.74419380
+	//lng=-90.09839319999999
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,6 +49,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationSensorImage.setVisibility(View.INVISIBLE);
 		googleSearch = new GooglePlacesSearch(apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
+		locationText.setText("Waiting for GPS...");
 		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 		searchButton.setOnClickListener(this);
 		searchText = (EditText) findViewById(R.id.editText_searchQuery);
@@ -87,17 +86,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
 		new Thread() {
 			public void run() {
-				try {
-					Message msg = updateCurrentLocationTextHandler.obtainMessage();
-					msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
-					updateCurrentLocationTextHandler.sendMessage(msg);
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				Message msg = updateCurrentLocationTextHandler.obtainMessage();
+				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
+				updateCurrentLocationTextHandler.sendMessage(msg);
 			}
 		}.start();
 		if(waitingForGps) {
@@ -112,60 +103,80 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		}
 	};
 
+	private void WaitForGps() {
+		waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
+				"", "waiting for GPS...", true);
+		waitingForGps = true;
+		new Thread() {
+			public void run() {
+				while(currentLocation == null) {
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				waitSpinner.dismiss();
+			}
+		}.start();
+	}
+
+	private void WaitForSearchResults() {
+		waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
+				"", "searching...", true);
+		searching = true;
+		new Thread() {
+			public void run() {
+				while(searching) {
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				waitSpinner.dismiss();
+			}
+		}.start();
+	}
+
 	public void onClick(View v) {
+		switch(v.getId()) {
+		case R.id.imageButton_search:
+			GetSearchResults();
+			break;
+		}
+	}
+
+	private void GetSearchResults() {	
 		if(currentLocation == null) {
-			waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
-					"", "waiting for GPS...", true);
-			waitingForGps = true;
-			new Thread() {
-				public void run() {
-					while(currentLocation == null) {
-						try {
-							sleep(1);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					waitSpinner.dismiss();
-				}
-			}.start();
+			WaitForGps();
 		} else {
-			waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
-					"", "searching...", true);
-			new Thread() {
-				public void run() {
-					while(googleSearch.GetResultCount() == 0) {
-						try {
-							sleep(1);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					waitSpinner.dismiss();
-				}
-			}.start();
+			WaitForSearchResults();
+
 			searchResultsList.clear();
 			searchResults.clear();
 			searchResultsListView.clearChoices();
-			try {
-				googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
-						10000, searchText.getText().toString(), true);
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
-				ItineraryItem newItem = googleSearch.GetPlace(i);
-				if(newItem != null) {
-					newItem.SetDistance(currentLocation);
-					searchResultsList.add(newItem);
-					searchResults.add(searchResultsList.get(i));
-				}
+			QuerySearchEngine();		
+			
+			BuildResultsList();
+		}
+	}
+
+	private void QuerySearchEngine() {
+		googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
+				10000, searchText.getText().toString(), true);
+		searching = false;		
+	}
+
+	private void BuildResultsList() {
+		for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
+			ItineraryItem newItem = googleSearch.GetPlace(i);
+			if(newItem != null) {
+				newItem.SetDistance(currentLocation);
+				searchResultsList.add(newItem);
+				searchResults.add(searchResultsList.get(i));
 			}
 		}
 	}
