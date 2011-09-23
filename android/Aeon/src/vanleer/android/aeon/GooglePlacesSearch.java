@@ -26,12 +26,12 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"; 
 	private static final String GOOGLE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-	private String apiKey;
-	private HttpClient httpClient;
+	private String apiKey = null;
+	private HttpClient httpClient = null;
 	private boolean autocomplete = false;
-	private JSONObject placesSearchResults;
-	private JSONObject geocodingSearchResults;
-	private ArrayList<ItineraryItem> places;
+	private JSONObject placesSearchResults = null;
+	private JSONObject geocodingSearchResults = null;
+	private ArrayList<ItineraryItem> places = null;
 
 	GooglePlacesSearch(String userApiKey, String userClientId) {
 		apiKey = userApiKey;
@@ -51,9 +51,12 @@ public final class GooglePlacesSearch {
 
 	void PerformSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
+		if(!places.isEmpty()) {
+			places.clear();
+		}
 		PerformGeocodingSearch(name, sensor);
 		PerformPlacesSearch(latitude, longitude, radius, types, name, sensor);
-		if(GetPlacesSearchResultCount() > 0)
+		if(GetSearchResultCount() > 0)
 		{
 			JSONObject distanceMatrixResults = GetDistances(httpClient, latitude, longitude, sensor);
 			ParseDistanceMatrixResults(distanceMatrixResults);
@@ -154,7 +157,9 @@ public final class GooglePlacesSearch {
 						destinations += places.get(index).GetLocation().getLongitude() + "|";
 					}
 				}
-				destinations = destinations.substring(0, destinations.length() - 1);
+				if(!destinations.isEmpty()) {
+					destinations = destinations.substring(0, destinations.length() - 1);
+				}
 			}
 		}
 		return destinations;
@@ -173,7 +178,9 @@ public final class GooglePlacesSearch {
 						destinations += places.get(index).GetLocation().getLongitude() + "|";
 					}
 				}
-				destinations = destinations.substring(0, destinations.length() - 1);
+				if(!destinations.isEmpty()) {
+					destinations = destinations.substring(0, destinations.length() - 1);
+				}
 			}
 		}
 		return destinations;
@@ -227,6 +234,10 @@ public final class GooglePlacesSearch {
 
 	public int GetResultCount() {
 		return places.size();
+	}
+
+	private int GetSearchResultCount() {
+		return GetPlacesSearchResultCount() + GetGeocodingSearchResultCount();
 	}
 
 	public int GetGeocodingSearchResultCount() {

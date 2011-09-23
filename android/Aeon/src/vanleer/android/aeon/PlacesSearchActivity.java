@@ -49,7 +49,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationSensorImage.setVisibility(View.INVISIBLE);
 		googleSearch = new GooglePlacesSearch(apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
-		locationText.setText("Waiting for GPS...");
+		locationText.setText("Waiting for location...");
 		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 		searchButton.setOnClickListener(this);
 		searchText = (EditText) findViewById(R.id.editText_searchQuery);
@@ -80,6 +80,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
+		boolean callOnClick = false;
+		if(waitingForGps) {
+			waitingForGps  = false;
+			callOnClick = true;
+		}
 		locationSensorImage.setVisibility(View.VISIBLE);
 		//make the image view square
 		MakeImageViewSquare(locationSensorImage);
@@ -91,8 +96,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				updateCurrentLocationTextHandler.sendMessage(msg);
 			}
 		}.start();
-		if(waitingForGps) {
-			waitingForGps  = false;
+		if(callOnClick) {
 			onClick(searchButton);
 		}
 	}
@@ -105,7 +109,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	private void WaitForGps() {
 		waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
-				"", "waiting for GPS...", true);
+				"", "waiting for location...", true);
 		waitingForGps = true;
 		new Thread() {
 			public void run() {

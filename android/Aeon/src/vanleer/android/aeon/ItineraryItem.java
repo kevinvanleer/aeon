@@ -7,7 +7,9 @@ import android.location.Location;
 
 public final class ItineraryItem {
 	private JSONObject googlePlaceResult = null;
+	//private GooglePlacesJSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
+	//private GoogleGeocodingJSONObject googleGeocodingResult = null;
 	private JSONObject googleDistanceMatrixResult = null;
 	private Location location;
 	private Long duration;
@@ -47,25 +49,26 @@ public final class ItineraryItem {
 	}
 	
 	private String GetGeocodingName() {
-		String streetNumber = null;
-		String route = null;
+		String streetNumber = "";
+		String route = "";
 		
 		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
 		for(int i = 0; i < addressComponents.size(); ++i) {
 			JSONObject addressComponent = (JSONObject) addressComponents.get(i);
 			if(addressComponent != null) {
 				JSONArray componentTypes = (JSONArray) addressComponent.get("types");
-				for(int j = 0; j < componentTypes.size(); ++i) {
-					if((String) componentTypes.get(j) == "street_number") {
+				for(int j = 0; j < componentTypes.size(); ++j) {
+					String componentType = (String) componentTypes.get(j);
+					if(componentType.equals("street_number")) {
 						streetNumber = (String) addressComponent.get("long_name");
-					} else if((String) componentTypes.get(j) == "route") {
+					} else if(componentType.equals("route")) {
 						route = (String) addressComponent.get("short_name");
 					}
 				}
 			}
 		}
 		
-		return streetNumber + " " + route;
+		return (streetNumber + " " + route).trim();
 	}
 
 	private String GetPlaceName() {
@@ -85,50 +88,34 @@ public final class ItineraryItem {
 	}
 	
 	private String GetGeocodingVicinity() {
-		// TODO Auto-generated method stub
-		String city = null;
-		String state = null;
-		String zipCode = null;
+		String city = "";
+		String state = "";
+		String zipCode = "";
 		
 		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
 		for(int i = 0; i < addressComponents.size(); ++i) {
 			JSONObject addressComponent = (JSONObject) addressComponents.get(i);
 			if(addressComponent != null) {
 				JSONArray componentTypes = (JSONArray) addressComponent.get("types");
-				for(int j = 0; j < componentTypes.size(); ++i) {
-					if((String) componentTypes.get(j) == "locality") {
+				for(int j = 0; j < componentTypes.size(); ++j) {
+					String componentType = (String) componentTypes.get(j); 
+					if(componentType.equals("locality") ||
+							componentType.equals("sublocality")) {
 						city = (String) addressComponent.get("long_name");
-					} else if((String) componentTypes.get(j) == "administrative_area_level_1") {
+					} else if(componentType.equals("administrative_area_level_1")) {
 						state = (String) addressComponent.get("short_name");
-					}
-					if((String) componentTypes.get(j) == "postal_code") {
+					} else if(componentType.equals("postal_code")) {
 						zipCode = (String) addressComponent.get("long_name");
 					}
 				}
 			}
 		}
 		
-		return city + ", " + state + " " + zipCode;
+		return (city + ", " + state + " " + zipCode).trim();
 	}
 
 	private String GetPlaceVicinity() {
 		return (String) googlePlaceResult.get("vicinity");			
-	}
-	
-	void SetDistance(JSONObject distanceMatrixData) {
-		if(distanceMatrixData != null) {
-			googleDistanceMatrixResult = distanceMatrixData;
-			
-			JSONObject distanceObject = (JSONObject) googleDistanceMatrixResult.get("distance");
-			if(distanceObject != null) {
-				distance = (Long) distanceObject.get("value");
-			}
-			
-			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
-			if(durationObject != null) {
-				duration = (Long) durationObject.get("value");
-			}
-		}
 	}
 	
 	Location GetLocation() {
@@ -165,6 +152,22 @@ public final class ItineraryItem {
 			if(jsonLocation != null) {
 				location.setLatitude((Double) jsonLocation.get("lat"));
 				location.setLongitude((Double) jsonLocation.get("lng"));
+			}
+		}
+	}
+	
+	void SetDistance(JSONObject distanceMatrixData) {
+		if(distanceMatrixData != null) {
+			googleDistanceMatrixResult = distanceMatrixData;
+			
+			JSONObject distanceObject = (JSONObject) googleDistanceMatrixResult.get("distance");
+			if(distanceObject != null) {
+				distance = (Long) distanceObject.get("value");
+			}
+			
+			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
+			if(durationObject != null) {
+				duration = (Long) durationObject.get("value");
 			}
 		}
 	}

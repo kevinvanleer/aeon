@@ -1,0 +1,6 @@
+Use the autocomplete api to help user determine search query
+add support for places types -- possibly a combo box
+audible alarms
+integration with calendar
+integration with navigator
+add support for network location -- wifi cell tower
