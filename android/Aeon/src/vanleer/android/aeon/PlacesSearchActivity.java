@@ -80,11 +80,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
-		boolean callOnClick = false;
-		if(waitingForGps) {
-			waitingForGps  = false;
-			callOnClick = true;
-		}
+		//TODO: fix bug preventing display of current location if discovered after query started
 		locationSensorImage.setVisibility(View.VISIBLE);
 		//make the image view square
 		MakeImageViewSquare(locationSensorImage);
@@ -96,7 +92,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				updateCurrentLocationTextHandler.sendMessage(msg);
 			}
 		}.start();
-		if(callOnClick) {
+		if(waitingForGps) {
+			waitingForGps  = false;
 			onClick(searchButton);
 		}
 	}
