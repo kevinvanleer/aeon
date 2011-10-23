@@ -5,9 +5,8 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent">
-        <TextView android:text="Itenerary" android:id="@+id/tView1" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content"></TextView>
+        <TextView android:text="Itinerary" android:id="@+id/tView1" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content"></TextView>
         <LinearLayout android:layout_height="match_parent" android:id="@+id/linearLayout2" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
-        <DigitalClock android:text="DigitalClock" android:id="@+id/digitalClock1" android:layout_width="wrap_content" android:layout_height="wrap_content"></DigitalClock>
     </LinearLayout>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/listView_itinerary"></ListView>
     

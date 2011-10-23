@@ -15,16 +15,16 @@ public class AeonActivity extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);      
-                        
-        planButton = (Button) findViewById(R.id.button_plan);        
-        planButton.setOnClickListener(this);    
+        setContentView(R.layout.main);
+
+        planButton = (Button) findViewById(R.id.button_plan);
+        planButton.setOnClickListener(this);
     }
 
 	public void onClick(View v)  {
 		switch(v.getId()) {
 		case R.id.button_plan:
-			Intent startItineraryOpen = new Intent(AeonActivity.this, Itinerary.class);			
+			Intent startItineraryOpen = new Intent(AeonActivity.this, Itinerary.class);
 			startActivity(startItineraryOpen);
 			break;
 		}

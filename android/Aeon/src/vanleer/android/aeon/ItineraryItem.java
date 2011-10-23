@@ -1,31 +1,58 @@
 package vanleer.android.aeon;
 
+import java.util.Date;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public final class ItineraryItem {
+public final class ItineraryItem implements Parcelable {
 	private JSONObject googlePlaceResult = null;
 	//private GooglePlacesJSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
 	//private GoogleGeocodingJSONObject googleGeocodingResult = null;
 	private JSONObject googleDistanceMatrixResult = null;
 	private Location location;
-	private Long duration;
+	private Long travelDuration;
 	private Long distance;
 	public String iconUrl;
+	private Date arrivalTime;
+	private Date departureTime;
+	private Long stayDuration;
+	private String phoneNumber;
 	private static final double MILES_PER_METER = 0.00062137119;
 	
-	ItineraryItem(JSONObject searchResult) {
+	public ItineraryItem(JSONObject searchResult) {
 		if(IsGeocodingResult(searchResult)) {
 			googleGeocodingResult = searchResult;
 		} else {
 		   googlePlaceResult = searchResult;
 		}
 		SetLocation();
+		
+		arrivalTime = new Date();
+		departureTime = new Date();
+		stayDuration = (long) 0;
+		phoneNumber = "NONE";
 	}
 	
+	private ItineraryItem(Parcel in) {
+		googlePlaceResult = (JSONObject) in.readSerializable();
+		googleGeocodingResult = (JSONObject) in.readSerializable();
+		googleDistanceMatrixResult = (JSONObject) in.readSerializable();
+		location = in.readParcelable(null);
+		travelDuration = in.readLong();
+		distance = in.readLong();
+		iconUrl = in.readString();
+		arrivalTime = (Date) in.readSerializable();
+		departureTime = (Date) in.readSerializable();
+		stayDuration = in.readLong();
+		phoneNumber = in.readString();
+	}
+
 	private boolean IsGeocodingResult(JSONObject result) {
 		boolean isGeocodingResult = false;
 		
@@ -72,7 +99,7 @@ public final class ItineraryItem {
 	}
 
 	private String GetPlaceName() {
-		return (String) googlePlaceResult.get("name");			
+		return (String) googlePlaceResult.get("name");
 	}
 	
 	String GetVicinity() {
@@ -115,7 +142,7 @@ public final class ItineraryItem {
 	}
 
 	private String GetPlaceVicinity() {
-		return (String) googlePlaceResult.get("vicinity");			
+		return (String) googlePlaceResult.get("vicinity");
 	}
 	
 	Location GetLocation() {
@@ -167,14 +194,14 @@ public final class ItineraryItem {
 			
 			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
 			if(durationObject != null) {
-				duration = (Long) durationObject.get("value");
+				travelDuration = (Long) durationObject.get("value");
 			}
 		}
 	}
 	
 	void SetDistance(final Location origin) {
 		distance = (long) location.distanceTo(origin);
-		duration = (long) 0;
+		travelDuration = (long) 0;
 		googleDistanceMatrixResult = null;
 	}
 	
@@ -193,13 +220,80 @@ public final class ItineraryItem {
 		return String.format("%1$.1f km", (distance / 1000.));
 	}
 	
-	public Long GetDuration() {
-		return duration;
+	public Long GetTravelDuration() {
+		return travelDuration;
 	}
 	
-	public String GetDurationClockFormat() {
-		long minutes = duration / 60;
-		long seconds = duration - minutes;		
+	public String GetTravelDurationClockFormat() {
+		long minutes = travelDuration / 60;
+		long seconds = travelDuration - minutes;
 		return minutes + ":" + seconds;
 	}
+
+	public Date GetArrivalTime() {
+		return arrivalTime;
+	}
+
+	public void SetArrivalTime(Date arrivalTime) {
+		this.arrivalTime = arrivalTime;
+	}
+
+	public Date GetDepartureTime() {
+		return departureTime;
+	}
+
+	public void SetDepartureTime(Date departureTime) {
+		this.departureTime = departureTime;
+	}
+
+	public Long GetStayDuration() {
+		return stayDuration;
+	}
+	
+	public String GetStayDurationClockFormat() {
+		long minutes = stayDuration / 60;
+		long seconds = stayDuration - minutes;		
+		return minutes + ":" + seconds;
+	}
+
+	public void SetStayDuration(Long stayDuration) {
+		this.stayDuration = stayDuration;
+	}
+
+	public String GetPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void SetPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeSerializable(googlePlaceResult);
+		dest.writeSerializable(googleGeocodingResult);
+		dest.writeSerializable(googleDistanceMatrixResult);
+		dest.writeParcelable(location, flags);
+		dest.writeLong(travelDuration);
+		dest.writeLong(distance);
+		dest.writeString(iconUrl);
+		dest.writeSerializable(arrivalTime);
+		dest.writeSerializable(departureTime);
+		dest.writeLong(stayDuration);
+		dest.writeString(phoneNumber);
+	}
+	
+	public static final Parcelable.Creator<ItineraryItem> CREATOR =
+			new Parcelable.Creator<ItineraryItem>() {
+		public ItineraryItem createFromParcel(Parcel in) {
+			return new ItineraryItem(in);
+		}
+		
+		 public ItineraryItem[] newArray(int size) {
+             return new ItineraryItem[size];
+         }
+	};
 }

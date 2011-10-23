@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,7 +15,8 @@ import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,7 +25,7 @@ import android.widget.TextView;
 
 public final class PlacesSearchActivity extends Activity implements OnClickListener{
 	private ArrayList<ItineraryItem> searchResultsList;
-	private ArrayAdapter<ItineraryItem> searchResults;
+	private ItineraryItemAdapter searchResults;
 	private ListView searchResultsListView;
 	private int listViewId = R.id.listView_searchResults;
 	private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
@@ -37,6 +39,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private EditText searchText;
 	private boolean waitingForGps = false; 
 	private boolean searching = false;
+	private Long searchRadius;
 
 	//lat=38.74419380
 	//lng=-90.09839319999999
@@ -59,6 +62,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		
+		ConfigureSearchResultsListViewLongClickListener();
 
 		// Define a listener that responds to location updates
 		LocationListener locationListener = new LocationListener() {
@@ -76,6 +81,19 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 		// Register the listener with the Location Manager to receive location updates
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	}
+
+	private void ConfigureSearchResultsListViewLongClickListener() {
+		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				Intent resultIntent = new Intent();
+				resultIntent.putExtra("itineraryItem", searchResultsList.get(position));
+				setResult(Activity.RESULT_OK, resultIntent);
+				finish();
+				return true;
+			}
+			
+		});
 	}
 
 	protected void makeUseOfNewLocation(Location location) {
@@ -147,6 +165,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		case R.id.imageButton_search:
 			GetSearchResults();
 			break;
+		//case listViewId:
+		//	break;
 		}
 	}
 
@@ -166,8 +186,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void QuerySearchEngine() {
+		searchRadius = (long) 5000000;
 		googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
-				10000, searchText.getText().toString(), true);
+				searchRadius, searchText.getText().toString(), true);
 		searching = false;		
 	}
 

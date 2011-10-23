@@ -15,7 +15,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Itinerary" android:label="@string/itenerary_title" />
+        <activity android:name=".Itinerary" android:label="@string/itinerary_title" />
         <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" />
     </application>
     

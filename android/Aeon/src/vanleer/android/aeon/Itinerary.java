@@ -1,97 +1,108 @@
 package vanleer.android.aeon;
 
+import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
+//import android.view.ContextMenu;
+//import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.View.OnClickListener;
 import android.widget.ListView;
 
-public final class Itinerary extends Activity {
+//Something for sending destinations to Navigator
+//I/ActivityManager(  118): Starting activity: Intent { act=android.intent.action.VIEW dat=google.navigation:///?q=Some%20place cmp=brut.googlemaps/com.google.android.maps.driveabout.app.NavigationActivity }
+
+public final class Itinerary extends Activity implements OnClickListener{
 
 	private int listViewId = R.id.listView_itinerary;
 	private ListView itineraryListView;
-	private ArrayAdapter<String> itineraryItems;
+	private ArrayList<ItineraryItem> itineraryItemList;
+	private ItineraryItemAdapter itineraryItems;
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
-	private static String ADD_DESTINATION = "Add Destination";
-	private static String STARRED_LOCATIONS = "Starred Locations";
-	private static String GOOGLE_SEARCH = "Google Search";
-	private static String MY_LOCATION = "My Location";
-	private static String MOVE = "Move";
-	private static String EDIT = "Edit";
-	private static String DELETE = "Delete";
+	/*private static final String ADD_DESTINATION = "Add Destination";
+	private static final String STARRED_LOCATIONS = "Starred Locations";
+	private static final String GOOGLE_SEARCH = "Google Search";
+	private static final String MY_LOCATION = "My Location";
+	private static final String MOVE = "Move";
+	private static final String EDIT = "Edit";
+	private static final String DELETE = "Delete";
+	private static final String CALL = "Call";*/
+	private static final int GET_NEW_DESTINATION = 0;
 
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
 
-		itineraryItems = new ArrayAdapter<String>(this, R.layout.itinerary_item);
-		/*itineraryItems.add("Home");
-		itineraryItems.add("Away");
-		itineraryItems.add("Here");
-		itineraryItems.add("There");
-		itineraryItems.add("Everywhere");
-		itineraryItems.add("My place");
-		itineraryItems.add("Your place");
-		itineraryItems.add("This place");
-		itineraryItems.add("That place");
-		itineraryItems.add("Another place");
-		itineraryItems.add("Some place new");*/
-		itineraryItems.add(ADD_DESTINATION);
-
+		itineraryItemList = new ArrayList<ItineraryItem>();
+		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item, itineraryItemList);
 		itineraryListView = (ListView) findViewById(listViewId);
 		itineraryListView.setAdapter(itineraryItems);
 
-		registerForContextMenu(itineraryListView);
+		//registerForContextMenu(itineraryListView);
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		if (v.getId() == listViewId) {
-			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-			menu.setHeaderTitle(itineraryItems.getItem(info.position));
-			if (itineraryItems.getItem(info.position) == ADD_DESTINATION) {
-				menu.add(STARRED_LOCATIONS);
-				menu.add(GOOGLE_SEARCH);
-				menu.add(MY_LOCATION);
-			} else {
-				menu.add(MOVE);
-				menu.add(EDIT);
-				menu.add(DELETE);
-			}
-		}
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		String menuItemName = (String) item.getTitle();
-		if (menuItemName == STARRED_LOCATIONS) {
-			if (!loggedIntoGoogle) {
-				// TODO: Login to Google account
-			}
-			setContentView(R.layout.select_favorite);
-		} else if (menuItemName == GOOGLE_SEARCH) {
-			Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);			
-			startActivity(startItineraryOpen);
-		} else if (menuItemName == MY_LOCATION) {
-			// TODO: get location from GPS if available
-		} else if (menuItemName == MOVE) {
-
-		} else if (menuItemName == EDIT) {
-
-		} else if (menuItemName == DELETE) {
-
-		} else {
-
-		}
-
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.itinerary_options, menu);
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_item_add_destination_google_search:
+			Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
+			startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
+			break;
+		case R.id.menu_item_add_destination_my_location:
+			break;
+		case R.id.menu_item_add_destination_starred_locations:
+			if(loggedIntoGoogle) {
+				//TODO: Something
+			}
+			else {
+				//TODO: Something else
+			}
+			break;
+		case R.id.menu_item_call_destination:
+			break;
+		case R.id.menu_item_delete_destination:
+			break;
+		case R.id.menu_item_edit_destination:
+			break;
+		case R.id.menu_item_move_destination:
+			break;
+		case R.id.menu_item_save_itinerary:
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch(requestCode)
+		{
+		case GET_NEW_DESTINATION:
+			if(resultCode == Activity.RESULT_OK) {
+				ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
+				itineraryItemList.add(newDestination);
+				itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1)); 
+			}
+			break;
+		default:
+		}
+	}
+
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+	}
 }
