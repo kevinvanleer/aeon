@@ -23,18 +23,9 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private ArrayList<ItineraryItem> itineraryItemList;
 	private ItineraryItemAdapter itineraryItems;
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
-	/*private static final String ADD_DESTINATION = "Add Destination";
-	private static final String STARRED_LOCATIONS = "Starred Locations";
-	private static final String GOOGLE_SEARCH = "Google Search";
-	private static final String MY_LOCATION = "My Location";
-	private static final String MOVE = "Move";
-	private static final String EDIT = "Edit";
-	private static final String DELETE = "Delete";
-	private static final String CALL = "Call";*/
 	private static final int GET_NEW_DESTINATION = 0;
 
 	public void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
 
@@ -43,7 +34,9 @@ public final class Itinerary extends Activity implements OnClickListener{
 		itineraryListView = (ListView) findViewById(listViewId);
 		itineraryListView.setAdapter(itineraryItems);
 
-		//registerForContextMenu(itineraryListView);
+		if(itineraryItemList.isEmpty()) {
+			//openOptionsMenu();
+		}
 	}
 
 	@Override
@@ -56,13 +49,13 @@ public final class Itinerary extends Activity implements OnClickListener{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_item_add_destination_google_search:
+		case R.id.submenu_item_add_destination_google_search:
 			Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
 			startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
 			break;
-		case R.id.menu_item_add_destination_my_location:
+		case R.id.submenu_item_add_destination_my_location:
 			break;
-		case R.id.menu_item_add_destination_starred_locations:
+		case R.id.submenu_item_add_destination_starred_locations:
 			if(loggedIntoGoogle) {
 				//TODO: Something
 			}
@@ -72,7 +65,12 @@ public final class Itinerary extends Activity implements OnClickListener{
 			break;
 		case R.id.menu_item_call_destination:
 			break;
-		case R.id.menu_item_delete_destination:
+		case R.id.submenu_item_clear_itinerary_yes:
+			itineraryItems.clear();
+			itineraryItemList.clear();
+			break;
+		case R.id.menu_item_clear_itinerary:
+		case R.id.submenu_item_clear_itinerary_no:
 			break;
 		case R.id.menu_item_edit_destination:
 			break;
