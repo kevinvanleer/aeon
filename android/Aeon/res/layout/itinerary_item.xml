@@ -7,19 +7,19 @@
     <TableLayout android:layout_width="match_parent" android:id="@+id/tableLayout1" android:layout_height="wrap_content">
         <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:layout_height="wrap_content" android:text="TravelDistance" android:layout_width="match_parent" android:layout_weight="1" android:id="@+id/textView_travelDistance"></TextView>
-            <TextView android:id="@+id/textView_travelTime" android:text="TravelTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0"></TextView>
+            <TextView android:id="@+id/textView_travelTime" android:text="TravelTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0" android:layout_gravity="right"></TextView>
         </TableRow>
         <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
-            <TextView android:text="ArrivalLocation" android:id="@+id/textView_arrivalLocation" android:layout_height="wrap_content" android:layout_width="0dp" android:layout_weight="1"></TextView>
-            <TextView android:text="ArrivalTime" android:id="@+id/textView_arrivalTime" android:layout_height="wrap_content" android:layout_width="0dp" android:layout_weight="0"></TextView>
+            <TextView android:text="ArrivalLocation" android:id="@+id/textView_arrivalLocation" android:layout_height="wrap_content" android:layout_width="0dp" android:layout_weight="1" android:lines="1" android:marqueeRepeatLimit="marquee_forever"></TextView>
+            <TextView android:layout_weight="0" android:layout_width="0dp" android:text="ArrivalTime" android:id="@+id/textView_arrivalTime" android:lines="1" android:layout_height="wrap_content" android:marqueeRepeatLimit="marquee_forever" android:layout_gravity="right"></TextView>
         </TableRow>
         <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:id="@+id/textView_destinationName" android:layout_height="wrap_content" android:text="DestinationName" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_weight="1"></TextView>
-            <TextView android:id="@+id/textView_stayDuration" android:layout_height="wrap_content" android:text="StayDuration" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_weight="0"></TextView>
+            <TextView android:id="@+id/textView_stayDuration" android:layout_height="wrap_content" android:text="StayDuration" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_weight="0" android:layout_gravity="right"></TextView>
         </TableRow>
         <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
-            <TextView android:text="DepartureLocation" android:id="@+id/textView_departureLocation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"></TextView>
-            <TextView android:text="DepartureTime" android:id="@+id/textView_departureTime" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+            <TextView android:text="DepartureLocation" android:id="@+id/textView_departureLocation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1" android:lines="1" android:marqueeRepeatLimit="marquee_forever"></TextView>
+            <TextView android:text="DepartureTime" android:id="@+id/textView_departureTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:lines="1" android:marqueeRepeatLimit="marquee_forever" android:layout_gravity="right"></TextView>
         </TableRow>
     </TableLayout>
 </LinearLayout>
