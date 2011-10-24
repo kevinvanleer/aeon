@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 public final class PlacesSearchActivity extends Activity implements OnClickListener{
 	private ArrayList<ItineraryItem> searchResultsList;
-	private ItineraryItemAdapter searchResults;
+	private SearchResultItemAdapter searchResults;
 	private ListView searchResultsListView;
 	private int listViewId = R.id.listView_searchResults;
 	private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
@@ -57,7 +57,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchButton.setOnClickListener(this);
 		searchText = (EditText) findViewById(R.id.editText_searchQuery);
 		searchResultsList = new ArrayList<ItineraryItem>();
-		searchResults = new ItineraryItemAdapter(this, R.layout.search_result_item, searchResultsList);
+		searchResults = new SearchResultItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    

@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
+class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 
 	private ArrayList<ItineraryItem> placesList;
 	  
-	public ItineraryItemAdapter(Context context, int textViewResourceId, ArrayList<ItineraryItem> items) {
+	public SearchResultItemAdapter(Context context, int textViewResourceId, ArrayList<ItineraryItem> items) {
 		super(context, textViewResourceId);
 		placesList = items;
 	}

@@ -225,13 +225,44 @@ public final class ItineraryItem implements Parcelable {
 	}
 	
 	public String GetTravelDurationClockFormat() {
+		long hours = travelDuration / 3600;
 		long minutes = travelDuration / 60;
-		long seconds = travelDuration - minutes;
-		return minutes + ":" + seconds;
+		long minutesPast = minutes - hours;
+		long secondsPast = travelDuration - minutes;
+		
+		return hours + ":" + minutesPast + ":" + secondsPast;
+	}
+
+	public String GetTravelDurationLongFormat() {
+		long hours = travelDuration / 3600;
+		long minutes = travelDuration / 60;
+		long minutesPast = minutes - hours;
+		//long secondsPast = travelDuration - minutes;
+
+		String timeString = "";
+		if(hours > 0) {
+			timeString += hours + " hr";
+		}
+		
+		if((minutesPast > 0) || (hours > 0)) {
+			if(hours > 0) {
+				timeString += " ";
+			}
+			
+			timeString += minutesPast + " min";
+		}
+		
+		return timeString;
 	}
 
 	public Date GetArrivalTime() {
 		return arrivalTime;
+	}
+
+	public String GetArrivalTimeString() {
+		//return arrivalTime.getHours() + ":" + arrivalTime.getMinutes();
+		//return arrivalTime.toString();
+		return arrivalTime.toLocaleString();
 	}
 
 	public void SetArrivalTime(Date arrivalTime) {
@@ -240,6 +271,12 @@ public final class ItineraryItem implements Parcelable {
 
 	public Date GetDepartureTime() {
 		return departureTime;
+	}
+
+	public String GetDepartureTimeString() {
+		//return departureTime.getHours() + ":" + departureTime.getMinutes() + departureTime.get;
+		//return departureTime.toString();
+		return departureTime.toLocaleString();
 	}
 
 	public void SetDepartureTime(Date departureTime) {
@@ -251,11 +288,36 @@ public final class ItineraryItem implements Parcelable {
 	}
 	
 	public String GetStayDurationClockFormat() {
+		long hours = stayDuration / 3600;
 		long minutes = stayDuration / 60;
-		long seconds = stayDuration - minutes;		
-		return minutes + ":" + seconds;
+		long minutesPast = minutes - hours;
+		long secondsPast = stayDuration - minutes;
+
+		return hours + ":" + minutesPast + ":" + secondsPast;
 	}
 
+	public String GetStayDurationLongFormat() {
+		long hours = stayDuration / 3600;
+		long minutes = stayDuration / 60;
+		long minutesPast = minutes - hours;
+		//long secondsPast = stayDuration - minutes;
+
+		String timeString = "";
+		if(hours > 0) {
+			timeString += hours + " hr";
+		}
+		
+		if((minutesPast > 0) || (hours > 0)) {
+			if(hours > 0) {
+				timeString += " ";
+			}
+			
+			timeString += minutesPast + " min";
+		}
+		
+		return timeString;
+	}
+	
 	public void SetStayDuration(Long stayDuration) {
 		this.stayDuration = stayDuration;
 	}
