@@ -1,10 +1,12 @@
 package vanleer.android.aeon;
 
-import java.util.Calendar;
+import java.text.DateFormat;
 import java.util.Date;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import vanleer.util.TimeFormat;
 
 import android.location.Location;
 import android.os.Parcel;
@@ -226,16 +228,17 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String GetTravelDurationClockFormat() {
-		long hours = travelDuration / 3600;
+		/*long hours = travelDuration / 3600;
 		long minutes = travelDuration / 60;
 		long minutesPast = minutes - hours;
 		long secondsPast = travelDuration - minutes;
 
-		return hours + ":" + minutesPast + ":" + secondsPast;
+		return hours + ":" + minutesPast + ":" + secondsPast;*/
+		return TimeFormat.format(travelDuration * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 	}
 
 	public String GetTravelDurationLongFormat() {
-		long hours = travelDuration / 3600;
+		/*long hours = travelDuration / 3600;
 		long minutes = travelDuration / 60;
 		long minutesPast = minutes - hours;
 		//long secondsPast = travelDuration - minutes;
@@ -247,17 +250,19 @@ public final class ItineraryItem implements Parcelable {
 
 		timeString += minutesPast + " min";
 
-		return timeString;
+		return timeString;*/
+		return TimeFormat.format(travelDuration * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 	}
-
+	
 	public Date GetArrivalTime() {
 		return arrivalTime;
 	}
 
 	public String GetArrivalTimeString() {
-		return arrivalTime.getHours() + ":" + arrivalTime.getMinutes();
+		//return arrivalTime.getHours() + ":" + arrivalTime.getMinutes();
 		//return arrivalTime.toString();
 		//return arrivalTime.toLocaleString();
+		return DateFormat.getTimeInstance(DateFormat.SHORT).format(arrivalTime);
 	}
 
 	public void SetArrivalTime(Date arrivalTime) {
@@ -269,9 +274,10 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String GetDepartureTimeString() {
-		return departureTime.getHours() + ":" + departureTime.getMinutes();
+		//return departureTime.getHours() + ":" + departureTime.getMinutes();
 		//return departureTime.toString();
 		//return departureTime.toLocaleString();
+		return DateFormat.getTimeInstance(DateFormat.SHORT).format(departureTime);
 	}
 
 	public void SetDepartureTime(Date departureTime) {
@@ -283,16 +289,17 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String GetStayDurationClockFormat() {
-		long hours = stayDuration / 3600;
+		/*long hours = stayDuration / 3600;
 		long minutes = stayDuration / 60;
 		long minutesPast = minutes - hours;
 		long secondsPast = stayDuration - minutes;
 
-		return hours + ":" + minutesPast + ":" + secondsPast;
+		return hours + ":" + minutesPast + ":" + secondsPast;*/
+		return TimeFormat.format(stayDuration * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 	}
 
 	public String GetStayDurationLongFormat() {
-		long hours = stayDuration / 3600;
+		/*long hours = stayDuration / 3600;
 		long minutes = stayDuration / 60;
 		long minutesPast = minutes - hours;
 		//long secondsPast = stayDuration - minutes;
@@ -304,7 +311,8 @@ public final class ItineraryItem implements Parcelable {
 
 		timeString += minutesPast + " min";
 
-		return timeString;
+		return timeString;*/
+		return TimeFormat.format(stayDuration * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 	}
 
 	public void SetStayDuration(Long stayDuration) {

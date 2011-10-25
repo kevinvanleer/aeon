@@ -24,6 +24,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private ItineraryItemAdapter itineraryItems;
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
 	private static final int GET_NEW_DESTINATION = 0;
+	private static final int UPDATE_DESTINATION_DETAILS = 1;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -91,12 +92,18 @@ public final class Itinerary extends Activity implements OnClickListener{
 		case GET_NEW_DESTINATION:
 			if(resultCode == Activity.RESULT_OK) {
 				ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
+				UpdateArrivalDepartureTimes(newDestination);
 				itineraryItemList.add(newDestination);
 				itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1)); 
 			}
 			break;
 		default:
 		}
+	}
+
+	private void UpdateArrivalDepartureTimes(ItineraryItem newDestination) {
+		Intent startDestinationDetailsOpen = new Intent(Itinerary.this, DestinationScheduleActivity.class);
+		startActivityForResult(startDestinationDetailsOpen, UPDATE_DESTINATION_DETAILS);
 	}
 
 	public void onClick(View v) {
