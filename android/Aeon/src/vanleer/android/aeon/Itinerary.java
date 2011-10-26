@@ -24,7 +24,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private ItineraryItemAdapter itineraryItems;
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
 	private static final int GET_NEW_DESTINATION = 0;
-	private static final int UPDATE_DESTINATION_DETAILS = 1;
+	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -93,7 +93,12 @@ public final class Itinerary extends Activity implements OnClickListener{
 			if(resultCode == Activity.RESULT_OK) {
 				ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
 				UpdateArrivalDepartureTimes(newDestination);
-				itineraryItemList.add(newDestination);
+			}
+			break;
+		case UPDATE_DESTINATION_SCHEDULE:
+			if(resultCode == Activity.RESULT_OK) {
+				ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
+				itineraryItemList.add(scheduledDestination);
 				itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1)); 
 			}
 			break;
@@ -102,8 +107,9 @@ public final class Itinerary extends Activity implements OnClickListener{
 	}
 
 	private void UpdateArrivalDepartureTimes(ItineraryItem newDestination) {
-		Intent startDestinationDetailsOpen = new Intent(Itinerary.this, DestinationScheduleActivity.class);
-		startActivityForResult(startDestinationDetailsOpen, UPDATE_DESTINATION_DETAILS);
+		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
+		startDestinationSchedule.putExtra("destination", newDestination);
+		startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION_SCHEDULE);
 	}
 
 	public void onClick(View v) {

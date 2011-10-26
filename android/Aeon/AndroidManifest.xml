@@ -17,6 +17,7 @@
         </activity>
         <activity android:name=".Itinerary" android:label="@string/itinerary_title" />
         <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" />
+        <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" />
     </application>
     
 </manifest>

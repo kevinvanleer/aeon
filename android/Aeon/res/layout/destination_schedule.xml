@@ -4,5 +4,25 @@
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
+    <RelativeLayout android:layout_width="match_parent" android:id="@+id/relativeLayout_arrivalTime" android:layout_height="wrap_content">
+        <TextView android:layout_width="wrap_content" android:id="@+id/textView_arrivalTime" android:layout_height="wrap_content" android:layout_alignParentTop="true" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_alignParentLeft="true" android:text="Arrival Time"></TextView>
+        <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_toLeftOf="@+id/timePicker_arrivalTime" android:layout_marginRight="30dp" android:id="@+id/checkBox_arrivalTime"></CheckBox>
+        <TimePicker android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_below="@+id/textView_arrivalTime" android:id="@+id/timePicker_arrivalTime"></TimePicker>
+    </RelativeLayout>
+    <RelativeLayout android:layout_width="match_parent" android:id="@+id/relativeLayout_duration" android:layout_marginTop="10dp" android:layout_height="wrap_content">
+        <TextView android:text="Duration" android:layout_width="wrap_content" android:id="@+id/textView_duration" android:layout_height="wrap_content" android:layout_alignParentTop="true" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_alignParentLeft="true"></TextView>
+        <CheckBox android:layout_centerVertical="true" android:layout_toLeftOf="@+id/timePicker_duration" android:layout_width="wrap_content" android:id="@+id/checkBox_duration" android:layout_height="wrap_content" android:layout_marginRight="30dp"></CheckBox>
+        <TimePicker android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/timePicker_duration" android:layout_alignParentRight="true" android:layout_below="@+id/textView_duration"></TimePicker>
+    </RelativeLayout>
+    <RelativeLayout android:layout_width="match_parent" android:id="@+id/relativeLayout_departureTime" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+        <TextView android:text="Departure Time" android:layout_width="wrap_content" android:id="@+id/textView_departureTime" android:layout_height="wrap_content" android:layout_alignParentTop="true" android:textAppearance="?android:attr/textAppearanceSmall" android:layout_alignParentLeft="true"></TextView>
+        <CheckBox android:layout_centerVertical="true" android:layout_toLeftOf="@+id/timePicker_departureTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="30dp" android:id="@+id/checkBox_departureTime"></CheckBox>
+        <TimePicker android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/timePicker_departureTime" android:layout_alignParentRight="true" android:layout_below="@+id/textView_departureTime"></TimePicker>
+    </RelativeLayout>
+    <LinearLayout android:layout_width="match_parent" android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:baselineAligned="true" android:orientation="horizontal">
+        <LinearLayout android:id="@+id/linearLayout2" android:layout_height="match_parent" android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1"></LinearLayout>
+        <Button android:text="Done" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="3" android:layout_marginTop="10dp" android:id="@+id/button_destinationScheduleDone"></Button>
+        <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:id="@+id/linearLayout3" android:layout_height="match_parent" android:layout_weight="1"></LinearLayout>
+    </LinearLayout>
     
 </LinearLayout>

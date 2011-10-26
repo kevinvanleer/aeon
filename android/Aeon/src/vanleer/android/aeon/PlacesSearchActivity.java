@@ -1,7 +1,6 @@
 package vanleer.android.aeon;
 
 import java.util.ArrayList;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -23,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public final class PlacesSearchActivity extends Activity implements OnClickListener{
+public final class PlacesSearchActivity extends Activity implements OnClickListener {
 	private ArrayList<ItineraryItem> searchResultsList;
 	private SearchResultItemAdapter searchResults;
 	private ListView searchResultsListView;
@@ -92,7 +91,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				finish();
 				return true;
 			}
-			
 		});
 	}
 
@@ -165,8 +163,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		case R.id.imageButton_search:
 			GetSearchResults();
 			break;
-		//case listViewId:
-		//	break;
+		default:
+			break;
 		}
 	}
 

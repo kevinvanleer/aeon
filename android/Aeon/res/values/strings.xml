@@ -16,4 +16,5 @@
     <string name="password_label">Password</string>
     <string name="login_label">Login</string>
     <string name="places_search_title">Places Search</string>
+    <string name="destination_schedule_title">Schedule</string>
 </resources>
