@@ -14,17 +14,15 @@ import android.os.Parcelable;
 
 public final class ItineraryItem implements Parcelable {
 	private JSONObject googlePlaceResult = null;
-	//private GooglePlacesJSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
-	//private GoogleGeocodingJSONObject googleGeocodingResult = null;
 	private JSONObject googleDistanceMatrixResult = null;
 	private Location location;
-	private Long travelDuration;
+	private Long travelDurationSec;
 	private Long distance;
 	public String iconUrl;
-	private Date arrivalTime;
-	private Date departureTime;
-	private Long stayDuration;
+	private Date arrivalTime = null;
+	private Date departureTime = null;
+	private Long stayDurationSec = null;
 	private String phoneNumber;
 	private static final double MILES_PER_METER = 0.00062137119;
 
@@ -38,7 +36,7 @@ public final class ItineraryItem implements Parcelable {
 
 		arrivalTime = new Date();
 		departureTime = new Date();
-		stayDuration = (long) 0;
+		stayDurationSec = (long) 0;
 		phoneNumber = "NONE";
 	}
 
@@ -47,12 +45,12 @@ public final class ItineraryItem implements Parcelable {
 		googleGeocodingResult = (JSONObject) in.readSerializable();
 		googleDistanceMatrixResult = (JSONObject) in.readSerializable();
 		location = in.readParcelable(null);
-		travelDuration = in.readLong();
+		travelDurationSec = in.readLong();
 		distance = in.readLong();
 		iconUrl = in.readString();
 		arrivalTime = (Date) in.readSerializable();
 		departureTime = (Date) in.readSerializable();
-		stayDuration = in.readLong();
+		stayDurationSec = in.readLong();
 		phoneNumber = in.readString();
 	}
 
@@ -197,14 +195,14 @@ public final class ItineraryItem implements Parcelable {
 
 			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
 			if(durationObject != null) {
-				travelDuration = (Long) durationObject.get("value");
+				travelDurationSec = (Long) durationObject.get("value");
 			}
 		}
 	}
 
 	void SetDistance(final Location origin) {
 		distance = (long) location.distanceTo(origin);
-		travelDuration = (long) 0;
+		travelDurationSec = (long) 0;
 		googleDistanceMatrixResult = null;
 	}
 
@@ -224,34 +222,15 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public Long GetTravelDuration() {
-		return travelDuration;
+		return travelDurationSec;
 	}
 
 	public String GetTravelDurationClockFormat() {
-		/*long hours = travelDuration / 3600;
-		long minutes = travelDuration / 60;
-		long minutesPast = minutes - hours;
-		long secondsPast = travelDuration - minutes;
-
-		return hours + ":" + minutesPast + ":" + secondsPast;*/
-		return TimeFormat.format(travelDuration * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
+		return TimeFormat.format(travelDurationSec * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 	}
 
 	public String GetTravelDurationLongFormat() {
-		/*long hours = travelDuration / 3600;
-		long minutes = travelDuration / 60;
-		long minutesPast = minutes - hours;
-		//long secondsPast = travelDuration - minutes;
-
-		String timeString = "";
-		if(hours > 0) {
-			timeString += hours + " hr ";
-		}
-
-		timeString += minutesPast + " min";
-
-		return timeString;*/
-		return TimeFormat.format(travelDuration * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		return TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 	}
 	
 	public Date GetArrivalTime() {
@@ -259,9 +238,6 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String GetArrivalTimeString() {
-		//return arrivalTime.getHours() + ":" + arrivalTime.getMinutes();
-		//return arrivalTime.toString();
-		//return arrivalTime.toLocaleString();
 		return DateFormat.getTimeInstance(DateFormat.SHORT).format(arrivalTime);
 	}
 
@@ -274,9 +250,6 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String GetDepartureTimeString() {
-		//return departureTime.getHours() + ":" + departureTime.getMinutes();
-		//return departureTime.toString();
-		//return departureTime.toLocaleString();
 		return DateFormat.getTimeInstance(DateFormat.SHORT).format(departureTime);
 	}
 
@@ -285,46 +258,27 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public Long GetStayDuration() {
-		return stayDuration;
+		return stayDurationSec;
 	}
 
 	public String GetStayDurationClockFormat() {
-		/*long hours = stayDuration / 3600;
-		long minutes = stayDuration / 60;
-		long minutesPast = minutes - hours;
-		long secondsPast = stayDuration - minutes;
-
-		return hours + ":" + minutesPast + ":" + secondsPast;*/
-		return TimeFormat.format(stayDuration * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
+		return TimeFormat.format(stayDurationSec * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 	}
 
 	public String GetStayDurationLongFormat() {
-		/*long hours = stayDuration / 3600;
-		long minutes = stayDuration / 60;
-		long minutesPast = minutes - hours;
-		//long secondsPast = stayDuration - minutes;
-
-		String timeString = "";
-		if(hours > 0) {
-			timeString += hours + " hr ";
-		}
-
-		timeString += minutesPast + " min";
-
-		return timeString;*/
-		return TimeFormat.format(stayDuration * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		return TimeFormat.format(stayDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 	}
 
-	public void SetStayDuration(Long stayDuration) {
-		this.stayDuration = stayDuration;
+	public void SetStayDuration(Long seconds) {
+		this.stayDurationSec = seconds;
 	}
 
 	public String GetPhoneNumber() {
 		return phoneNumber;
 	}
 
-	public void SetPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
+	public void SetPhoneNumber(String phoneNum) {
+		this.phoneNumber = phoneNum;
 	}
 
 	public int describeContents() {
@@ -336,12 +290,12 @@ public final class ItineraryItem implements Parcelable {
 		dest.writeSerializable(googleGeocodingResult);
 		dest.writeSerializable(googleDistanceMatrixResult);
 		dest.writeParcelable(location, flags);
-		dest.writeLong(travelDuration);
+		dest.writeLong(travelDurationSec);
 		dest.writeLong(distance);
 		dest.writeString(iconUrl);
 		dest.writeSerializable(arrivalTime);
 		dest.writeSerializable(departureTime);
-		dest.writeLong(stayDuration);
+		dest.writeLong(stayDurationSec);
 		dest.writeString(phoneNumber);
 	}
 

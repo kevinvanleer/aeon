@@ -78,8 +78,14 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			public void onProviderDisabled(String provider) {}
 		};
 
-		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		currentLocation = getIntent().getExtras().getParcelable("location");
+		
+		if(currentLocation == null) {
+			// Register the listener with the Location Manager to receive location updates
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		} else {
+			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
+		}
 	}
 
 	private void ConfigureSearchResultsListViewLongClickListener() {
@@ -194,7 +200,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
 			ItineraryItem newItem = googleSearch.GetPlace(i);
 			if(newItem != null) {
-				newItem.SetDistance(currentLocation);
+				//newItem.SetDistance(currentLocation);
 				searchResultsList.add(newItem);
 				searchResults.add(searchResultsList.get(i));
 			}

@@ -47,7 +47,7 @@ public class TimeFormat {
 
 		if((RESOLUTION & TimeFormat.MINUTES) == TimeFormat.MINUTES) {
 			if(timeString != null) {
-				timeString += minutesPast + " min";
+				timeString += " " + minutesPast + " min";
 			} else if(minutes > 0) {
 				timeString = minutes + " min";
 			}
@@ -55,7 +55,7 @@ public class TimeFormat {
 
 		if((RESOLUTION & TimeFormat.SECONDS) == TimeFormat.SECONDS) {
 			if(timeString != null) {
-				timeString += secondsPast + " sec";
+				timeString += " " + secondsPast + " sec";
 			} else if(seconds > 0) {
 				timeString = seconds + " sec";
 			}			
@@ -63,7 +63,7 @@ public class TimeFormat {
 
 		if((RESOLUTION & TimeFormat.MILLISECONDS) == TimeFormat.MILLISECONDS) {
 			if(timeString != null) {
-				timeString += millisecondsPast + " ms";
+				timeString += " " + millisecondsPast + " ms";
 			} else {
 				timeString = TIME_MS + " ms";
 			}

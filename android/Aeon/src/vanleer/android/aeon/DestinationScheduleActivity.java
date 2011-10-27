@@ -12,7 +12,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 public final class DestinationScheduleActivity extends Activity implements OnClickListener {
-	
+	private static final Integer DEFAULT_DURATION_MIN = 30;
 	private CheckBox checkBoxArrivalTime;
 	private CheckBox checkBoxDuration;
 	private CheckBox checkBoxDepartureTime;
@@ -62,10 +62,21 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 
 	private void InitializeArrivalControls() {
 		checkBoxArrivalTime.setOnClickListener(this);
-		
-		textViewArrivalTime.setText("Getting to " + destination.GetName() + " at");
+	
 		checkBoxArrivalTime.setChecked(true);
-		timePickerArrivalTime.setEnabled(checkBoxArrivalTime.isChecked());
+		textViewArrivalTime.setText("Getting to " + destination.GetName() + " at");
+		
+		if(destination.GetArrivalTime() != null) {
+			checkBoxArrivalTime.setEnabled(false);
+			timePickerArrivalTime.setEnabled(false);
+			
+			Calendar arrivalTimeCalculator = Calendar.getInstance();
+			arrivalTimeCalculator.setTime(destination.GetArrivalTime());
+			timePickerArrivalTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR));
+			timePickerArrivalTime.setCurrentMinute(arrivalTimeCalculator.get(Calendar.MINUTE));
+		} else {
+			timePickerArrivalTime.setEnabled(checkBoxArrivalTime.isChecked());
+		}
 	}
 
 	private void InitializeDurationControls() {
@@ -76,6 +87,9 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		checkBoxDuration.setChecked(true);
 		timePickerDuration.setEnabled(checkBoxDuration.isChecked());
 		checkBoxLastChecked = checkBoxDuration;
+		
+		timePickerDuration.setCurrentHour(0);
+		timePickerDuration.setCurrentMinute(DEFAULT_DURATION_MIN);
 	}
 
 	private void InitalizeDepartureControls() {
@@ -84,6 +98,12 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		textViewDepartureTime.setText("Leaving " + destination.GetName() + " at");
 		checkBoxDepartureTime.setChecked(false);
 		timePickerDepartureTime.setEnabled(checkBoxDepartureTime.isChecked());
+		
+		Calendar arrivalTimeCalculator = Calendar.getInstance();
+		arrivalTimeCalculator.setTime(destination.GetArrivalTime());
+		arrivalTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
+		timePickerDepartureTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR));
+		timePickerDepartureTime.setCurrentMinute(arrivalTimeCalculator.get(Calendar.MINUTE));
 	}
 
 	public void onClick(View v) {
@@ -154,16 +174,34 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerArrivalTime.getCurrentHour());
 			timeConverter.set(Calendar.MINUTE, timePickerArrivalTime.getCurrentMinute());
 			destination.SetArrivalTime(timeConverter.getTime());
+		} else {
+			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
+			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
+			timeConverter.add(Calendar.HOUR_OF_DAY, -timePickerDuration.getCurrentHour());
+			timeConverter.add(Calendar.MINUTE, -timePickerDuration.getCurrentMinute());
+			destination.SetArrivalTime(timeConverter.getTime());
 		}
 		
 		if(checkBoxDuration.isChecked()) {
-			destination.SetStayDuration((long) ((timePickerDuration.getCurrentHour() * 60) +
-					(timePickerDuration.getCurrentMinute())));
+			destination.SetStayDuration((long) ((timePickerDuration.getCurrentHour() * 3600) +
+					((timePickerDuration.getCurrentMinute() * 60))));
+		} else {
+			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
+			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
+			timeConverter.add(Calendar.HOUR_OF_DAY, -timePickerArrivalTime.getCurrentHour());
+			timeConverter.add(Calendar.MINUTE, -timePickerArrivalTime.getCurrentMinute());
+			destination.SetStayDuration(timeConverter.getTimeInMillis() / 1000);
 		}
 		
 		if(checkBoxDepartureTime.isChecked()) {
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
 			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
+			destination.SetDepartureTime(timeConverter.getTime());
+		} else {
+			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerArrivalTime.getCurrentHour());
+			timeConverter.set(Calendar.MINUTE, timePickerArrivalTime.getCurrentMinute());
+			timeConverter.add(Calendar.HOUR_OF_DAY, timePickerDuration.getCurrentHour());
+			timeConverter.add(Calendar.MINUTE, timePickerDuration.getCurrentMinute());
 			destination.SetDepartureTime(timeConverter.getTime());
 		}
 	}

@@ -1,8 +1,14 @@
 package vanleer.android.aeon;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 //import android.view.ContextMenu;
 //import android.view.ContextMenu.ContextMenuInfo;
@@ -23,6 +29,9 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private ArrayList<ItineraryItem> itineraryItemList;
 	private ItineraryItemAdapter itineraryItems;
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
+	private LocationManager locationManager;
+	private Location currentLocation = null;
+	
 	private static final int GET_NEW_DESTINATION = 0;
 	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
 
@@ -35,11 +44,48 @@ public final class Itinerary extends Activity implements OnClickListener{
 		itineraryListView = (ListView) findViewById(listViewId);
 		itineraryListView.setAdapter(itineraryItems);
 
+		// Acquire a reference to the system Location Manager	    
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		LocationListener locationListener = new LocationListener() {
+			public void onLocationChanged(Location location) {
+				// Called when a new location is found by the network location provider.
+				OnNewLocation(location);
+			}
+
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+			public void onProviderEnabled(String provider) {}
+
+			public void onProviderDisabled(String provider) {}
+		};
+		
+		// Register the listener with the Location Manager to receive location updates
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		
 		if(itineraryItemList.isEmpty()) {
 			//openOptionsMenu();
 		}
 	}
 
+	protected void OnNewLocation(Location location) {
+		currentLocation = location;
+		/*//TODO: fix bug preventing display of current location if discovered after query started
+		locationSensorImage.setVisibility(View.VISIBLE);
+		//make the image view square
+		MakeImageViewSquare(locationSensorImage);
+		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+		new Thread() {
+			public void run() {
+				Message msg = updateCurrentLocationTextHandler.obtainMessage();
+				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
+				updateCurrentLocationTextHandler.sendMessage(msg);
+			}
+		}.start();
+		if(waitingForGps) {
+			waitingForGps  = false;
+			onClick(searchButton);
+		}*/
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -52,6 +98,14 @@ public final class Itinerary extends Activity implements OnClickListener{
 		switch (item.getItemId()) {
 		case R.id.submenu_item_add_destination_google_search:
 			Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
+			
+			if(itineraryItemList.isEmpty()) {
+				startItineraryOpen.putExtra("location", currentLocation);
+			} else {
+				startItineraryOpen.putExtra("location",
+						itineraryItemList.get(itineraryItemList.size() - 1).GetLocation());
+			}
+				
 			startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
 			break;
 		case R.id.submenu_item_add_destination_my_location:
@@ -108,6 +162,13 @@ public final class Itinerary extends Activity implements OnClickListener{
 
 	private void UpdateArrivalDepartureTimes(ItineraryItem newDestination) {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
+		if(!itineraryItemList.isEmpty()) {
+			Calendar arrivalTimeCalculator = Calendar.getInstance();
+			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 1);
+			arrivalTimeCalculator.setTime(lastDestination.GetDepartureTime());
+			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.GetTravelDuration() * 1000));
+			newDestination.SetArrivalTime(arrivalTimeCalculator.getTime());
+		}
 		startDestinationSchedule.putExtra("destination", newDestination);
 		startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION_SCHEDULE);
 	}

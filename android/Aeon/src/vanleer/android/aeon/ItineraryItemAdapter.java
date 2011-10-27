@@ -38,17 +38,26 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView travelDistance = (TextView) v.findViewById(R.id.textView_travelDistance);
 				TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
 
+				//TODO: Get type of transportation used
+				travelDistance.setText("Drive/Walk/Bike/Ride " + item.GetDistanceMiles());
+				travelTime.setText(" in " + item.GetTravelDurationLongFormat());
+				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
+				arrivalTime.setText(" at " + item.GetArrivalTimeString());
+				destinationName.setText(item.GetName());
+				stayDuration.setText(" for " + item.GetStayDurationLongFormat());
+				departureVicinity.setText("Depart from " + item.GetVicinity());
+				departureTime.setText(" at " + item.GetDepartureTimeString());
+				
 				if(position == 0) {
-					//TODO: Add "starting from" annotation
 					travelDistance.setVisibility(View.GONE);
 					travelTime.setVisibility(View.GONE);
 
-					arrivalVicinity.setVisibility(View.GONE);
-					arrivalTime.setVisibility(View.GONE);
+					arrivalVicinity.setText("Start at " + item.GetVicinity());
 				} else if(position == (destinationList.size() - 1)) {
-					//TODO: Add "final destination" annotation
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);
+					
+					arrivalVicinity.setText("End at " + item.GetVicinity());
 				} else {
 					travelDistance.setVisibility(View.VISIBLE);
 					travelTime.setVisibility(View.VISIBLE);
@@ -60,15 +69,6 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					departureTime.setVisibility(View.VISIBLE);
 				}
 
-				//TODO: Get type of transportation used
-				travelDistance.setText("Drive/Walk/Bike/Ride " + item.GetDistanceMiles());
-				travelTime.setText(" in " + item.GetTravelDurationLongFormat());
-				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
-				arrivalTime.setText(" at " + item.GetArrivalTimeString());
-				destinationName.setText(item.GetName());
-				stayDuration.setText(" for " + item.GetStayDurationLongFormat());
-				departureVicinity.setText("Depart from " + item.GetVicinity());
-				departureTime.setText(" at " + item.GetDepartureTimeString());
 			}
 		}
 		return v;
