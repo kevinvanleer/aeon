@@ -49,11 +49,21 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				departureTime.setText(" at " + item.GetDepartureTimeString());
 				
 				if(position == 0) {
+					arrivalVicinity.setVisibility(View.GONE);
+					arrivalTime.setVisibility(View.GONE);
 					travelDistance.setVisibility(View.GONE);
 					travelTime.setVisibility(View.GONE);
+					stayDuration.setVisibility(View.GONE);
+					departureVicinity.setVisibility(View.VISIBLE);
+					departureTime.setVisibility(View.VISIBLE);
 
-					arrivalVicinity.setText("Start at " + item.GetVicinity());
+					departureVicinity.setText("Start from " + item.GetVicinity());
 				} else if(position == (destinationList.size() - 1)) {
+					travelDistance.setVisibility(View.VISIBLE);
+					travelTime.setVisibility(View.VISIBLE);
+					arrivalVicinity.setVisibility(View.VISIBLE);
+					arrivalTime.setVisibility(View.VISIBLE);
+					stayDuration.setVisibility(View.GONE);
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);
 					
@@ -61,10 +71,9 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				} else {
 					travelDistance.setVisibility(View.VISIBLE);
 					travelTime.setVisibility(View.VISIBLE);
-
 					arrivalVicinity.setVisibility(View.VISIBLE);
 					arrivalTime.setVisibility(View.VISIBLE);
-					
+					stayDuration.setVisibility(View.VISIBLE);
 					departureVicinity.setVisibility(View.VISIBLE);
 					departureTime.setVisibility(View.VISIBLE);
 				}
