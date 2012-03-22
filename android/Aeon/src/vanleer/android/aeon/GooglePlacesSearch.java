@@ -75,7 +75,6 @@ public final class GooglePlacesSearch {
 	}
 
 	private void PerformGeocodingSearch(String address, boolean sensor) {
-		// TODO Auto-generated method stub
 		String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor;
 		geocodingSearchResults = PerformHttpGet(url);
 	}
