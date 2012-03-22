@@ -10,8 +10,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-//import android.view.ContextMenu;
-//import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -97,18 +95,10 @@ public final class Itinerary extends Activity implements OnClickListener{
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.submenu_item_add_destination_google_search:
-			Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
-			
-			if(itineraryItemList.isEmpty()) {
-				startItineraryOpen.putExtra("location", currentLocation);
-			} else {
-				startItineraryOpen.putExtra("location",
-						itineraryItemList.get(itineraryItemList.size() - 1).GetLocation());
-			}
-				
-			startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
+			StartSearchActivity();
 			break;
 		case R.id.submenu_item_add_destination_my_location:
+			GetMyLocationInfo();
 			break;
 		case R.id.submenu_item_add_destination_starred_locations:
 			if(loggedIntoGoogle) {
@@ -139,6 +129,41 @@ public final class Itinerary extends Activity implements OnClickListener{
 		return true;
 	}
 
+	private void StartSearchActivity() {
+		Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
+		
+		if(itineraryItemList.isEmpty()) {
+			startItineraryOpen.putExtra("location", currentLocation);
+		} else {
+			startItineraryOpen.putExtra("location",
+					GetLastDestination().GetLocation());
+		}
+			
+		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
+	}
+
+	private void GetMyLocationInfo() {
+		ItineraryItem myLocation = null;
+		
+		try{
+			ItineraryItem lastDestination = GetLastDestination();
+			myLocation = new ItineraryItem(currentLocation, lastDestination.GetLocation());
+		}
+		catch(IllegalStateException e){
+			myLocation = new ItineraryItem(currentLocation);
+		}
+		
+		UpdateArrivalDepartureTimes(myLocation);
+	}
+
+	private ItineraryItem GetLastDestination() {
+		if(itineraryItemList.size() == 0) {
+			throw new IllegalStateException("The destination list is empty.  There is no previous destination");
+		}
+		
+		return itineraryItemList.get(itineraryItemList.size() - 1);
+	}
+
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode)
@@ -164,7 +189,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 		if(!itineraryItemList.isEmpty()) {
 			Calendar arrivalTimeCalculator = Calendar.getInstance();
-			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 1);
+			ItineraryItem lastDestination = GetLastDestination();
 			arrivalTimeCalculator.setTime(lastDestination.GetDepartureTime());
 			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.GetTravelDuration() * 1000));
 			newDestination.SetArrivalTime(arrivalTimeCalculator.getTime());

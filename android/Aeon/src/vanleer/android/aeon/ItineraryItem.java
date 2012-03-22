@@ -24,13 +24,17 @@ public final class ItineraryItem implements Parcelable {
 	private Date departureTime = null;
 	private Long stayDurationSec = null;
 	private String phoneNumber;
+	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
+	private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 
 	public ItineraryItem(JSONObject searchResult) {
 		if(IsGeocodingResult(searchResult)) {
 			googleGeocodingResult = searchResult;
+			name = GetGeocodingName();
 		} else {
 			googlePlaceResult = searchResult;
+			name = GetPlaceName();
 		}
 		SetLocation();
 
@@ -52,6 +56,29 @@ public final class ItineraryItem implements Parcelable {
 		departureTime = (Date) in.readSerializable();
 		stayDurationSec = in.readLong();
 		phoneNumber = in.readString();
+		name = in.readString(); 
+	}
+
+	public ItineraryItem(Location myLocation) {
+		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
+		location = myLocation;
+		name = googleSearch.ReverseGeocode(location, true); 
+		googlePlaceResult = null;
+		googleGeocodingResult = null;
+		googleDistanceMatrixResult = null;
+		travelDurationSec = (long) 0;
+		distance = (long) 0;
+		iconUrl = null;
+		arrivalTime = new Date();
+		departureTime = new Date();
+		stayDurationSec = (long) 0;
+		phoneNumber = "NONE";
+	}
+
+	public ItineraryItem(Location myLocation, Location previousLocation) {
+		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
+		location = myLocation;
+		name = googleSearch.ReverseGeocode(location, true); 
 	}
 
 	private boolean IsGeocodingResult(JSONObject result) {
@@ -65,14 +92,6 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	String GetName() {
-		String name;
-
-		if(googlePlaceResult != null) {
-			name = GetPlaceName();
-		} else {
-			name = GetGeocodingName();
-		}
-
 		return name;
 	}
 
@@ -297,6 +316,7 @@ public final class ItineraryItem implements Parcelable {
 		dest.writeSerializable(departureTime);
 		dest.writeLong(stayDurationSec);
 		dest.writeString(phoneNumber);
+		dest.writeString(name);
 	}
 
 	public static final Parcelable.Creator<ItineraryItem> CREATOR =
