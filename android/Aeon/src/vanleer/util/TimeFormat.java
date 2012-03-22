@@ -40,12 +40,23 @@ public class TimeFormat {
 		long millisecondsPast = TIME_MS - (seconds * 1000);
 
 		if((RESOLUTION & TimeFormat.HOURS) == TimeFormat.HOURS) {
+			if(RESOLUTION == TimeFormat.HOURS) {
+				if(minutesPast >= 30) {
+					++hours;
+				}
+			}
 			if(hours > 0) {
 				timeString = hours + " hr";
 			}
 		}
 
 		if((RESOLUTION & TimeFormat.MINUTES) == TimeFormat.MINUTES) {
+			if(RESOLUTION == TimeFormat.MINUTES) {
+				if(secondsPast >= 30) {
+					++minutesPast;
+					++minutes;
+				}
+			}
 			if(timeString != null) {
 				timeString += " " + minutesPast + " min";
 			} else if(minutes > 0) {
@@ -54,6 +65,12 @@ public class TimeFormat {
 		}
 
 		if((RESOLUTION & TimeFormat.SECONDS) == TimeFormat.SECONDS) {
+			if(RESOLUTION == TimeFormat.SECONDS) {
+				if(millisecondsPast >= 500) {
+					++secondsPast;
+					++seconds;
+				}
+			}
 			if(timeString != null) {
 				timeString += " " + secondsPast + " sec";
 			} else if(seconds > 0) {
@@ -83,14 +100,31 @@ public class TimeFormat {
 		long millisecondsPast = MILLISECONDS - (seconds * 1000);
 
 		if((RESOLUTION & TimeFormat.HOURS) == TimeFormat.HOURS) {
+			if(RESOLUTION == TimeFormat.HOURS) {
+				if(minutesPast >= 30) {
+					++hours;
+				}
+			}
 			timeString += hours;
 		}
 
 		if((RESOLUTION & TimeFormat.MINUTES) == TimeFormat.MINUTES) {
+			if(RESOLUTION == TimeFormat.MINUTES) {
+				if(secondsPast >= 30) {
+					++minutesPast;
+					++minutes;
+				}
+			}
 			timeString += ":" + minutesPast;
 		}
 
 		if((RESOLUTION & TimeFormat.SECONDS) == TimeFormat.SECONDS) {
+			if(RESOLUTION == TimeFormat.SECONDS) {
+				if(millisecondsPast >= 500) {
+					++secondsPast;
+					++seconds;
+				}
+			}
 			timeString += ":" + secondsPast;
 		}
 
