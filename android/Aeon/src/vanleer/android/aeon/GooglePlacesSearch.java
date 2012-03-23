@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.lang.Math;
 
 import org.apache.http.HttpResponse;
@@ -32,6 +33,7 @@ public final class GooglePlacesSearch {
 	private JSONObject placesSearchResults = null;
 	private JSONObject geocodingSearchResults = null;
 	private ArrayList<ItineraryItem> places = null;
+	private ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
 
 	GooglePlacesSearch(String userApiKey, String userClientId) {
 		apiKey = userApiKey;
@@ -60,6 +62,7 @@ public final class GooglePlacesSearch {
 		{
 			JSONObject distanceMatrixResults = GetDistances(httpClient, latitude, longitude, sensor);
 			ParseDistanceMatrixResults(distanceMatrixResults);
+			Collections.sort(places, distanceCompare);
 		}
 	}
 	
