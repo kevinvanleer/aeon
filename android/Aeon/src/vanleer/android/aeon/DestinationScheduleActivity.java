@@ -160,7 +160,6 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 
 	private void FinishSchedulingDestination() {
 		CalculateScheduling();
-		
 		Intent finishedScheduling = new Intent();
 		finishedScheduling.putExtra("destination", destination);
 		setResult(Activity.RESULT_OK, finishedScheduling);
