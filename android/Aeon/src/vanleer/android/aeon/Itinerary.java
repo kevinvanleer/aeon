@@ -29,13 +29,18 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private boolean loggedIntoGoogle = /*false*/true; // for debugging	
 	private LocationManager locationManager;
 	private Location currentLocation = null;
-	
 	private static final int GET_NEW_DESTINATION = 0;
 	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
+
+		//FOR TESTING
+		//currentLocation = new Location("test");
+		//currentLocation.setLatitude(38.74419380);
+		//currentLocation.setLongitude(-90.09839319999999);
+		//FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
 		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item, itineraryItemList);
@@ -56,10 +61,10 @@ public final class Itinerary extends Activity implements OnClickListener{
 
 			public void onProviderDisabled(String provider) {}
 		};
-		
+
 		// Register the listener with the Location Manager to receive location updates
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-		
+
 		if(itineraryItemList.isEmpty()) {
 			//openOptionsMenu();
 		}
@@ -131,20 +136,20 @@ public final class Itinerary extends Activity implements OnClickListener{
 
 	private void StartSearchActivity() {
 		Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
-		
+
 		if(itineraryItemList.isEmpty()) {
 			startItineraryOpen.putExtra("location", currentLocation);
 		} else {
 			startItineraryOpen.putExtra("location",
 					GetLastDestination().GetLocation());
 		}
-			
+
 		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
 	}
 
 	private void GetMyLocationInfo() {
 		ItineraryItem myLocation = null;
-		
+
 		try{
 			ItineraryItem lastDestination = GetLastDestination();
 			myLocation = new ItineraryItem(currentLocation, lastDestination.GetLocation());
@@ -152,7 +157,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 		catch(IllegalStateException e){
 			myLocation = new ItineraryItem(currentLocation);
 		}
-		
+
 		UpdateArrivalDepartureTimes(myLocation);
 	}
 
@@ -160,7 +165,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 		if(itineraryItemList.size() == 0) {
 			throw new IllegalStateException("The destination list is empty.  There is no previous destination");
 		}
-		
+
 		return itineraryItemList.get(itineraryItemList.size() - 1);
 	}
 
@@ -200,6 +205,6 @@ public final class Itinerary extends Activity implements OnClickListener{
 
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

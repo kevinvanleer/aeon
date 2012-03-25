@@ -40,6 +40,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private boolean searching = false;
 	private Long searchRadius;
 
+	//4812 Danielle CT Granite City IL 62040
 	//lat=38.74419380
 	//lng=-90.09839319999999
 
@@ -61,7 +62,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		
+
 		ConfigureSearchResultsListViewLongClickListener();
 
 		// Define a listener that responds to location updates
@@ -79,11 +80,16 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		};
 
 		currentLocation = getIntent().getExtras().getParcelable("location");
-		
+
 		if(currentLocation == null) {
 			// Register the listener with the Location Manager to receive location updates
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			//TODO: locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, some looper thing);
 		} else {
+			if(currentLocation.getProvider() == LocationManager.GPS_PROVIDER)
+			{
+				locationSensorImage.setVisibility(View.VISIBLE);
+			}
 			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
 		}
 	}
@@ -104,7 +110,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		currentLocation = location;
 		//TODO: fix bug preventing display of current location if discovered after query started
 		locationSensorImage.setVisibility(View.VISIBLE);
-		//make the image view square
 		MakeImageViewSquare(locationSensorImage);
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
 		new Thread() {
@@ -184,7 +189,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			searchResults.clear();
 			searchResultsListView.clearChoices();
 			QuerySearchEngine();		
-			
+
 			BuildResultsList();
 		}
 	}

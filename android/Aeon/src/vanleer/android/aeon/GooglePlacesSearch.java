@@ -29,17 +29,18 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
-	private HttpClient httpClient = new DefaultHttpClient();
 	private boolean autocomplete = false;
-	private JSONObject placesSearchResults = null;
-	private JSONObject geocodingSearchResults = null;
 	private ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
 	private ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
-	private ArrayList<String> placeTypes = new ArrayList<String>();
+	private static final ArrayList<String> placeTypes = new ArrayList<String>();
 
 	GooglePlacesSearch(String userApiKey, String userClientId) {
 		apiKey = userApiKey;
-		InitializePlaceTypes();
+
+		if(placeTypes.isEmpty())
+		{
+			InitializePlaceTypes();
+		}
 	}
 
 	void PerformSearch(double latitude, double longitude,
@@ -59,7 +60,7 @@ public final class GooglePlacesSearch {
 
 	private String FindType(String name) {
 		String inferredType = null;
-		
+
 		name = name.toLowerCase();
 		if(name.endsWith("es")) {
 			name = name.substring(0, (name.length() - 2));
@@ -67,7 +68,7 @@ public final class GooglePlacesSearch {
 		if(name.endsWith("s")) {
 			name = name.substring(0, (name.length() - 1));
 		}
-		
+
 		Iterator<String> itr = placeTypes.iterator();
 		while(itr.hasNext()) {
 			String type = itr.next();
@@ -76,7 +77,7 @@ public final class GooglePlacesSearch {
 				break;
 			}
 		}
-		
+
 		return inferredType;
 	}
 
@@ -88,46 +89,116 @@ public final class GooglePlacesSearch {
 	void PerformSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
 		ClearSearchResults();
-		
-		PerformGeocodingSearch(name, sensor);
+
 		PerformPlacesSearch(latitude, longitude, radius, types, name, sensor);
-		
-		if(GetSearchResultCount() > 0)
+		PerformGeocodingSearch(name, sensor);
+
+		if(places.size() > 0)
 		{
-			JSONObject distanceMatrixResults = GetDistances(httpClient, latitude, longitude, sensor);
+			JSONObject distanceMatrixResults = GetDistances(latitude, longitude, sensor);
 			ParseDistanceMatrixResults(distanceMatrixResults);
 			Collections.sort(places, distanceCompare);
 		}
 	}
-	
+
 	private void ClearSearchResults() {
 		if(places != null) {
 			places.clear();
-		}
-		if(placesSearchResults != null) {
-			placesSearchResults.clear();
-		}
-		if(geocodingSearchResults != null) {
-			geocodingSearchResults.clear();
 		}
 	}
 
 	void PerformPlacesSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
 		String url = BuildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
-		placesSearchResults = PerformHttpGet(url);
+		JSONObject placesSearchResults = PerformHttpGet(url);
+		AddPlacesResults(placesSearchResults);
+	}
+
+	private String BuildGooglePlacesSearchUrl(double latitude,
+			double longitude, double radius, String[] types, String name,
+			boolean sensor) {
+
+		String url;
+		if(autocomplete) {			
+			url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
+		} else {
+			url = GOOGLE_PLACES_SEARCH_URL;
+		}
+
+		url += "?location=" + latitude + "," + longitude;
+		url += "&radius=" + radius;
+
+		if(types != null) {	
+			url += "&types=" + GetTypesUrlPart(types);
+		}
+
+		if(name != "") {
+			if(autocomplete) {
+				url += "&input=" + Uri.encode(name);
+			} else {
+				url += "&name=" + Uri.encode(name);
+			}
+		}
+
+		url += "&sensor=" + sensor;
+		url += "&key=" + apiKey;
+
+		return url;
+	} 
+
+	private String GetTypesUrlPart(String[] types) {
+		String typesUrlPart = "";
+
+		for(int i = 0; i < types.length; ++i) {
+			if(i > 0) {
+				typesUrlPart += "|";
+			}
+
+			typesUrlPart += types[i];
+		}
+
+		return Uri.encode(typesUrlPart);
+	}
+
+	private void AddPlacesResults(JSONObject placesSearchResults) {
+		if(placesSearchResults != null) {
+			JSONArray placesResultArray = (JSONArray) placesSearchResults.get("results");
+			if(placesResultArray != null) {
+				for(int index = 0; index < placesResultArray.size(); ++index) {
+					JSONObject place = (JSONObject) placesResultArray.get(index);
+					if(place != null) {
+						places.add(new ItineraryItem(place));
+					}
+				}
+			}
+		}
 	}
 
 	private void PerformGeocodingSearch(String address, boolean sensor) {
 		String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor;
-		geocodingSearchResults = PerformHttpGet(url);
+		JSONObject geocodingSearchResults = PerformHttpGet(url);
+		AddGeocodingResults(geocodingSearchResults);
 	}
-	
-	private JSONObject GetDistances(HttpClient httpClient, double latitude, double longitude, boolean sensor) {
+
+	private void AddGeocodingResults(JSONObject geocodingSearchResults) {
+		if(geocodingSearchResults != null) {
+			JSONArray geocodeResultArray = (JSONArray) geocodingSearchResults.get("results");
+			if(geocodeResultArray != null) {
+				for(int index = 0; index < geocodeResultArray.size(); ++index) {
+					JSONObject place = (JSONObject) geocodeResultArray.get(index);
+					if(place != null) {
+						places.add(new ItineraryItem(place));
+					}
+				}
+			}
+		}
+	}
+
+	private JSONObject GetDistances(double latitude, double longitude, boolean sensor) {
 		String url = BuildDistanceMatrixUrl(latitude, longitude, sensor);
 		return PerformHttpGet(url);
 	}
-	
+
 	public String ReverseGeocode(final Location location, Boolean sensor) {
 		String bestDescription = "";
 		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) +
@@ -138,6 +209,7 @@ public final class GooglePlacesSearch {
 			if(resultArray != null) {
 				JSONObject placemark = (JSONObject) resultArray.get(0);
 				if(placemark != null) {
+					//TODO: Attempt to get establishment string
 					bestDescription = (String) placemark.get("formatted_address");
 				}
 			}
@@ -149,6 +221,7 @@ public final class GooglePlacesSearch {
 	private JSONObject PerformHttpGet(String url) {
 		JSONObject jsonResponse = null;
 		try {
+			HttpClient httpClient = new DefaultHttpClient();
 			HttpResponse response = httpClient.execute(new HttpGet(url));
 			StatusLine statusLine = response.getStatusLine();
 			if(statusLine.getStatusCode() == HttpStatus.SC_OK) {
@@ -166,6 +239,31 @@ public final class GooglePlacesSearch {
 		return jsonResponse;
 	}
 
+	private String BuildDistanceMatrixUrl(double latitude, double longitude, boolean sensor) {
+		String url = GOOGLE_DISTANCE_MATRIX_URL;
+		url += "?origins=" + latitude + "," + longitude;
+		String destinations = GetDestinationsUrlPart(); 
+		url += "&destinations=" + Uri.encode(destinations);
+		url += "&sensor=" + sensor;
+		return url;
+	}
+
+	private String GetDestinationsUrlPart() {
+		String destinations = "";
+		Iterator<ItineraryItem> placeIterator = places.iterator();
+		while(placeIterator.hasNext()) {
+			ItineraryItem place = placeIterator.next();
+			if(place != null) {
+				destinations += place.GetLocation().getLatitude() + ",";
+				destinations += place.GetLocation().getLongitude() + "|";
+			}
+		}
+		if(!destinations.isEmpty()) {
+			destinations = destinations.substring(0, destinations.length() - 1);
+		}
+		return destinations;
+	}
+
 	private void ParseDistanceMatrixResults(JSONObject distanceMatrix) {
 		if(distanceMatrix != null) {
 			JSONArray results = (JSONArray) distanceMatrix.get("rows");
@@ -181,101 +279,6 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	private String BuildDistanceMatrixUrl(double latitude, double longitude, boolean sensor) {
-		String url = GOOGLE_DISTANCE_MATRIX_URL;
-		url += "?origins=" + latitude + "," + longitude;
-		String placesDestinations = GetPlacesDestinations();
-		String geocodingDestinations = GetGeocodingDestinations();
-		String destinations = geocodingDestinations + "|" + placesDestinations;
-		url += "&destinations=" + Uri.encode(destinations);
-		url += "&sensor=" + sensor;
-		return url;
-	}
-
-	private String GetGeocodingDestinations() {
-		String destinations = "";
-		if(geocodingSearchResults != null) {
-			JSONArray placesResultArray = (JSONArray) geocodingSearchResults.get("results");
-			if(placesResultArray != null) {
-				for(int index = 0; index < placesResultArray.size(); ++index) {
-					JSONObject place = (JSONObject) placesResultArray.get(index);
-					if(place != null) {
-						places.add(new ItineraryItem(place));
-						destinations += places.get(index).GetLocation().getLatitude() + ",";
-						destinations += places.get(index).GetLocation().getLongitude() + "|";
-					}
-				}
-				if(!destinations.isEmpty()) {
-					destinations = destinations.substring(0, destinations.length() - 1);
-				}
-			}
-		}
-		return destinations;
-	}
-
-	private String GetPlacesDestinations() {
-		String destinations = "";
-		if(placesSearchResults != null) {
-			JSONArray placesResultArray = (JSONArray) placesSearchResults.get("results");
-			if(placesResultArray != null) {
-				for(int index = 0; index < placesResultArray.size(); ++index) {
-					JSONObject place = (JSONObject) placesResultArray.get(index);
-					if(place != null) {
-						places.add(new ItineraryItem(place));
-						destinations += places.get(index).GetLocation().getLatitude() + ",";
-						destinations += places.get(index).GetLocation().getLongitude() + "|";
-					}
-				}
-				if(!destinations.isEmpty()) {
-					destinations = destinations.substring(0, destinations.length() - 1);
-				}
-			}
-		}
-		return destinations;
-	}
-
-	private String BuildGooglePlacesSearchUrl(double latitude,
-			double longitude, double radius, String[] types, String name,
-			boolean sensor) {
-
-		String url;
-		if(autocomplete) {			
-			url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
-		} else {
-			url = GOOGLE_PLACES_SEARCH_URL;
-		}
-
-		url += "?location=" + latitude + "," + longitude;
-		url += "&radius=" + radius;
-
-		if(types != null) {	    	
-			String typesString = "";
-			url += "&types=";
-			for(int i = 0; i < types.length; ++i) {
-				if(i > 0) {
-					typesString += "|";
-				}
-
-				typesString += types[i];
-			}
-
-			url += Uri.encode(typesString);
-		}	    
-
-		if(name != "") {
-			if(autocomplete) {
-				url += "&input=" + Uri.encode(name);
-			} else {
-				url += "&name=" + Uri.encode(name);
-			}
-		}
-
-		url += "&sensor=" + sensor;
-		url += "&key=" + apiKey;
-
-		return url;
-	} 
-
 	public ItineraryItem GetPlace(final int index) {
 		return places.get(index);
 	}
@@ -284,33 +287,6 @@ public final class GooglePlacesSearch {
 		return places.size();
 	}
 
-	private int GetSearchResultCount() {
-		return GetPlacesSearchResultCount() + GetGeocodingSearchResultCount();
-	}
-
-	public int GetGeocodingSearchResultCount() {
-		int resultCount = 0;
-		if(geocodingSearchResults != null) {
-			JSONArray resultArray = (JSONArray) geocodingSearchResults.get("results");
-			if(resultArray != null) {
-				resultCount = resultArray.size();
-			}
-		}
-		return resultCount;
-	}
-
-	public int GetPlacesSearchResultCount() {
-		int resultCount = 0;
-		if(placesSearchResults != null) {
-			JSONArray resultArray = (JSONArray) placesSearchResults.get("results");
-			if(resultArray != null) {
-				resultCount = resultArray.size();
-			}
-		}
-		return resultCount;
-	}
-
-	
 	static String GetGeodeticString(Location location) {
 		String latSuffix = "° N";
 		String lngSuffix = "° E";
@@ -326,7 +302,7 @@ public final class GooglePlacesSearch {
 
 		return (latString + latSuffix + ", " + lngString + lngSuffix);
 	}
-	
+
 	private void InitializePlaceTypes() {
 		//Levenshtein distance
 		//frej
