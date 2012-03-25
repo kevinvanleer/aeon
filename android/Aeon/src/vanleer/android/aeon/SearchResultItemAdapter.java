@@ -39,7 +39,7 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 					vicinity.setText(item.GetVicinity());
 				}
 				if(distance != null) {
-					distance.setText(item.GetDistanceMiles());
+					distance.setText(item.GetFormattedDistance());
 				}
 			}
 		}

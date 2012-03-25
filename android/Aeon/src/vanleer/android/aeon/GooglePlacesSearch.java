@@ -87,11 +87,11 @@ public final class GooglePlacesSearch {
 
 	void PerformSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
-		if(!places.isEmpty()) {
-			places.clear();
-		}
+		ClearSearchResults();
+		
 		PerformGeocodingSearch(name, sensor);
 		PerformPlacesSearch(latitude, longitude, radius, types, name, sensor);
+		
 		if(GetSearchResultCount() > 0)
 		{
 			JSONObject distanceMatrixResults = GetDistances(httpClient, latitude, longitude, sensor);
@@ -100,20 +100,32 @@ public final class GooglePlacesSearch {
 		}
 	}
 	
+	private void ClearSearchResults() {
+		if(places != null) {
+			places.clear();
+		}
+		if(placesSearchResults != null) {
+			placesSearchResults.clear();
+		}
+		if(geocodingSearchResults != null) {
+			geocodingSearchResults.clear();
+		}
+	}
+
 	void PerformPlacesSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
 		String url = BuildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
 		placesSearchResults = PerformHttpGet(url);
 	}
 
-	private JSONObject GetDistances(HttpClient httpClient, double latitude, double longitude, boolean sensor) {
-		String url = BuildDistanceMatrixUrl(latitude, longitude, sensor);
-		return PerformHttpGet(url);
-	}
-
 	private void PerformGeocodingSearch(String address, boolean sensor) {
 		String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor;
 		geocodingSearchResults = PerformHttpGet(url);
+	}
+	
+	private JSONObject GetDistances(HttpClient httpClient, double latitude, double longitude, boolean sensor) {
+		String url = BuildDistanceMatrixUrl(latitude, longitude, sensor);
+		return PerformHttpGet(url);
 	}
 	
 	public String ReverseGeocode(final Location location, Boolean sensor) {

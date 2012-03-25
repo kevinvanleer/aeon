@@ -6,6 +6,7 @@ import java.util.Date;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import vanleer.util.DistanceUnit;
 import vanleer.util.TimeFormat;
 
 import android.location.Location;
@@ -13,13 +14,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public final class ItineraryItem implements Parcelable {
+	public DistanceUnit distanceUnit = DistanceUnit.MILES;
 	private JSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
 	private JSONObject googleDistanceMatrixResult = null;
 	private Location location;
 	private Long travelDurationSec;
 	private Long distance;
-	public String iconUrl;
+	private String iconUrl;
 	private Date arrivalTime = null;
 	private Date departureTime = null;
 	private Long stayDurationSec = null;
@@ -229,14 +231,38 @@ public final class ItineraryItem implements Parcelable {
 		return distance;
 	}
 
-	public String GetDistanceMeters() {
+	public String GetFormattedDistance() {
+		String distanceString;
+		if(distance == null) {
+			distanceString = "unknown";
+		} else {
+			switch(distanceUnit) {
+			case METERS:
+				distanceString = GetDistanceMeters();
+				break;
+			case KILOMETERS:
+				distanceString = GetDistanceKilometers();
+				break;
+			case MILES:
+				distanceString = GetDistanceMiles();
+				break;
+			default:
+				distanceString = "unsupported unit";
+				break;
+			}
+		}
+
+		return distanceString;
+	}
+	
+	private String GetDistanceMeters() {
 		return String.format("%1$l m", distance);
 	}
 
-	public String GetDistanceMiles() {
+	private String GetDistanceMiles() {
 		return String.format("%1$.1f mi", (distance * MILES_PER_METER));
 	}
-	public String GetDistanceKilometers() {
+	private String GetDistanceKilometers() {
 		return String.format("%1$.1f km", (distance / 1000.));
 	}
 

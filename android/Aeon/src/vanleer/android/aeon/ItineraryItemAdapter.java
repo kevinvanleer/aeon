@@ -39,7 +39,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
 
 				//TODO: Get type of transportation used
-				travelDistance.setText("Drive/Walk/Bike/Ride " + item.GetDistanceMiles());
+				travelDistance.setText("Drive/Walk/Bike/Ride " + item.GetFormattedDistance());
 				travelTime.setText(" in " + item.GetTravelDurationLongFormat());
 				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
 				arrivalTime.setText(" at " + item.GetArrivalTimeString());
