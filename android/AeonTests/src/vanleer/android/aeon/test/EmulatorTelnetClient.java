@@ -9,10 +9,9 @@ import java.net.UnknownHostException;
 public final class EmulatorTelnetClient {
 	static void sendLocation(double latitude, double longitude) {
 		try {
-			Socket socket = new Socket("10.0.2.2", 5554); // usually 5554
-			socket.setKeepAlive(true);
-			String str = "geo fix " + longitude + " " + latitude ;
+			Socket socket = new Socket("10.0.2.2", 5554);
 			Writer w = new OutputStreamWriter(socket.getOutputStream());
+			String str = "geo fix " + longitude + " " + latitude ;
 			w.write(str + "\r\n");
 			w.flush();
 		}
@@ -25,10 +24,9 @@ public final class EmulatorTelnetClient {
 	}
 	static void unlockScreen() {
 		try {
-			Socket socket = new Socket("10.0.2.2", 5554); // usually 5554
-			socket.setKeepAlive(true);
-			String str = "event send EV_KEY:KEY_MENU:1 EV_KEY:KEY_MENU:0";
+			Socket socket = new Socket("10.0.2.2", 5554);
 			Writer w = new OutputStreamWriter(socket.getOutputStream());
+			String str = "event send EV_KEY:KEY_MENU:1 EV_KEY:KEY_MENU:0";
 			w.write(str + "\r\n");
 			w.flush();
 		}
