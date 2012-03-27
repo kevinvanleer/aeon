@@ -8,12 +8,12 @@ import com.jayway.android.robotium.solo.Solo;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
 
-public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<AeonActivity> {
+public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinerary> {
 	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 
 	public TestGetGpsLocation() throws ClassNotFoundException {
-		super(TARGET_PACKAGE_ID, AeonActivity.class);
+		super(TARGET_PACKAGE_ID, Itinerary.class);
 	}
 
 	@Override
@@ -23,8 +23,6 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<AeonAct
 	}
 
 	public void testUpdateGpsLocationFromItinerary() {
-		solo.assertCurrentActivity("Main menu is not the current activity.", AeonActivity.class);
-		solo.clickOnButton("Plan");
 		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
@@ -36,8 +34,6 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<AeonAct
 	}
 	
 	public void testUpdateGpsLocationPreSearch() {
-		solo.assertCurrentActivity("Main menu is not the current activity.", AeonActivity.class);
-		solo.clickOnButton("Plan");
 		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
 		solo.clickOnText("Add");
@@ -50,8 +46,6 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<AeonAct
 	}
 	
 	public void testUpdateGpsLocationPostSearch() {
-		solo.assertCurrentActivity("Main menu is not the current activity.", AeonActivity.class);
-		solo.clickOnButton("Plan");
 		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
 		solo.clickOnText("Add");
@@ -73,7 +67,8 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<AeonAct
 		return (findView(id).getVisibility() == View.VISIBLE);
 	}
 	
-	/*public void sendGpsLocation(double latitude, double longitude)
+	/*Will have to use this method for real device testing?
+	 * public void sendGpsLocation(double latitude, double longitude)
 	{
 		final String TEST_PROVIDER = "testGps";
 		LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
