@@ -86,7 +86,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 			//TODO: locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, some looper thing);
 		} else {
-			if(currentLocation.getProvider() == LocationManager.GPS_PROVIDER)
+			locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+			if(currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER))
 			{
 				locationSensorImage.setVisibility(View.VISIBLE);
 			}
