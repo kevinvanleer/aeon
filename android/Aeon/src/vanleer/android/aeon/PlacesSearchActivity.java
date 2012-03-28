@@ -28,7 +28,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private ListView searchResultsListView;
 	private int listViewId = R.id.listView_searchResults;
 	private String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
-	private Location currentLocation;
+	private Location currentLocation = null;
 	private ImageButton searchButton;
 	private TextView locationText;
 	private ImageView locationSensorImage;
@@ -79,7 +79,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			public void onProviderDisabled(String provider) {}
 		};
 
-		currentLocation = getIntent().getExtras().getParcelable("location");
+		if(getIntent() != null && getIntent().getExtras() != null) {
+			currentLocation = getIntent().getExtras().getParcelable("location");
+		}
 
 		if(currentLocation == null) {
 			// Register the listener with the Location Manager to receive location updates
