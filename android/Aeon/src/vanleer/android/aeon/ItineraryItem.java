@@ -100,6 +100,7 @@ public final class ItineraryItem implements Parcelable {
 	private String GetGeocodingName() {
 		String streetNumber = "";
 		String route = "";
+		String establishment = "";
 
 		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
 		for(int i = 0; i < addressComponents.size(); ++i) {
@@ -112,12 +113,21 @@ public final class ItineraryItem implements Parcelable {
 						streetNumber = (String) addressComponent.get("long_name");
 					} else if(componentType.equals("route")) {
 						route = (String) addressComponent.get("short_name");
+					} else if(componentType.equals("establishment")) {
+						establishment = (String) addressComponent.get("short_name");
 					}
 				}
 			}
 		}
 
-		return (streetNumber + " " + route).trim();
+		String addressName;
+		if(!(route.isEmpty() || establishment.isEmpty())) {
+			addressName = (route + " " + establishment);
+		} else {
+			addressName = (streetNumber + " " + route).trim();
+		}
+		
+		return addressName;
 	}
 
 	private String GetPlaceName() {
