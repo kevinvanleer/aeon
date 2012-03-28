@@ -12,7 +12,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 
-	public TestGetGpsLocation() throws ClassNotFoundException {
+	public TestGetGpsLocation() {
 		super(TARGET_PACKAGE_ID, Itinerary.class);
 	}
 
@@ -20,6 +20,11 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 	protected void setUp() throws Exception {
 		EmulatorTelnetClient.unlockScreen();
 		solo = new Solo(getInstrumentation(), getActivity());
+	}
+
+	@Override
+	public void tearDown() throws Exception {
+		solo.finishOpenedActivities();
 	}
 
 	public void testUpdateGpsLocationFromItinerary() {
@@ -59,6 +64,15 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		assertTrue(isViewVisible(R.id.imageView_currentLocation));
 	}
 	
+	public void testAddMyLocation() {
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
+		solo.sendKey(Solo.MENU);
+		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		solo.clickOnText("Add");
+		solo.clickOnText("My Location");
+		assertTrue(solo.waitForText("4812 Danielle"));
+	}
+	
 	View findView(int id) {
 		return solo.getCurrentActivity().findViewById(id);
 	}
@@ -87,9 +101,4 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		
 		locationManager.setTestProviderLocation(TEST_PROVIDER, mockLocation);
 	}*/
-
-	@Override
-	public void tearDown() throws Exception {
-		solo.finishOpenedActivities();
-	}
 }
