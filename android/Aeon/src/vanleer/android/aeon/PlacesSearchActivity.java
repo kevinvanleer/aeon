@@ -96,6 +96,17 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
 		}
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		try {
+			waitSpinner.dismiss();
+			waitSpinner = null;
+		}
+		catch(Exception e) {
+		}
+	}
 
 	private void ConfigureSearchResultsListViewLongClickListener() {
 		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
