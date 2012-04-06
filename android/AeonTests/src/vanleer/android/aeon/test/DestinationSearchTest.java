@@ -1,17 +1,18 @@
 package vanleer.android.aeon.test;
 
-import java.util.ArrayList;
-
 import com.jayway.android.robotium.solo.Solo;
 
 import vanleer.android.aeon.ItineraryItem;
 import vanleer.android.aeon.PlacesSearchActivity;
+import vanleer.android.aeon.R;
 import android.test.ActivityInstrumentationTestCase2;
+import android.view.View;
 import android.widget.ListView;
 
 public class DestinationSearchTest extends ActivityInstrumentationTestCase2<PlacesSearchActivity> {
 	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
+	static final int TIMEOUT_MS = 20000;
 	
 	public DestinationSearchTest() {
 		super(TARGET_PACKAGE_ID, PlacesSearchActivity.class);
@@ -28,57 +29,63 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		solo.finishOpenedActivities();
 	}
 	
+	View findView(int id) {
+		return solo.getCurrentActivity().findViewById(id);
+	}
+	
+	void checkDistanceOrder(ListView tested) {
+		Long distance = (long) 0;
+		for(int itemIndex = 0; itemIndex < tested.getCount(); ++itemIndex) {
+			ItineraryItem result = (ItineraryItem) tested.getItemAtPosition(itemIndex);
+			if(distance == null)
+			{
+				assertTrue(result.GetDistance() == null);
+			}			
+			else if(result.GetDistance() != null)
+			{
+				assertTrue(distance <= result.GetDistance());
+				distance = result.GetDistance();
+			}
+			else
+			{
+				distance = null;
+			}
+		}
+	}
+	
 	public void testCategorySearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "church");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("Church", 1, 5000));
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();
-		}
+		assertTrue(solo.waitForText("Church", 1, TIMEOUT_MS));
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testNameSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("Schlafly Bottleworks", 1, 5000));
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		assertTrue(solo.waitForText("Schlafly Bottleworks", 1, TIMEOUT_MS));
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testAddressSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "4812 Danielle CT 62040");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("4812 Danielle Ct", 1, 5000));
+		assertTrue(solo.waitForText("4812 Danielle Ct", 1, TIMEOUT_MS));
 		assertTrue(solo.waitForText("Granite City, IL 62040", 1, 1));
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	/*public void testEstablishmentAddressSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "2100 Locust Street, St Louis MO");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("The Schlafly Tap Room", 1, 5000));
+		assertTrue(solo.waitForText("The Schlafly Tap Room", 1, TIMEOUT_MS));
 		ArrayList<ListView> listViews = solo.getCurrentListViews();
 		ListView resultsListView = listViews.get(0);
 		long distance = 0;
@@ -93,93 +100,67 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("Schlafly Bottleworks", 1, 5000));
+		assertTrue(solo.waitForText("Schlafly Bottleworks", 1, TIMEOUT_MS));
 		solo.clearEditText(0);
 		solo.enterText(0, "Schlafly Tap Room");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("Schlafly Tap Room", 1, 5000));
+		assertTrue(solo.waitForText("Schlafly Tap Room", 1, TIMEOUT_MS));
 		solo.clearEditText(0);
 		solo.enterText(0, "church");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("Church", 1, 5000));
+		assertTrue(solo.waitForText("Church", 1, TIMEOUT_MS));
 		solo.clearEditText(0);
 		solo.enterText(0, "1975 Krenning 63013");
 		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("1975 Krenning Rd", 1, 5000));
+		assertTrue(solo.waitForText("1975 Krenning Rd", 1, TIMEOUT_MS));
 		
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView bottleworksListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < bottleworksListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) bottleworksListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testRepeatedSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
 		solo.clickOnImageButton(0);
+		solo.waitForDialogToClose(TIMEOUT_MS);
 		solo.enterText(0, "Schlafly Tap Room");
 		solo.clickOnImageButton(0);
+		solo.waitForDialogToClose(TIMEOUT_MS);
 		solo.enterText(0, "city hall");
 		solo.clickOnImageButton(0);
+		solo.waitForDialogToClose(TIMEOUT_MS);
 		solo.enterText(0, "1975 Krenning 63013");
 		solo.clickOnImageButton(0);
+		solo.waitForDialogToClose(TIMEOUT_MS);
 		
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView bottleworksListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < bottleworksListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) bottleworksListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testInvalidCategorySearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "real estate gency");
 		solo.clickOnImageButton(0);
-		//solo.waitForText("The Schlafly Tap Room", 1, 5000);
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		solo.waitForDialogToClose(TIMEOUT_MS);
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testInvalidNameSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		solo.enterText(0, "blah");
+		solo.enterText(0, "63013");
 		solo.clickOnImageButton(0);
-		//solo.waitForText("The Schlafly Tap Room", 1, 5000);
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		solo.waitForDialogToClose(TIMEOUT_MS);
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 	
 	public void testInvalidSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "bibbleh");
 		solo.clickOnImageButton(0);
-		//solo.waitForText("The Schlafly Tap Room", 1, 5000);
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance <= result.GetDistance());
-			distance = result.GetDistance();			
-		}
+		solo.waitForDialogToClose(TIMEOUT_MS);
+		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
+		checkDistanceOrder(resultsListView);
 	}
 }

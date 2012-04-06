@@ -122,7 +122,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
-		//TODO: fix bug preventing display of current location if discovered after query started
 		locationSensorImage.setVisibility(View.VISIBLE);
 		MakeImageViewSquare(locationSensorImage);
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));

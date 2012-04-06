@@ -150,6 +150,8 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private void GetMyLocationInfo() {
 		ItineraryItem myLocation = null;
 
+		//TODO: Wait for location service if current location is null
+		
 		try{
 			ItineraryItem lastDestination = GetLastDestination();
 			myLocation = new ItineraryItem(currentLocation, lastDestination.GetLocation());

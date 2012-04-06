@@ -28,8 +28,9 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 	}
 
 	public void testUpdateGpsLocationFromItinerary() {
-		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		solo.waitForText("Itinerary");
+		solo.sendKey(Solo.MENU);
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.clickOnText("Add");
 		solo.clickOnText("Google Search");
@@ -39,8 +40,9 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 	}
 	
 	public void testUpdateGpsLocationPreSearch() {
-		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		solo.waitForText("Itinerary");
+		solo.sendKey(Solo.MENU);
 		solo.clickOnText("Add");
 		solo.clickOnText("Google Search");
 		solo.assertCurrentActivity("PlacesSearch is not the current activity.", PlacesSearchActivity.class);
@@ -51,8 +53,9 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 	}
 	
 	public void testUpdateGpsLocationPostSearch() {
-		solo.sendKey(Solo.MENU);
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		solo.waitForText("Itinerary");
+		solo.sendKey(Solo.MENU);
 		solo.clickOnText("Add");
 		solo.clickOnText("Google Search");
 		solo.assertCurrentActivity("PlacesSearch is not the current activity.", PlacesSearchActivity.class);
@@ -64,12 +67,23 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		assertTrue(isViewVisible(R.id.imageView_currentLocation));
 	}
 	
-	public void testAddMyLocation() {
-		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		solo.sendKey(Solo.MENU);
+	public void testAddMyLocationAfterGpsFix() {
 		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
+		solo.waitForText("Itinerary");
+		solo.sendKey(Solo.MENU);
 		solo.clickOnText("Add");
 		solo.clickOnText("My Location");
+		assertTrue(solo.waitForText("4812 Danielle"));
+	}
+	
+	public void testAddMyLocationBeforeGpsFix() {
+		solo.assertCurrentActivity("Itinerary is not the current activity.", Itinerary.class);
+		solo.waitForText("Itinerary");
+		solo.sendKey(Solo.MENU);
+		solo.clickOnText("Add");
+		solo.clickOnText("My Location");
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		assertTrue(solo.waitForText("4812 Danielle"));
 	}
 	
