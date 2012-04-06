@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public final class PlacesSearchActivity extends Activity implements OnClickListener {
+public final class PlacesSearchActivity extends Activity implements OnClickListener, Runnable {
 	private ArrayList<ItineraryItem> searchResultsList;
 	private SearchResultItemAdapter searchResults;
 	private ListView searchResultsListView;
@@ -39,6 +39,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private boolean waitingForGps = false; 
 	private boolean searching = false;
 	private Long searchRadius;
+	static Context thisContext;
 
 	//4812 Danielle CT Granite City IL 62040
 	//lat=38.74419380
@@ -62,6 +63,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResultsListView.setAdapter(searchResults);
 		// Acquire a reference to the system Location Manager	    
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		thisContext = this.getApplicationContext();
 
 		ConfigureSearchResultsListViewLongClickListener();
 
@@ -94,6 +96,18 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				locationSensorImage.setVisibility(View.VISIBLE);
 			}
 			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
+		}		
+	}
+	
+	@Override	
+	protected void onDestroy() {
+		super.onDestroy();
+		try {
+			waitSpinner.dismiss();
+			waitSpinner = null;
+		}
+		catch(Exception e) {
+		
 		}
 	}
 
@@ -111,7 +125,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
-		//TODO: fix bug preventing display of current location if discovered after query started
 		locationSensorImage.setVisibility(View.VISIBLE);
 		MakeImageViewSquare(locationSensorImage);
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
@@ -122,10 +135,14 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				updateCurrentLocationTextHandler.sendMessage(msg);
 			}
 		}.start();
-		if(waitingForGps) {
-			waitingForGps  = false;
-			onClick(searchButton);
+
+		synchronized(this) {
+			if(waitingForGps) {
+				waitingForGps  = false;
+				this.notify();
+			}
 		}
+		onClick(searchButton);
 	}
 
 	final Handler updateCurrentLocationTextHandler = new Handler() {
@@ -135,41 +152,19 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	};
 
 	private void WaitForGps() {
-		waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
-				"", "waiting for location...", true);
-		waitingForGps = true;
-		new Thread() {
-			public void run() {
-				while(currentLocation == null) {
-					try {
-						sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				waitSpinner.dismiss();
-			}
-		}.start();
+		synchronized(this) {
+			waitSpinner = ProgressDialog.show(this,	"", "waiting for location...", true);
+			waitingForGps = true;
+		}
+		new Thread(this).start();
 	}
 
 	private void WaitForSearchResults() {
-		waitSpinner = ProgressDialog.show(PlacesSearchActivity.this,
-				"", "searching...", true);
-		searching = true;
-		new Thread() {
-			public void run() {
-				while(searching) {
-					try {
-						sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				waitSpinner.dismiss();
-			}
-		}.start();
+		synchronized(this) {
+			waitSpinner = ProgressDialog.show(this,	"", "searching...", true);
+			searching = true;
+		}
+		new Thread(this).start();
 	}
 
 	public void onClick(View v) {
@@ -201,14 +196,16 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchRadius = (long) 5000000;
 		googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
 				searchRadius, searchText.getText().toString(), true);
-		searching = false;		
+		synchronized(this) {
+			searching = false;
+			this.notify();
+		}
 	}
 
 	private void BuildResultsList() {
 		for(int i = 0; i < googleSearch.GetResultCount(); ++i) {
 			ItineraryItem newItem = googleSearch.GetPlace(i);
 			if(newItem != null) {
-				//newItem.SetDistance(currentLocation);
 				searchResultsList.add(newItem);
 				searchResults.add(searchResultsList.get(i));
 			}
@@ -219,5 +216,19 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		LayoutParams params = image.getLayoutParams();
 		params.width = image.getHeight();
 		image.setLayoutParams(params);
+	}
+
+	public void run() {
+		synchronized(this) {
+			while(searching || waitingForGps) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			waitSpinner.dismiss();
+		}
 	}
 }
