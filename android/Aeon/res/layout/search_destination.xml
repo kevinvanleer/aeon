@@ -15,7 +15,7 @@
         <ImageView android:id="@+id/imageView_poweredByGoogle" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom"></ImageView>
     </LinearLayout>
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:layout_width="match_parent" android:baselineAligned="false">
-        <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/editText_searchQuery" android:layout_marginLeft="15dp" android:layout_weight="1" android:inputType="textPostalAddress"></EditText>
+        <AutoCompleteTextView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/editText_searchQuery" android:layout_marginLeft="15dp" android:layout_weight="1" android:inputType="textPostalAddress" android:completionThreshold="2" android:dropDownHeight="match_parent" android:dropDownWidth="match_parent" android:hint="Enter name or address"></AutoCompleteTextView>
         <ImageButton android:id="@+id/imageButton_search" android:layout_height="match_parent" android:layout_width="match_parent" android:src="@android:drawable/ic_menu_search" android:layout_weight="5"></ImageButton>
     </LinearLayout>
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout7" android:layout_width="match_parent" android:baselineAligned="true">

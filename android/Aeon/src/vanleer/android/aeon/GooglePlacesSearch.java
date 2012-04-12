@@ -29,7 +29,6 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
-	private boolean autocomplete = false;
 	private ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
 	private ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
 	private static final ArrayList<String> placeTypes = new ArrayList<String>();
@@ -107,24 +106,46 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	void PerformPlacesSearch(double latitude, double longitude,
+	public void PerformPlacesSearch(double latitude, double longitude,
 			double radius, String[] types, String name, boolean sensor) {
 		String url = BuildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
 		JSONObject placesSearchResults = PerformHttpGet(url);
 		AddPlacesResults(placesSearchResults);
+	}
+	
+	public ArrayList<String> performPlacesAutocomplete(String input, boolean sensor,
+			Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+		String url = BuildGooglePlacesAutocompleteUrl(
+				input, sensor, latitude, longitude, radius, types, offset);
+		
+		JSONObject autocompleteResults = PerformHttpGet(url);
+		return GetResultsList(autocompleteResults);
+	}
+	
+	private ArrayList<String> GetResultsList(JSONObject autocompleteResults) {
+		ArrayList<String> results = new ArrayList<String>();
+		
+		if(autocompleteResults != null) {
+			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
+			if(resultArray != null) {
+				for(int index = 0; index < resultArray.size(); ++index) {
+					JSONObject result = (JSONObject) resultArray.get(index);
+					if(result != null) {
+						results.add((String) result.get("description"));
+					}
+				}
+			}
+		}
+		
+		return results;
 	}
 
 	private String BuildGooglePlacesSearchUrl(double latitude,
 			double longitude, double radius, String[] types, String name,
 			boolean sensor) {
 
-		String url;
-		if(autocomplete) {			
-			url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
-		} else {
-			url = GOOGLE_PLACES_SEARCH_URL;
-		}
-
+		String url = GOOGLE_PLACES_SEARCH_URL;
+		
 		url += "?location=" + latitude + "," + longitude;
 		url += "&radius=" + radius;
 
@@ -133,11 +154,7 @@ public final class GooglePlacesSearch {
 		}
 
 		if(name != "") {
-			if(autocomplete) {
-				url += "&input=" + Uri.encode(name);
-			} else {
-				url += "&name=" + Uri.encode(name);
-			}
+			url += "&name=" + Uri.encode(name);
 		}
 
 		url += "&sensor=" + sensor;
@@ -145,6 +162,41 @@ public final class GooglePlacesSearch {
 
 		return url;
 	} 
+
+	private String BuildGooglePlacesAutocompleteUrl(String input, boolean sensor, Double latitude,
+			Double longitude, Double radius, String[] types, Long offset) {
+		String url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
+		
+		if(input == null || input == "") {
+			throw new IllegalArgumentException(
+					"Places autocomplete search requires an input string");
+		}
+		
+		url += "?input=" + Uri.encode(input);
+		url += "&types=establishment"; 
+		if(types != null) {	
+			url += "|" + GetTypesUrlPart(types);
+		}
+			
+
+		if((latitude != null) && (longitude != null))
+		{
+			url += "&location=" + latitude + "," + longitude;
+		}
+		
+		if(radius != null) {
+			url += "&radius=" + radius;
+		}
+
+		if((offset != 0) && (offset != null)) {
+			url += "&offset=" + offset;
+		}
+		
+		url += "&sensor=" + sensor;
+		url += "&key=" + apiKey;
+		
+		return url;
+	}
 
 	private String GetTypesUrlPart(String[] types) {
 		String typesUrlPart = "";

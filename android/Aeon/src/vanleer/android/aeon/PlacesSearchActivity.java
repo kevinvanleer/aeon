@@ -1,5 +1,7 @@
 package vanleer.android.aeon;
 
+import vanleer.util.UnfilteredArrayAdapter;
+
 import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -8,15 +10,18 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,10 +40,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private GooglePlacesSearch googleSearch;
 	private LocationManager locationManager;
 	private ProgressDialog waitSpinner = null; 
-	private EditText searchText;
+	private AutoCompleteTextView searchText;
 	private boolean waitingForGps = false; 
 	private boolean searching = false;
-	private Long searchRadius;
+	private Long searchRadius = (long) 5000000;
+	private UnfilteredArrayAdapter<String> suggestionList;
 
 	//4812 Danielle CT Granite City IL 62040
 	//lat=38.74419380
@@ -48,55 +54,13 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search_destination);
-		locationSensorImage = (ImageView) findViewById(R.id.imageView_currentLocation);
-		locationSensorImage.setVisibility(View.INVISIBLE);
-		googleSearch = new GooglePlacesSearch(apiKey, "");
-		locationText = (TextView) findViewById(R.id.textView_currentLocation);
-		locationText.setText("Waiting for location...");
-		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
-		searchButton.setOnClickListener(this);
-		searchText = (EditText) findViewById(R.id.editText_searchQuery);
-		searchResultsList = new ArrayList<ItineraryItem>();
-		searchResults = new SearchResultItemAdapter(this, R.layout.search_result_item, searchResultsList);
-		searchResultsListView = (ListView) findViewById(listViewId);
-		searchResultsListView.setAdapter(searchResults);
-		// Acquire a reference to the system Location Manager	    
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
+		InitializeMembers();
 		ConfigureSearchResultsListViewLongClickListener();
-
-		// Define a listener that responds to location updates
-		LocationListener locationListener = new LocationListener() {
-			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location provider.
-				makeUseOfNewLocation(location);
-			}
-
-			public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-			public void onProviderEnabled(String provider) {}
-
-			public void onProviderDisabled(String provider) {}
-		};
-
-		if(getIntent() != null && getIntent().getExtras() != null) {
-			currentLocation = getIntent().getExtras().getParcelable("location");
-		}
-
-		if(currentLocation == null) {
-			// Register the listener with the Location Manager to receive location updates
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-			//TODO: locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, some looper thing);
-		} else {
-			locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
-			if(currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER))
-			{
-				locationSensorImage.setVisibility(View.VISIBLE);
-			}
-			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
-		}
+		ConfigureLocationManager();
+		ConfigureTextWatcher();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -106,6 +70,61 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		}
 		catch(Exception e) {
 		}
+	}
+
+	private void InitializeMembers() {
+		locationSensorImage = (ImageView) findViewById(R.id.imageView_currentLocation);
+		locationSensorImage.setVisibility(View.INVISIBLE);
+		googleSearch = new GooglePlacesSearch(apiKey, "");
+		locationText = (TextView) findViewById(R.id.textView_currentLocation);
+		locationText.setText("Waiting for location...");
+		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
+		searchButton.setOnClickListener(this);
+		suggestionList = new UnfilteredArrayAdapter<String>(
+				this, android.R.layout.simple_dropdown_item_1line);
+		searchText = (AutoCompleteTextView) findViewById(R.id.editText_searchQuery);
+		searchText.setAdapter(suggestionList);
+		searchResultsList = new ArrayList<ItineraryItem>();
+		searchResults = new SearchResultItemAdapter(
+				this, R.layout.search_result_item, searchResultsList);
+		searchResultsListView = (ListView) findViewById(listViewId);
+		searchResultsListView.setAdapter(searchResults);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	}
+
+
+	private void ConfigureLocationManager() {		
+		LocationListener locationListener = CreateLocationListener();
+
+		if(getIntent() != null && getIntent().getExtras() != null) {
+			currentLocation = getIntent().getExtras().getParcelable("location");
+		}
+
+		if(currentLocation == null) {
+			// Register the listener with the Location Manager to receive location updates
+			locationManager.requestLocationUpdates(
+					LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			//TODO: locationManager.requestSingleUpdate(
+			//		LocationManager.GPS_PROVIDER, locationListener, some looper thing);
+		} else {
+			locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+			if(currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER))
+			{
+				locationSensorImage.setVisibility(View.VISIBLE);
+			}
+			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
+		}
+	}
+
+	private LocationListener CreateLocationListener() {
+		return new LocationListener() {
+			public void onLocationChanged(Location location) {
+				makeUseOfNewLocation(location);
+			}
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+			public void onProviderEnabled(String provider) {}
+			public void onProviderDisabled(String provider) {}
+		};
 	}
 
 	private void ConfigureSearchResultsListViewLongClickListener() {
@@ -120,18 +139,95 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		});
 	}
 
+	private void ConfigureTextWatcher() {
+		searchText.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(final CharSequence s, int start, int before, int count) {
+				if(s.length() > 1) {
+					new AsyncTask<CharSequence, Void, ArrayList<String>>() {
+						@Override
+						protected ArrayList<String> doInBackground(CharSequence... arg0) {
+							return performAutocompleteSearch(s);
+						}
+
+						@Override
+						protected void onPostExecute(ArrayList<String> suggestions) {
+							updateAutocompleteChoices(suggestions);
+						}
+					}.execute(s);
+				}
+			}
+			
+			public void afterTextChanged(Editable s) {}
+			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
+		});
+	}
+
+	private ArrayList<String> performAutocompleteSearch(CharSequence s) {
+		//String input = searchText.getText().toString();
+		String input = s.toString();
+		ArrayList<String> results = null;
+		if(input != "") {
+			Double latitude = null;
+			Double longitude = null;
+			Double radius = null;
+
+			if(currentLocation != null) {
+				latitude = currentLocation.getLatitude();
+				longitude = currentLocation.getLongitude();
+				radius = (double) 1000;
+			}
+
+			Long offset = (long) searchText.getSelectionStart();
+
+			results = googleSearch.performPlacesAutocomplete(input, true, latitude, longitude, radius, (String[]) null, offset);
+		}
+		return results;
+	}
+
+	private void updateAutocompleteChoices(ArrayList<String> suggestions) {
+		suggestionList.clear();
+		if(suggestions != null) {
+			for(String suggestion : suggestions) {
+				suggestionList.add(suggestion);
+			}
+		}
+		suggestionList.notifyDataSetChanged();
+	}
+
 	protected void makeUseOfNewLocation(Location location) {
 		currentLocation = location;
 		locationSensorImage.setVisibility(View.VISIBLE);
 		MakeImageViewSquare(locationSensorImage);
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
-		new Thread() {
+		/*new Thread() {
 			public void run() {
 				Message msg = updateCurrentLocationTextHandler.obtainMessage();
 				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
 				updateCurrentLocationTextHandler.sendMessage(msg);
+				if(searchText.enoughToFilter()) {
+					updateAutocompleteChoices(
+							performAutocompleteSearch(searchText.getText()));
+				}
 			}
-		}.start();
+		}.start();*/
+		new AsyncTask<Void, Void, ArrayList<String>>() {
+			@Override
+			protected ArrayList<String> doInBackground(Void... arg0) {
+				ArrayList<String> suggestions = null;
+				Message msg = updateCurrentLocationTextHandler.obtainMessage();
+				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
+				updateCurrentLocationTextHandler.sendMessage(msg);
+				if(searchText.enoughToFilter()) {
+					suggestions = performAutocompleteSearch(searchText.getText());
+				}
+				return suggestions;
+			}
+			
+			@Override
+			protected void onPostExecute(ArrayList<String> suggestions) {
+				updateAutocompleteChoices(suggestions);
+			}
+		}.execute();
 		if(waitingForGps) {
 			waitingForGps  = false;
 			onClick(searchButton);
@@ -208,7 +304,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void QuerySearchEngine() {
-		searchRadius = (long) 5000000;
+		//searchRadius = (long) 5000000;
 		googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(),
 				searchRadius, searchText.getText().toString(), true);
 		searching = false;		
