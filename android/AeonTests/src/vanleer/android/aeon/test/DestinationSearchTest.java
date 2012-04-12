@@ -163,4 +163,21 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
+	
+	public void testPreLocatedSearchAutoComplete() {
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
+		solo.enterText(0, "sch");
+		assertTrue(solo.waitForText("Schlafly Tap Room", 0, TIMEOUT_MS));
+		assertTrue(solo.waitForText("Schnucks", 0, TIMEOUT_MS));
+		solo.enterText(0, "nu");
+		assertTrue(solo.waitForText("Schnucks", 0, TIMEOUT_MS));
+	}
+	
+	public void testPostLocatedSearchAutoComplete() {
+		solo.enterText(0, "sch");
+		assertTrue(solo.waitForText("Schiphol", 0, TIMEOUT_MS));
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
+		assertTrue(solo.waitForText("Schlafly Tap Room", 0, TIMEOUT_MS));
+		assertTrue(solo.waitForText("Schnucks", 0, TIMEOUT_MS));
+	}
 }
