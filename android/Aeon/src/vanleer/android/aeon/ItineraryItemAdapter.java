@@ -39,14 +39,14 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
 
 				//TODO: Get type of transportation used
-				travelDistance.setText("Drive/Walk/Bike/Ride " + item.GetFormattedDistance());
-				travelTime.setText(" in " + item.GetTravelDurationLongFormat());
+				travelDistance.setText("Drive/Walk/Bike/Ride " + item.getFormattedDistance());
+				travelTime.setText(" in " + item.getTravelDurationLongFormat());
 				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
-				arrivalTime.setText(" at " + item.GetArrivalTimeString());
-				destinationName.setText(item.GetName());
-				stayDuration.setText(" for " + item.GetStayDurationLongFormat());
+				arrivalTime.setText(" at " + item.getSchedule().getArrivalTimeString());
+				destinationName.setText(item.getName());
+				stayDuration.setText(" for " + item.getSchedule().getStayDurationLongFormat());
 				departureVicinity.setText("Depart from " + item.GetVicinity());
-				departureTime.setText(" at " + item.GetDepartureTimeString());
+				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
 				
 				if(position == 0) {
 					arrivalVicinity.setVisibility(View.GONE);

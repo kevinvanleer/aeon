@@ -163,7 +163,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private ArrayList<String> performAutocompleteSearch(CharSequence s) {
-		//String input = searchText.getText().toString();
 		String input = s.toString();
 		ArrayList<String> results = null;
 		if(input != "") {
@@ -199,17 +198,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationSensorImage.setVisibility(View.VISIBLE);
 		MakeImageViewSquare(locationSensorImage);
 		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
-		/*new Thread() {
-			public void run() {
-				Message msg = updateCurrentLocationTextHandler.obtainMessage();
-				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
-				updateCurrentLocationTextHandler.sendMessage(msg);
-				if(searchText.enoughToFilter()) {
-					updateAutocompleteChoices(
-							performAutocompleteSearch(searchText.getText()));
-				}
-			}
-		}.start();*/
 		new AsyncTask<Void, Void, ArrayList<String>>() {
 			@Override
 			protected ArrayList<String> doInBackground(Void... arg0) {

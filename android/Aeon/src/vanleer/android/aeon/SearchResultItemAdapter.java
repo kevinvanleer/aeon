@@ -33,13 +33,13 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView vicinity = (TextView) v.findViewById(R.id.textView_vicinity);
 				TextView distance = (TextView) v.findViewById(R.id.textView_distance);
 				if (name != null) {
-					name.setText(item.GetName());
+					name.setText(item.getName());
 				}
 				if (vicinity != null) {
 					vicinity.setText(item.GetVicinity());
 				}
 				if(distance != null) {
-					distance.setText(item.GetFormattedDistance());
+					distance.setText(item.getFormattedDistance());
 				}
 			}
 		}

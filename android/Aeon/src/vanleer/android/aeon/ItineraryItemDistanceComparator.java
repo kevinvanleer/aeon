@@ -6,18 +6,18 @@ public class ItineraryItemDistanceComparator implements Comparator<ItineraryItem
 	public int compare(ItineraryItem leftItem, ItineraryItem rightItem) {
 		int compared = 0;
 		try {
-			if(leftItem.GetDistance() < rightItem.GetDistance()) {
+			if(leftItem.getDistance() < rightItem.getDistance()) {
 				compared = -1;
 			}
-			else if(leftItem.GetDistance() > rightItem.GetDistance()) {
+			else if(leftItem.getDistance() > rightItem.getDistance()) {
 				compared = 1;
 			}
 		}
 		catch(NullPointerException e) {
-			if(leftItem.GetDistance() == null) {
+			if(leftItem.getDistance() == null) {
 				compared = 1;
 			}
-			else if(rightItem.GetDistance() == null) {
+			else if(rightItem.getDistance() == null) {
 				compared = -1;
 			}
 		}

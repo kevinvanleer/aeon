@@ -39,12 +39,12 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 			ItineraryItem result = (ItineraryItem) tested.getItemAtPosition(itemIndex);
 			if(distance == null)
 			{
-				assertTrue(result.GetDistance() == null);
+				assertTrue(result.getDistance() == null);
 			}			
-			else if(result.GetDistance() != null)
+			else if(result.getDistance() != null)
 			{
-				assertTrue(distance <= result.GetDistance());
-				distance = result.GetDistance();
+				assertTrue(distance <= result.getDistance());
+				distance = result.getDistance();
 			}
 			else
 			{

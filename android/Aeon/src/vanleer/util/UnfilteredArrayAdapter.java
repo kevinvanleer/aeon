@@ -47,7 +47,6 @@ public class UnfilteredArrayAdapter<T> extends ArrayAdapter<T> {
 
 	@Override
 	public void remove(T object) {
-		// TODO Auto-generated method stub
 		elements.remove(object);
 	}
 

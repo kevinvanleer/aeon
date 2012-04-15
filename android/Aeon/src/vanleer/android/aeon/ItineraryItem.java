@@ -1,8 +1,5 @@
 package vanleer.android.aeon;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -22,45 +19,29 @@ public final class ItineraryItem implements Parcelable {
 	private Long travelDurationSec;
 	private Long distance;
 	private String iconUrl;
-	private Date arrivalTime = null;
-	private Date departureTime = null;
-	private Long stayDurationSec = null;
+	private Schedule times;
 	private String phoneNumber;
 	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
 	private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 
 	public ItineraryItem(JSONObject searchResult) {
-		if(IsGeocodingResult(searchResult)) {
+		if(isGeocodingResult(searchResult)) {
 			googleGeocodingResult = searchResult;
-			name = GetGeocodingName();
+			name = getGeocodingName();
 		} else {
 			googlePlaceResult = searchResult;
-			name = GetPlaceName();
+			name = getPlaceName();
 		}
-		SetLocation();
+		setLocation();
 
-		arrivalTime = new Date();
-		departureTime = new Date();
-		stayDurationSec = (long) 0;
 		phoneNumber = "NONE";
 	}
 
 	private ItineraryItem(Parcel in) {
-		googlePlaceResult = (JSONObject) in.readSerializable();
-		googleGeocodingResult = (JSONObject) in.readSerializable();
-		googleDistanceMatrixResult = (JSONObject) in.readSerializable();
-		location = in.readParcelable(null);
-		travelDurationSec = in.readLong();
-		distance = in.readLong();
-		iconUrl = in.readString();
-		arrivalTime = (Date) in.readSerializable();
-		departureTime = (Date) in.readSerializable();
-		stayDurationSec = in.readLong();
-		phoneNumber = in.readString();
-		name = in.readString(); 
+		readFromParcel(in);
 	}
-
+	
 	public ItineraryItem(Location myLocation) {
 		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
 		location = myLocation;
@@ -70,10 +51,8 @@ public final class ItineraryItem implements Parcelable {
 		googleDistanceMatrixResult = null;
 		travelDurationSec = (long) 0;
 		distance = (long) 0;
+		times = null;
 		iconUrl = null;
-		arrivalTime = new Date();
-		departureTime = new Date();
-		stayDurationSec = (long) 0;
 		phoneNumber = "NONE";
 	}
 
@@ -83,7 +62,33 @@ public final class ItineraryItem implements Parcelable {
 		name = googleSearch.ReverseGeocode(location, true); 
 	}
 
-	private boolean IsGeocodingResult(JSONObject result) {
+	private void readFromParcel(Parcel in) {
+		googlePlaceResult = (JSONObject) in.readSerializable();
+		googleGeocodingResult = (JSONObject) in.readSerializable();
+		googleDistanceMatrixResult = (JSONObject) in.readSerializable();
+		location = in.readParcelable(null);
+		travelDurationSec = in.readLong();
+		distance = in.readLong();
+		iconUrl = in.readString();
+		times = in.readParcelable(null);
+		phoneNumber = in.readString();
+		name = in.readString(); 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeSerializable(googlePlaceResult);
+		dest.writeSerializable(googleGeocodingResult);
+		dest.writeSerializable(googleDistanceMatrixResult);
+		dest.writeParcelable(location, flags);
+		dest.writeLong(travelDurationSec);
+		dest.writeLong(distance);
+		dest.writeString(iconUrl);
+		dest.writeParcelable(times, flags);
+		dest.writeString(phoneNumber);
+		dest.writeString(name);
+	}
+
+	private boolean isGeocodingResult(JSONObject result) {
 		boolean isGeocodingResult = false;
 
 		if(result != null) {
@@ -93,11 +98,11 @@ public final class ItineraryItem implements Parcelable {
 		return isGeocodingResult;
 	}
 
-	String GetName() {
+	String getName() {
 		return name;
 	}
 
-	private String GetGeocodingName() {
+	private String getGeocodingName() {
 		String streetNumber = "";
 		String route = "";
 		String establishment = "";
@@ -130,7 +135,7 @@ public final class ItineraryItem implements Parcelable {
 		return addressName;
 	}
 
-	private String GetPlaceName() {
+	private String getPlaceName() {
 		return (String) googlePlaceResult.get("name");
 	}
 
@@ -138,15 +143,15 @@ public final class ItineraryItem implements Parcelable {
 		String vicinity;
 
 		if(googlePlaceResult != null) {
-			vicinity = GetPlaceVicinity();
+			vicinity = getPlaceVicinity();
 		} else {
-			vicinity = GetGeocodingVicinity();
+			vicinity = getGeocodingVicinity();
 		}
 
 		return vicinity;
 	}
 
-	private String GetGeocodingVicinity() {
+	private String getGeocodingVicinity() {
 		String city = "";
 		String state = "";
 		String zipCode = "";
@@ -173,23 +178,23 @@ public final class ItineraryItem implements Parcelable {
 		return (city + ", " + state + " " + zipCode).trim();
 	}
 
-	private String GetPlaceVicinity() {
+	private String getPlaceVicinity() {
 		return (String) googlePlaceResult.get("vicinity");
 	}
 
-	Location GetLocation() {
+	Location getLocation() {
 		return location;
 	}
 
-	void SetLocation() {
+	void setLocation() {
 		if(googlePlaceResult != null) {
-			SetPlaceLocation();
+			setPlaceLocation();
 		} else {
-			SetGeocodingLocation();
+			setGeocodingLocation();
 		}
 	}
 
-	private void SetGeocodingLocation() {
+	private void setGeocodingLocation() {
 		location = new Location("Google Geocoding");
 
 		JSONObject jsonGeometry = (JSONObject) googleGeocodingResult.get("geometry");
@@ -202,7 +207,7 @@ public final class ItineraryItem implements Parcelable {
 		}
 	}
 
-	void SetPlaceLocation() {
+	void setPlaceLocation() {
 		location = new Location("Google Places");
 
 		JSONObject jsonGeometry = (JSONObject) googlePlaceResult.get("geometry");
@@ -215,7 +220,7 @@ public final class ItineraryItem implements Parcelable {
 		}
 	}
 
-	void SetDistance(JSONObject distanceMatrixData) {
+	void setDistance(JSONObject distanceMatrixData) {
 		if(distanceMatrixData != null) {
 			googleDistanceMatrixResult = distanceMatrixData;
 
@@ -231,30 +236,30 @@ public final class ItineraryItem implements Parcelable {
 		}
 	}
 
-	void SetDistance(final Location origin) {
+	void setDistance(final Location origin) {
 		distance = (long) location.distanceTo(origin);
 		travelDurationSec = (long) 0;
 		googleDistanceMatrixResult = null;
 	}
 
-	public Long GetDistance() {
+	public Long getDistance() {
 		return distance;
 	}
 
-	public String GetFormattedDistance() {
+	public String getFormattedDistance() {
 		String distanceString;
 		if(distance == null) {
 			distanceString = "unknown";
 		} else {
 			switch(distanceUnit) {
 			case METERS:
-				distanceString = GetDistanceMeters();
+				distanceString = getDistanceMeters();
 				break;
 			case KILOMETERS:
-				distanceString = GetDistanceKilometers();
+				distanceString = getDistanceKilometers();
 				break;
 			case MILES:
-				distanceString = GetDistanceMiles();
+				distanceString = getDistanceMiles();
 				break;
 			default:
 				distanceString = "unsupported unit";
@@ -265,94 +270,48 @@ public final class ItineraryItem implements Parcelable {
 		return distanceString;
 	}
 	
-	private String GetDistanceMeters() {
+	private String getDistanceMeters() {
 		return String.format("%1$l m", distance);
 	}
 
-	private String GetDistanceMiles() {
+	private String getDistanceMiles() {
 		return String.format("%1$.1f mi", (distance * MILES_PER_METER));
 	}
-	private String GetDistanceKilometers() {
+	private String getDistanceKilometers() {
 		return String.format("%1$.1f km", (distance / 1000.));
 	}
 
-	public Long GetTravelDuration() {
+	public Long getTravelDuration() {
 		return travelDurationSec;
 	}
 
-	public String GetTravelDurationClockFormat() {
+	public String getTravelDurationClockFormat() {
 		return TimeFormat.format(travelDurationSec * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 	}
 
-	public String GetTravelDurationLongFormat() {
+	public String getTravelDurationLongFormat() {
 		return TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 	}
 	
-	public Date GetArrivalTime() {
-		return arrivalTime;
-	}
-
-	public String GetArrivalTimeString() {
-		return DateFormat.getTimeInstance(DateFormat.SHORT).format(arrivalTime);
-	}
-
-	public void SetArrivalTime(Date arrivalTime) {
-		this.arrivalTime = arrivalTime;
-	}
-
-	public Date GetDepartureTime() {
-		return departureTime;
-	}
-
-	public String GetDepartureTimeString() {
-		return DateFormat.getTimeInstance(DateFormat.SHORT).format(departureTime);
-	}
-
-	public void SetDepartureTime(Date departureTime) {
-		this.departureTime = departureTime;
-	}
-
-	public Long GetStayDuration() {
-		return stayDurationSec;
-	}
-
-	public String GetStayDurationClockFormat() {
-		return TimeFormat.format(stayDurationSec * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
-	}
-
-	public String GetStayDurationLongFormat() {
-		return TimeFormat.format(stayDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
-	}
-
-	public void SetStayDuration(Long seconds) {
-		this.stayDurationSec = seconds;
-	}
-
-	public String GetPhoneNumber() {
+	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
-	public void SetPhoneNumber(String phoneNum) {
+	public void setPhoneNumber(String phoneNum) {
 		this.phoneNumber = phoneNum;
 	}
 
+	
 	public int describeContents() {
 		return 0;
 	}
 
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeSerializable(googlePlaceResult);
-		dest.writeSerializable(googleGeocodingResult);
-		dest.writeSerializable(googleDistanceMatrixResult);
-		dest.writeParcelable(location, flags);
-		dest.writeLong(travelDurationSec);
-		dest.writeLong(distance);
-		dest.writeString(iconUrl);
-		dest.writeSerializable(arrivalTime);
-		dest.writeSerializable(departureTime);
-		dest.writeLong(stayDurationSec);
-		dest.writeString(phoneNumber);
-		dest.writeString(name);
+	public Schedule getSchedule() {
+		return times;
+	}
+
+	public void setSchedule(Schedule times) {
+		this.times = times;
 	}
 
 	public static final Parcelable.Creator<ItineraryItem> CREATOR =

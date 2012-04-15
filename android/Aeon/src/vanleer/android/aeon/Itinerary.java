@@ -141,7 +141,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 			startItineraryOpen.putExtra("location", currentLocation);
 		} else {
 			startItineraryOpen.putExtra("location",
-					GetLastDestination().GetLocation());
+					GetLastDestination().getLocation());
 		}
 
 		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
@@ -154,7 +154,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 		
 		try{
 			ItineraryItem lastDestination = GetLastDestination();
-			myLocation = new ItineraryItem(currentLocation, lastDestination.GetLocation());
+			myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation());
 		}
 		catch(IllegalStateException e){
 			myLocation = new ItineraryItem(currentLocation);
@@ -197,9 +197,9 @@ public final class Itinerary extends Activity implements OnClickListener{
 		if(!itineraryItemList.isEmpty()) {
 			Calendar arrivalTimeCalculator = Calendar.getInstance();
 			ItineraryItem lastDestination = GetLastDestination();
-			arrivalTimeCalculator.setTime(lastDestination.GetDepartureTime());
-			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.GetTravelDuration() * 1000));
-			newDestination.SetArrivalTime(arrivalTimeCalculator.getTime());
+			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
+			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
+			newDestination.getSchedule().setArrivalTime(arrivalTimeCalculator.getTime());
 		}
 		startDestinationSchedule.putExtra("destination", newDestination);
 		startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION_SCHEDULE);

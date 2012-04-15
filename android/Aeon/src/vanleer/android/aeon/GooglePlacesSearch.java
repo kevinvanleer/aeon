@@ -306,8 +306,8 @@ public final class GooglePlacesSearch {
 		while(placeIterator.hasNext()) {
 			ItineraryItem place = placeIterator.next();
 			if(place != null) {
-				destinations += place.GetLocation().getLatitude() + ",";
-				destinations += place.GetLocation().getLongitude() + "|";
+				destinations += place.getLocation().getLatitude() + ",";
+				destinations += place.getLocation().getLongitude() + "|";
 			}
 		}
 		if(!destinations.isEmpty()) {
@@ -324,7 +324,7 @@ public final class GooglePlacesSearch {
 				for(int index = 0; index < places.size(); ++index) {
 					JSONObject distance = (JSONObject) resultArray.get(index);
 					if(distance != null) {
-						places.get(index).SetDistance(distance);
+						places.get(index).setDistance(distance);
 					}
 				}
 			}
