@@ -223,6 +223,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	final Handler updateCurrentLocationTextHandler = new Handler() {
+		@Override
 		public void handleMessage(Message msg) {
 			locationText.setText((String) msg.obj);
 		}
@@ -233,6 +234,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				"", "waiting for location...", true);
 		waitingForGps = true;
 		new Thread() {
+			@Override
 			public void run() {
 				while(currentLocation == null) {
 					try {
@@ -252,6 +254,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				"", "searching...", true);
 		searching = true;
 		new Thread() {
+			@Override
 			public void run() {
 				while(searching) {
 					try {

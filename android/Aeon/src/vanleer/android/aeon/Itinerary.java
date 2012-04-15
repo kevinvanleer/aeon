@@ -32,6 +32,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private static final int GET_NEW_DESTINATION = 0;
 	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
 
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
@@ -171,6 +172,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 		return itineraryItemList.get(itineraryItemList.size() - 1);
 	}
 
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode)

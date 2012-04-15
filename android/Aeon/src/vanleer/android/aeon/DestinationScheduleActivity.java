@@ -29,6 +29,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 	private CheckBox checkBoxLastChecked;
 	private Button buttonDoneScheduling;
 	
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.destination_schedule);
