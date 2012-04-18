@@ -307,6 +307,9 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public Schedule getSchedule() {
+		if(times == null) {
+			times = new Schedule();
+		}
 		return times;
 	}
 
