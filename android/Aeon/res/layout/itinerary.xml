@@ -5,8 +5,22 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent">
-        <TextView android:text="Itinerary" android:id="@+id/tView1" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content"></TextView>
-        <LinearLayout android:layout_height="match_parent" android:id="@+id/linearLayout2" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
+
+        <TextView
+            android:id="@+id/tView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/itinerary_title"
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+</TextView>
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal" >
+</LinearLayout>
     </LinearLayout>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/listView_itinerary"></ListView>
     
