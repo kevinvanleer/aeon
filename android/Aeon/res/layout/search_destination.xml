@@ -6,21 +6,58 @@
   android:layout_height="match_parent" android:weightSum="1" android:layout_margin="5dp">
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:orientation="vertical">
         <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:layout_width="match_parent" android:baselineAligned="true">
-            <LinearLayout android:layout_height="match_parent" android:id="@+id/linearLayout3" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:layout_height="match_parent" android:id="@+id/linearLayout3" android:layout_width="0dp" android:layout_weight="1"></LinearLayout>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout android:id="@+id/linearLayout4" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:text="Places Search" android:id="@+id/textView3" android:layout_height="wrap_content"></TextView>
-        <LinearLayout android:id="@+id/linearLayout5" android:layout_height="match_parent" android:layout_width="wrap_content" android:layout_weight="1"></LinearLayout>
-        <ImageView android:id="@+id/imageView_poweredByGoogle" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom"></ImageView>
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/places_search_title"
+            android:textAppearance="?android:attr/textAppearanceMedium" >
+</TextView>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal" >
+</LinearLayout>
+        <ImageView android:id="@+id/imageView_poweredByGoogle" android:layout_height="wrap_content" android:src="@drawable/powered_by_google_on_non_white" android:layout_width="wrap_content" android:layout_gravity="bottom" android:contentDescription="@string/powered_by_google"></ImageView>
     </LinearLayout>
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:layout_width="match_parent" android:baselineAligned="false">
-        <AutoCompleteTextView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/editText_searchQuery" android:layout_marginLeft="15dp" android:layout_weight="1" android:inputType="textPostalAddress" android:completionThreshold="2" android:dropDownHeight="match_parent" android:dropDownWidth="match_parent" android:hint="Enter name or address"></AutoCompleteTextView>
+
+        <AutoCompleteTextView
+            android:id="@+id/editText_searchQuery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_weight="1"
+            android:completionThreshold="2"
+            android:contentDescription="@string/enter_search_query_here"
+            android:dropDownHeight="match_parent"
+            android:dropDownWidth="match_parent"
+            android:hint="@string/destination_search_hint"
+            android:inputType="textPostalAddress" >
+</AutoCompleteTextView>
         <ImageButton android:id="@+id/imageButton_search" android:layout_height="match_parent" android:layout_width="match_parent" android:src="@android:drawable/ic_menu_search" android:layout_weight="5"></ImageButton>
     </LinearLayout>
-    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout7" android:layout_width="match_parent" android:baselineAligned="true">
+    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout7" android:layout_width="match_parent" android:baselineAligned="true" android:contentDescription="TODO">
         <ImageView android:src="@android:drawable/ic_menu_mylocation" android:id="@+id/imageView_currentLocation" android:layout_height="match_parent" android:adjustViewBounds="true" android:layout_width="16dp"></ImageView>
-        <TextView android:id="@+id/textView_currentLocation" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceSmall" android:text="My location" android:layout_weight="1" android:lines="1" android:marqueeRepeatLimit="marquee_forever"></TextView>
+
+        <TextView
+            android:id="@+id/textView_currentLocation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:lines="1"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:text="@string/my_location_default"
+            android:textAppearance="?android:attr/textAppearanceSmall" >
+</TextView>
     </LinearLayout>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/listView_searchResults"></ListView>
     

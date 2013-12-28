@@ -17,4 +17,11 @@
     <string name="login_label">Login</string>
     <string name="places_search_title">Places Search</string>
     <string name="destination_schedule_title">Schedule</string>
+    <string name="my_location_default">My location</string>
+    <string name="destination_search_hint">Enter name, address or type</string>
+    <string name="enter_search_query_here">Enter search query here</string>
+    <string name="powered_by_google">Powered by Google</string>
+    <string name="destination_search_button">destination search button</string>
+    <string name="my_location_layout">current location area</string>
+    <string name="my_location_icon">My location icon</string>
 </resources>
