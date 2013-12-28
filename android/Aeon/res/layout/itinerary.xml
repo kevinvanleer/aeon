@@ -7,6 +7,7 @@
     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent">
 
         <TextView
+            android:orientation="horizontal"
             android:id="@+id/tView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
