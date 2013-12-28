@@ -37,16 +37,37 @@
             android:layout_marginLeft="15dp"
             android:layout_weight="1"
             android:completionThreshold="2"
-            android:contentDescription="@string/enter_search_query_here"
             android:dropDownHeight="match_parent"
             android:dropDownWidth="match_parent"
             android:hint="@string/destination_search_hint"
             android:inputType="textPostalAddress" >
 </AutoCompleteTextView>
-        <ImageButton android:id="@+id/imageButton_search" android:layout_height="match_parent" android:layout_width="match_parent" android:src="@android:drawable/ic_menu_search" android:layout_weight="5"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/imageButton_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:contentDescription="@string/destination_search_button"
+            android:src="@android:drawable/ic_menu_search" >
+</ImageButton>
     </LinearLayout>
-    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout7" android:layout_width="match_parent" android:baselineAligned="true" android:contentDescription="TODO">
-        <ImageView android:src="@android:drawable/ic_menu_mylocation" android:id="@+id/imageView_currentLocation" android:layout_height="match_parent" android:adjustViewBounds="true" android:layout_width="16dp"></ImageView>
+
+    <LinearLayout
+        android:id="@+id/linearLayout7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="true"
+        android:contentDescription="@string/my_location_layout" >
+
+        <ImageView
+            android:id="@+id/imageView_currentLocation"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/my_location_icon"
+            android:src="@android:drawable/ic_menu_mylocation" >
+</ImageView>
 
         <TextView
             android:id="@+id/textView_currentLocation"
