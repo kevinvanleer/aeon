@@ -3,6 +3,23 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="lib" path="C:/pkgs/json_simple-1.1.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="lib" path="C:/pkgs/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-android2-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-android2-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-android3-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-extensions-android3-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-extensions-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-extensions-1.4.1-beta-sources.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-extensions-android2-1.4.1-beta.jar"/>
+	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-googleapis-extensions-android2-1.4.1-beta-sources.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

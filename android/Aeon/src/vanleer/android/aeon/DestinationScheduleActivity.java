@@ -48,7 +48,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		
 		buttonDoneScheduling = (Button) findViewById(R.id.button_destinationScheduleDone);
 		
-		destination = getIntent().getExtras().getParcelable("destination");
+		destination = getIntent().getExtras().getParcelable("vanleer.android.aeon.destination");
 		
 		InitializeControls();
 	}

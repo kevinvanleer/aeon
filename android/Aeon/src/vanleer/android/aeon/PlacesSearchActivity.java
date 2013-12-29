@@ -46,10 +46,13 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private Long searchRadius = (long) 5000000;
 	private UnfilteredArrayAdapter<String> suggestionList;
 
-	//4812 Danielle CT Granite City IL 62040
+	//4812 Danielle CT Granite City IL 62040 38.74419380,-90.09839319999999
 	//lat=38.74419380
 	//lng=-90.09839319999999
 
+	//283 STONEHENGE DR WASHINGTON, MO 63090-4312
+	//38.477548,-91.051562
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

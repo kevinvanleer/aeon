@@ -70,7 +70,7 @@ public final class ItineraryItem implements Parcelable {
 		travelDurationSec = in.readLong();
 		distance = in.readLong();
 		iconUrl = in.readString();
-		times = in.readParcelable(null);
+		times = in.readParcelable(Schedule.class.getClassLoader());
 		phoneNumber = in.readString();
 		name = in.readString(); 
 	}
@@ -78,12 +78,12 @@ public final class ItineraryItem implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeSerializable(googlePlaceResult);
 		dest.writeSerializable(googleGeocodingResult);
-		dest.writeSerializable(googleDistanceMatrixResult);
-		dest.writeParcelable(location, flags);
+		dest.writeSerializable(googleDistanceMatrixResult);		
+		dest.writeParcelable(location, flags);		
 		dest.writeLong(travelDurationSec);
 		dest.writeLong(distance);
 		dest.writeString(iconUrl);
-		dest.writeParcelable(times, flags);
+		dest.writeParcelable(getSchedule(), flags);		
 		dest.writeString(phoneNumber);
 		dest.writeString(name);
 	}
@@ -326,5 +326,5 @@ public final class ItineraryItem implements Parcelable {
 		public ItineraryItem[] newArray(int size) {
 			return new ItineraryItem[size];
 		}
-	};
+	};	
 }

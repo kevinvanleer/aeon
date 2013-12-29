@@ -10,15 +10,16 @@ import android.os.Parcelable;
 import vanleer.util.TimeFormat;
 
 public class Schedule implements Parcelable{
+	private Long INVALID_DURATION = Long.valueOf((long) -1);
 	private Date minArrivalTime = null;
 	private Date maxArrivalTime = null;
 	private Date arrivalTime = null;
 	private Date minDepartureTime = null;
 	private Date maxDepartureTime = null;
 	private Date departureTime = null;
-	private Long minStayDurationSec = null;
-	private Long maxStayDurationSec = null;
-	private Long stayDurationSec = null;
+	private Long minStayDurationSec = INVALID_DURATION;
+	private Long maxStayDurationSec = INVALID_DURATION;
+	private Long stayDurationSec = INVALID_DURATION;
 
 	public Schedule() {
 	}
@@ -53,8 +54,9 @@ public class Schedule implements Parcelable{
 
 	public boolean areTimesConstrained() {
 		boolean constrained;
-		if(!isArrivalTimeFlexible() ? (!isDepartureTimeFlexible() || !isStayDurationFlexible()) :
-			(!isDepartureTimeFlexible() && !isStayDurationFlexible())) {
+		if(isArrivalTimeFlexible() ? 
+				!(isDepartureTimeFlexible() || isStayDurationFlexible()) :
+					!(isDepartureTimeFlexible() && isStayDurationFlexible())) {
 			
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(getArrivalTime());
@@ -97,7 +99,11 @@ public class Schedule implements Parcelable{
 	}
 
 	private boolean isDurationFlexible(Long duration, Long minDuration, Long maxDuration) {
-		return !((duration == minDuration) && (duration == maxDuration));
+		boolean flexible = ((duration == INVALID_DURATION) || (minDuration == INVALID_DURATION) || (maxDuration == INVALID_DURATION));
+		if(!flexible) {
+			flexible = !((duration == minDuration) && (duration == maxDuration));
+		}
+		return flexible;
 	}
 
 	public boolean isArrivalTimeValid(Date time) {
@@ -152,12 +158,16 @@ public class Schedule implements Parcelable{
 		if(duration == null) {
 			throw new NullPointerException();
 		}
+		
+		if(duration == INVALID_DURATION) {
+			throw new RuntimeException();
+		}
 
 		boolean inBounds = true;
-		if(minDuration != null) {
+		if(minDuration != INVALID_DURATION) {
 			inBounds = duration >= minDuration;
 		}
-		if(inBounds && (maxDuration != null)) {
+		if(inBounds && (maxDuration != INVALID_DURATION)) {
 			inBounds = (duration <= maxDuration);
 		}
 		return inBounds;
@@ -172,11 +182,14 @@ public class Schedule implements Parcelable{
 			arrival = getMinArrivalTime();
 		}
 		if(arrival == null) {
-			if((getDepartureTime() != null) && (getStayDuration() != null)) {
+			if((departureTime != null) && (stayDurationSec != INVALID_DURATION)) {
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(getDepartureTime());
 				arrival = new Date((cal.get(Calendar.SECOND) - getStayDuration()) * 1000);
 			}
+		}
+		if(arrival == null) {
+			//TODO: SET ARRIVAL TIME FROM TRAVEL DURATION
 		}
 		return arrival;
 	}
@@ -198,7 +211,7 @@ public class Schedule implements Parcelable{
 			departure = getMaxDepartureTime();
 		}
 		if(departure == null) {
-			if((getArrivalTime() != null) && (getStayDuration() != null)) {
+			if((arrivalTime != null) && (stayDurationSec != INVALID_DURATION)) {
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(getArrivalTime());
 				departure = new Date((cal.get(Calendar.SECOND) + getStayDuration()) * 1000);
@@ -217,13 +230,13 @@ public class Schedule implements Parcelable{
 
 	public Long getStayDuration() {
 		Long duration = stayDurationSec;
-		if(duration == null) {
+		if(duration == INVALID_DURATION) {
 			duration = getMaxStayDuration();
 		}
-		if(duration == null) {
+		if(duration == INVALID_DURATION) {
 			duration = getMinStayDuration();
 		}
-		if(duration == null) {
+		if(duration == INVALID_DURATION) {
 			if((getDepartureTime() != null) && (getArrivalTime() != null)) {
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(getArrivalTime());
@@ -262,7 +275,7 @@ public class Schedule implements Parcelable{
 
 	public String getStayDurationClockFormat() {
 		String duration = "undefined";
-		if(getStayDuration() != null) {
+		if(getStayDuration() != INVALID_DURATION) {
 			duration = TimeFormat.format(getStayDuration() * 1000, TimeFormat.SHORT_FORMAT, TimeFormat.MINUTES);
 		}
 		return duration;
@@ -351,19 +364,24 @@ public class Schedule implements Parcelable{
 		} 
 
 		if(!isArrivalTimeValid(time)) {
-			throw new NullPointerException();
+			throw new IllegalArgumentException();
 		}
 
 		arrivalTime = time;
 	}
 
 	private void setMinArrivalTime(Date time, boolean override) {
-		if(!isDateInBounds(arrivalTime, time, maxArrivalTime)) {
-			if(override) {
-				arrivalTime = time;
-			} else {
-				throw new NullPointerException();
+		try {
+			//TODO: change this to test if minTime is less than max and arrival time
+			if(!isDateInBounds(arrivalTime, time, maxArrivalTime)) {
+				if(override) {
+					arrivalTime = time;
+				} else {
+					throw new IllegalArgumentException();
+				}
 			}
+		} catch (NullPointerException e) {
+			//Do nothing
 		}
 		minArrivalTime = time;
 	}
@@ -421,7 +439,7 @@ public class Schedule implements Parcelable{
 		}
 
 		if(!isStayDurationValid(seconds)) {
-			throw new NullPointerException();
+			throw new RuntimeException();
 		}
 
 		stayDurationSec = seconds;
