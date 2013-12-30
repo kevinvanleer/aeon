@@ -1,6 +1,8 @@
 package vanleer.android.aeon;
 
 import java.util.Calendar;
+
+import vanleer.util.TimeFormat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -70,23 +72,41 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		if(destination.getSchedule().getArrivalTime() != null) {
 			checkBoxArrivalTime.setEnabled(false);
 			timePickerArrivalTime.setEnabled(false);
+			timePickerArrivalTime.setVisibility(TimePicker.GONE);
 			
 			Calendar arrivalTimeCalculator = Calendar.getInstance();
 			arrivalTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
-			timePickerArrivalTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR));
+			timePickerArrivalTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR_OF_DAY));
 			timePickerArrivalTime.setCurrentMinute(arrivalTimeCalculator.get(Calendar.MINUTE));
+			textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + destination.getSchedule().getArrivalTime().toString());
+			//textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + TimeFormat.format(arrivalTimeCalculator.getTimeInMillis(), TimeFormat._12_HOUR_FORMAT, TimeFormat.MINUTES));
+			
 		} else {
-			timePickerArrivalTime.setEnabled(checkBoxArrivalTime.isChecked());
+			timePickerArrivalTime.setEnabled(wantEnabled(checkBoxArrivalTime));
+			timePickerArrivalTime.setVisibility(wantVisible(checkBoxArrivalTime));
 		}
 	}
 
+	private int wantVisible(CheckBox theBox) {
+		if(theBox.isChecked() && theBox.isEnabled()) {
+			return  TimePicker.VISIBLE;
+		} else {
+			return TimePicker.GONE;
+		}		
+	}
+	
+	private boolean wantEnabled(CheckBox theBox) {		
+		return (theBox.isChecked() && theBox.isEnabled());				
+	}
+	
 	private void InitializeDurationControls() {
 		timePickerDuration.setIs24HourView(true);
 		checkBoxDuration.setOnClickListener(this);
 		
 		textViewDuration.setText("Staying at " + destination.getName() + " for");
-		checkBoxDuration.setChecked(true);
-		timePickerDuration.setEnabled(checkBoxDuration.isChecked());
+		checkBoxDuration.setChecked(wantEnabled(checkBoxArrivalTime));
+		timePickerDuration.setEnabled(wantEnabled(checkBoxArrivalTime));
+		timePickerDuration.setVisibility(wantVisible(checkBoxDuration));
 		checkBoxLastChecked = checkBoxDuration;
 		
 		timePickerDuration.setCurrentHour(0);
@@ -97,14 +117,15 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		checkBoxDepartureTime.setOnClickListener(this);
 		
 		textViewDepartureTime.setText("Leaving " + destination.getName() + " at");
-		checkBoxDepartureTime.setChecked(false);
-		timePickerDepartureTime.setEnabled(checkBoxDepartureTime.isChecked());
+		checkBoxDepartureTime.setChecked(!wantEnabled(checkBoxArrivalTime));
+		timePickerDepartureTime.setEnabled(wantEnabled(checkBoxDepartureTime));
+		timePickerDepartureTime.setVisibility(wantVisible(checkBoxDepartureTime));
 		
-		Calendar arrivalTimeCalculator = Calendar.getInstance();
-		arrivalTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
-		arrivalTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
-		timePickerDepartureTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR));
-		timePickerDepartureTime.setCurrentMinute(arrivalTimeCalculator.get(Calendar.MINUTE));
+		Calendar departureTimeCalculator = Calendar.getInstance();
+		departureTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
+		departureTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
+		timePickerDepartureTime.setCurrentHour(departureTimeCalculator.get(Calendar.HOUR_OF_DAY));
+		timePickerDepartureTime.setCurrentMinute(departureTimeCalculator.get(Calendar.MINUTE));
 	}
 
 	public void onClick(View v) {
@@ -154,9 +175,13 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			break;
 		}
 		
-		timePickerArrivalTime.setEnabled(checkBoxArrivalTime.isChecked());
-		timePickerDuration.setEnabled(checkBoxDuration.isChecked());
-		timePickerDepartureTime.setEnabled(checkBoxDepartureTime.isChecked());
+		timePickerArrivalTime.setEnabled(wantEnabled(checkBoxArrivalTime));
+		timePickerDuration.setEnabled(wantEnabled(checkBoxDuration));
+		timePickerDepartureTime.setEnabled(wantEnabled(checkBoxDepartureTime));
+		
+		timePickerArrivalTime.setVisibility(wantVisible(checkBoxArrivalTime));
+		timePickerDuration.setVisibility(wantVisible(checkBoxDuration));
+		timePickerDepartureTime.setVisibility(wantVisible(checkBoxDepartureTime));
 	}
 
 	private void FinishSchedulingDestination() {

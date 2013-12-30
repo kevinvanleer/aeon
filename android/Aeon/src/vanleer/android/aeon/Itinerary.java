@@ -39,8 +39,8 @@ public final class Itinerary extends Activity implements OnClickListener{
 
 		//FOR TESTING
 		//currentLocation = new Location("test");
-		//currentLocation.setLatitude(38.74419380);
-		//currentLocation.setLongitude(-90.09839319999999);
+		//currentLocation.setLatitude(38.477548);
+		//currentLocation.setLongitude(-91.051562);
 		//FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
@@ -187,7 +187,7 @@ public final class Itinerary extends Activity implements OnClickListener{
 			if(resultCode == Activity.RESULT_OK) {
 				ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
 				itineraryItemList.add(scheduledDestination);
-				itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1)); 
+				itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1));
 			}
 			break;
 		default:
