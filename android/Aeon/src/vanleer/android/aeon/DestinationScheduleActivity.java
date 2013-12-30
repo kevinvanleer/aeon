@@ -1,6 +1,8 @@
 package vanleer.android.aeon;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import vanleer.util.TimeFormat;
 import android.app.Activity;
@@ -78,7 +80,9 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			arrivalTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
 			timePickerArrivalTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR_OF_DAY));
 			timePickerArrivalTime.setCurrentMinute(arrivalTimeCalculator.get(Calendar.MINUTE));
-			textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + destination.getSchedule().getArrivalTime().toString());
+			
+			SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
+			textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + timeFormat.format(destination.getSchedule().getArrivalTime()));
 			//textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + TimeFormat.format(arrivalTimeCalculator.getTimeInMillis(), TimeFormat._12_HOUR_FORMAT, TimeFormat.MINUTES));
 			
 		} else {
