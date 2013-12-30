@@ -251,23 +251,35 @@ public final class GooglePlacesSearch {
 		return PerformHttpGet(url);
 	}
 
-	public String ReverseGeocode(final Location location, Boolean sensor) {
+	public String getReverseGeocodeDescription(final Location location, Boolean sensor) {
 		String bestDescription = "";
-		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) +
-				"," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
-		JSONObject placemarks  = PerformHttpGet(url);
+		
+		JSONObject placemark = getBestReverseGeocodeResult(location, sensor);
+		if(placemark != null) {					
+			bestDescription = (String) placemark.get("formatted_address");
+		}
+		
+		return bestDescription;
+	}
+	
+	public JSONObject getBestReverseGeocodeResult(final Location location, Boolean sensor) {
+		JSONObject placemark = null;
+		
+		JSONObject placemarks  = getReverseGeocodeResults(location, sensor);
 		if(placemarks != null) {
 			JSONArray resultArray = (JSONArray) placemarks.get("results");
 			if(resultArray != null) {
-				JSONObject placemark = (JSONObject) resultArray.get(0);
-				if(placemark != null) {
-					//TODO: Attempt to get establishment string
-					bestDescription = (String) placemark.get("formatted_address");
-				}
+				placemark = (JSONObject) resultArray.get(0);				
 			}
 		}
 
-		return bestDescription;
+		return placemark;
+	}
+	
+	public JSONObject getReverseGeocodeResults(final Location location, Boolean sensor) {		
+		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) +
+				"," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
+		return PerformHttpGet(url);		
 	}
 
 	private JSONObject PerformHttpGet(String url) {

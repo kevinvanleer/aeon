@@ -14,7 +14,7 @@ public final class ItineraryItem implements Parcelable {
 	public DistanceUnit distanceUnit = DistanceUnit.MILES;
 	private JSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
-	private JSONObject googleDistanceMatrixResult = null;
+	private JSONObject googleDistanceMatrixResult = null;	
 	private Location location;
 	private Long travelDurationSec;
 	private Long distance;
@@ -44,10 +44,10 @@ public final class ItineraryItem implements Parcelable {
 	
 	public ItineraryItem(Location myLocation) {
 		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
-		location = myLocation;
-		name = googleSearch.ReverseGeocode(location, true); 
+		location = myLocation;		
+		googleGeocodingResult = googleSearch.getBestReverseGeocodeResult(location, true);
+		name = getGeocodingName();
 		googlePlaceResult = null;
-		googleGeocodingResult = null;
 		googleDistanceMatrixResult = null;
 		travelDurationSec = (long) 0;
 		distance = (long) 0;
@@ -59,7 +59,8 @@ public final class ItineraryItem implements Parcelable {
 	public ItineraryItem(Location myLocation, Location previousLocation) {
 		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
 		location = myLocation;
-		name = googleSearch.ReverseGeocode(location, true); 
+		googleGeocodingResult = googleSearch.getBestReverseGeocodeResult(location, true);
+		name = getGeocodingName();
 	}
 
 	private void readFromParcel(Parcel in) {
@@ -144,8 +145,10 @@ public final class ItineraryItem implements Parcelable {
 
 		if(googlePlaceResult != null) {
 			vicinity = getPlaceVicinity();
-		} else {
+		} else if (googleGeocodingResult != null){
 			vicinity = getGeocodingVicinity();
+		} else {
+			vicinity = "unknown";
 		}
 
 		return vicinity;

@@ -115,7 +115,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			{
 				locationSensorImage.setVisibility(View.VISIBLE);
 			}
-			locationText.setText(googleSearch.ReverseGeocode(currentLocation, true));
+			locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation, true));
 		}
 	}
 
@@ -206,7 +206,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			protected ArrayList<String> doInBackground(Void... arg0) {
 				ArrayList<String> suggestions = null;
 				Message msg = updateCurrentLocationTextHandler.obtainMessage();
-				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
+				msg.obj = googleSearch.getReverseGeocodeDescription(currentLocation, true);
 				updateCurrentLocationTextHandler.sendMessage(msg);
 				if(searchText.enoughToFilter()) {
 					suggestions = performAutocompleteSearch(searchText.getText());
