@@ -155,10 +155,14 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	private String getGeocodingVicinity() {
+		if(googleGeocodingResult == null) {
+			//TODO: fail gracefully
+		}
+		
 		String city = "";
 		String state = "";
 		String zipCode = "";
-
+		
 		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
 		for(int i = 0; i < addressComponents.size(); ++i) {
 			JSONObject addressComponent = (JSONObject) addressComponents.get(i);
@@ -182,6 +186,10 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	private String getPlaceVicinity() {
+		if(googlePlaceResult == null) {
+			//TODO: Fail gracefully
+		}
+		
 		return (String) googlePlaceResult.get("vicinity");
 	}
 

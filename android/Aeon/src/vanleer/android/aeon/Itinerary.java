@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -31,6 +32,8 @@ public final class Itinerary extends Activity implements OnClickListener{
 	private Location currentLocation = null;
 	private static final int GET_NEW_DESTINATION = 0;
 	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
+	private ProgressDialog waitSpinner;
+	private boolean waitingForGps = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,26 +73,35 @@ public final class Itinerary extends Activity implements OnClickListener{
 			//openOptionsMenu();
 		}
 	}
-
-	protected void OnNewLocation(Location location) {
-		currentLocation = location;
-		/*//TODO: fix bug preventing display of current location if discovered after query started
-		locationSensorImage.setVisibility(View.VISIBLE);
-		//make the image view square
-		MakeImageViewSquare(locationSensorImage);
-		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+	
+	private void waitForGps() {
+		waitSpinner = ProgressDialog.show(Itinerary.this,
+				"", "waiting for location...", true);
+		waitingForGps = true;
 		new Thread() {
+			@Override
 			public void run() {
-				Message msg = updateCurrentLocationTextHandler.obtainMessage();
-				msg.obj = googleSearch.ReverseGeocode(currentLocation, true);
-				updateCurrentLocationTextHandler.sendMessage(msg);
+				while(currentLocation == null) {
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				waitSpinner.dismiss();
 			}
 		}.start();
-		if(waitingForGps) {
-			waitingForGps  = false;
-			onClick(searchButton);
-		}*/
 	}
+	
+	protected void OnNewLocation(Location location) {
+		currentLocation = location;
+		if(waitingForGps) {
+			waitingForGps = false;
+			GetMyLocationInfo();
+		}		
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -149,19 +161,23 @@ public final class Itinerary extends Activity implements OnClickListener{
 	}
 
 	private void GetMyLocationInfo() {
-		ItineraryItem myLocation = null;
-
-		//TODO: Wait for location service if current location is null
-		
-		try{
-			ItineraryItem lastDestination = GetLastDestination();
-			myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation());
+		if(currentLocation == null) {
+			waitForGps();
+		} else {
+			ItineraryItem myLocation = null;
+	
+			//TODO: Wait for location service if current location is null
+			
+			try{
+				ItineraryItem lastDestination = GetLastDestination();
+				myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation());
+			}
+			catch(IllegalStateException e){
+				myLocation = new ItineraryItem(currentLocation);
+			}
+	
+			UpdateArrivalDepartureTimes(myLocation);
 		}
-		catch(IllegalStateException e){
-			myLocation = new ItineraryItem(currentLocation);
-		}
-
-		UpdateArrivalDepartureTimes(myLocation);
 	}
 
 	private ItineraryItem GetLastDestination() {
