@@ -16,6 +16,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 //Something for sending destinations to Navigator
@@ -42,6 +44,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ProgressDialog waitSpinner;
 	private boolean waitingForGps = false;
 	private ItineraryItem origin = null;
+	private ItineraryItem andNewItemItem = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -88,12 +91,42 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		configureItineraryListViewLongClickListener();
 		initializeOrigin();
+		initializeAddNewItineraryItem();
+	}
+	
+	private void initializeAddNewItineraryItem() {
+		andNewItemItem = new ItineraryItem("Press to add new destination");
+		LayoutInflater vi =
+				(LayoutInflater) this.getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = vi.inflate(R.layout.itinerary_item, null);
+		
+		//TextView destinationName = (TextView) v.findViewById(R.id.textView_destinationName);		
+		TextView arrivalVicinity = (TextView) v.findViewById(R.id.textView_arrivalLocation);
+		TextView arrivalTime = (TextView) v.findViewById(R.id.textView_arrivalTime);
+		TextView travelDistance = (TextView) v.findViewById(R.id.textView_travelDistance);
+		TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
+		TextView stayDuration = (TextView) v.findViewById(R.id.textView_stayDuration);
+		TextView departureVicinity = (TextView) v.findViewById(R.id.textView_departureLocation);
+		TextView departureTime = (TextView) v.findViewById(R.id.textView_departureTime);
+		
+		arrivalVicinity.setVisibility(View.GONE);
+		arrivalTime.setVisibility(View.GONE);
+		travelDistance.setVisibility(View.GONE);
+		travelTime.setVisibility(View.GONE);
+		stayDuration.setVisibility(View.GONE);
+		departureVicinity.setVisibility(View.GONE);
+		departureTime.setVisibility(View.GONE);
+		
+		//TODO: define custom color scheme for this item
+		//destinationName.setTextColor
+		
+		itineraryItemList.add(andNewItemItem);
+		itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1));
 	}
 	
 	private void configureItineraryListViewLongClickListener() {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {				
 				return true;
 			}
 		});

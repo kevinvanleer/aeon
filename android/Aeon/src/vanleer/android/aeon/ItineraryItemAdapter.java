@@ -28,6 +28,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		}
 		if(!destinationList.isEmpty()) {
 			ItineraryItem item = destinationList.get(position);
+			
 			if (item != null) {
 				TextView destinationName = (TextView) v.findViewById(R.id.textView_destinationName);
 				TextView stayDuration = (TextView) v.findViewById(R.id.textView_stayDuration);
@@ -48,7 +49,15 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				departureVicinity.setText("Depart from " + item.GetVicinity());
 				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
 				
-				if(position == 0) {
+				if(item.getName() == "Press to add new destination") {
+					//HACK: Make this betterarrivalVicinity.setVisibility(View.GONE);
+					arrivalTime.setVisibility(View.GONE);
+					travelDistance.setVisibility(View.GONE);
+					travelTime.setVisibility(View.GONE);
+					stayDuration.setVisibility(View.GONE);
+					departureVicinity.setVisibility(View.GONE);
+					departureTime.setVisibility(View.GONE);
+				} else if(position == 0) {
 					arrivalVicinity.setVisibility(View.GONE);
 					arrivalTime.setVisibility(View.GONE);
 					travelDistance.setVisibility(View.GONE);
@@ -76,10 +85,10 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					stayDuration.setVisibility(View.VISIBLE);
 					departureVicinity.setVisibility(View.VISIBLE);
 					departureTime.setVisibility(View.VISIBLE);
-				}
-
+				}			
 			}
 		}
+		
 		return v;
 	}
 }
