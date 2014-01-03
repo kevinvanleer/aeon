@@ -38,17 +38,22 @@ public final class ItineraryItem implements Parcelable {
 		phoneNumber = "NONE";
 	}
 
+	public ItineraryItem(String fakeName) {
+		location = null;		
+		name = fakeName;				
+		travelDurationSec = (long) 0;
+		distance = (long) 0;
+		times = null;
+		iconUrl = null;
+		phoneNumber = "NONE";
+	}
+	
 	private ItineraryItem(Parcel in) {
 		readFromParcel(in);
 	}
 	
 	public ItineraryItem(Location myLocation) {
-		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
-		location = myLocation;		
-		googleGeocodingResult = googleSearch.getBestReverseGeocodeResult(location, true);
-		name = getGeocodingName();
-		googlePlaceResult = null;
-		googleDistanceMatrixResult = null;
+		updateLocation(myLocation);		
 		travelDurationSec = (long) 0;
 		distance = (long) 0;
 		times = null;
@@ -57,8 +62,16 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public ItineraryItem(Location myLocation, Location previousLocation) {
+		updateLocation(myLocation);
+		//TODO: Something with previous location
+	}
+	
+	void updateLocation(Location newLocation) {
+		if(newLocation == null) {
+			throw new NullPointerException();
+		}
 		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
-		location = myLocation;
+		location = newLocation;
 		googleGeocodingResult = googleSearch.getBestReverseGeocodeResult(location, true);
 		name = getGeocodingName();
 	}
