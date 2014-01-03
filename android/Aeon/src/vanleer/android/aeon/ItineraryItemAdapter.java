@@ -50,7 +50,8 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
 				
 				if(item.getName() == "Press to add new destination") {
-					//HACK: Make this betterarrivalVicinity.setVisibility(View.GONE);
+					//HACK: Make this better
+					arrivalVicinity.setVisibility(View.GONE);
 					arrivalTime.setVisibility(View.GONE);
 					travelDistance.setVisibility(View.GONE);
 					travelTime.setVisibility(View.GONE);
