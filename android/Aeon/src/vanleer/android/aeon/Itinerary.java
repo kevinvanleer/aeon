@@ -207,7 +207,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (itineraryItemList.isEmpty()) {
 			startItineraryOpen.putExtra("location", currentLocation);
 		} else {
-			startItineraryOpen.putExtra("location", getLastDestination().getLocation());
+			// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
+			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 2);
+			startItineraryOpen.putExtra("location", lastDestination.getLocation());
 		}
 
 		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
@@ -297,6 +299,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private ItineraryItem getLastDestination() {
+		// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
 		return itineraryItemList.get(getLastDestinationIndex());
 	}
 
@@ -325,6 +328,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 		Calendar arrivalTimeCalculator = Calendar.getInstance();
 		if (!itineraryItemList.isEmpty()) {
+			// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
 			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 2);
 			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
 			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
