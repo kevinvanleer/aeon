@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 public final class DestinationScheduleActivity extends Activity implements OnClickListener {
+	private static final Integer DEFAULT_DURATION_HOUR = 0;
 	private static final Integer DEFAULT_DURATION_MIN = 30;
 	private CheckBox checkBoxArrivalTime;
 	private CheckBox checkBoxDuration;
@@ -56,7 +57,19 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		
 		InitializeControls();
 	}
-	
+
+	private int wantVisible(CheckBox theBox) {
+		if(theBox.isChecked() && theBox.isEnabled()) {
+			return  TimePicker.VISIBLE;
+		} else {
+			return TimePicker.GONE;
+		}
+	}
+
+	private boolean wantEnabled(CheckBox theBox) {
+		return (theBox.isChecked() && theBox.isEnabled());
+	}
+
 	private void InitializeControls() {
 		InitializeArrivalControls();
 		InitializeDurationControls();
@@ -83,24 +96,10 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			
 			SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
 			textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + timeFormat.format(destination.getSchedule().getArrivalTime()));
-			//textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + TimeFormat.format(arrivalTimeCalculator.getTimeInMillis(), TimeFormat._12_HOUR_FORMAT, TimeFormat.MINUTES));
-			
 		} else {
 			timePickerArrivalTime.setEnabled(wantEnabled(checkBoxArrivalTime));
 			timePickerArrivalTime.setVisibility(wantVisible(checkBoxArrivalTime));
 		}
-	}
-
-	private int wantVisible(CheckBox theBox) {
-		if(theBox.isChecked() && theBox.isEnabled()) {
-			return  TimePicker.VISIBLE;
-		} else {
-			return TimePicker.GONE;
-		}		
-	}
-	
-	private boolean wantEnabled(CheckBox theBox) {		
-		return (theBox.isChecked() && theBox.isEnabled());				
 	}
 	
 	private void InitializeDurationControls() {
@@ -113,7 +112,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		timePickerDuration.setVisibility(wantVisible(checkBoxDuration));
 		checkBoxLastChecked = checkBoxDuration;
 		
-		timePickerDuration.setCurrentHour(0);
+		timePickerDuration.setCurrentHour(DEFAULT_DURATION_HOUR);
 		timePickerDuration.setCurrentMinute(DEFAULT_DURATION_MIN);
 	}
 
@@ -127,6 +126,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		
 		Calendar departureTimeCalculator = Calendar.getInstance();
 		departureTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
+		departureTimeCalculator.add(Calendar.HOUR_OF_DAY, DEFAULT_DURATION_HOUR);
 		departureTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
 		timePickerDepartureTime.setCurrentHour(departureTimeCalculator.get(Calendar.HOUR_OF_DAY));
 		timePickerDepartureTime.setCurrentMinute(departureTimeCalculator.get(Calendar.MINUTE));
@@ -189,14 +189,14 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 	}
 
 	private void FinishSchedulingDestination() {
-		CalculateScheduling();
+		calculateScheduling();
 		Intent finishedScheduling = new Intent();
 		finishedScheduling.putExtra("destination", destination);
 		setResult(Activity.RESULT_OK, finishedScheduling);
 		finish();
 	}
 
-	private void CalculateScheduling() {
+	private void calculateScheduling() {
 		Calendar timeConverter = Calendar.getInstance();
 		
 		if(checkBoxArrivalTime.isChecked()) {
@@ -215,11 +215,12 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			destination.getSchedule().setStayDuration((long) ((timePickerDuration.getCurrentHour() * 3600) +
 					((timePickerDuration.getCurrentMinute() * 60))));
 		} else {
-			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
-			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
-			timeConverter.add(Calendar.HOUR_OF_DAY, -timePickerArrivalTime.getCurrentHour());
-			timeConverter.add(Calendar.MINUTE, -timePickerArrivalTime.getCurrentMinute());
-			destination.getSchedule().setStayDuration(timeConverter.getTimeInMillis() / 1000);
+			
+			int durationHour = timePickerDepartureTime.getCurrentHour() - timePickerArrivalTime.getCurrentHour();
+			int durationMin = timePickerDepartureTime.getCurrentMinute() - timePickerArrivalTime.getCurrentMinute();
+			
+			long duration = (long)((durationHour * 3600) + (durationMin * 60));
+			destination.getSchedule().setStayDuration(duration);
 		}
 		
 		if(checkBoxDepartureTime.isChecked()) {
