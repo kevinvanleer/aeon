@@ -3,20 +3,14 @@ package vanleer.android.aeon;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -123,7 +117,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == (itineraryItemList.size() - 1)) {
-					StartSearchActivity();
+					startSearchActivity();
 				}
 				return true;
 			}
@@ -168,7 +162,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.submenu_item_add_destination_google_search:
-			StartSearchActivity();
+			startSearchActivity();
 			break;
 		case R.id.submenu_item_add_destination_my_location:
 			GetMyLocationInfo();
@@ -201,14 +195,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return true;
 	}
 
-	private void StartSearchActivity() {
+	private void startSearchActivity() {
 		Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
 
 		if (itineraryItemList.isEmpty()) {
 			startItineraryOpen.putExtra("location", currentLocation);
 		} else {
-			// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
-			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 2);
+			ItineraryItem lastDestination = getFinalDestination();
 			startItineraryOpen.putExtra("location", lastDestination.getLocation());
 		}
 
@@ -280,7 +273,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			// TODO: Wait for location service if current location is null
 
 			try {
-				ItineraryItem lastDestination = getLastDestination();
+				ItineraryItem lastDestination = getFinalDestination();
 				myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation());
 			} catch (IllegalStateException e) {
 				myLocation = new ItineraryItem(currentLocation);
@@ -290,7 +283,19 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
-	private int getLastDestinationIndex() {
+	private int getFinalDestinationIndex() {
+		if (itineraryItemList.size() < 2) {
+			throw new IllegalStateException("The destination list has not been initialize correctly.");
+		}
+
+		return (itineraryItemList.size() - 2); // was -1
+	}
+
+	private ItineraryItem getFinalDestination() {
+		return itineraryItemList.get(getFinalDestinationIndex());
+	}
+
+	private int getAppendDestinationIndex() {
 		if (itineraryItemList.size() < 2) {
 			throw new IllegalStateException("The destination list has not been initialize correctly.");
 		}
@@ -298,9 +303,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return (itineraryItemList.size() - 1);
 	}
 
-	private ItineraryItem getLastDestination() {
-		// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
-		return itineraryItemList.get(getLastDestinationIndex());
+	private void appendDestination(ItineraryItem newItem) {
+		itineraryItemList.add(getAppendDestinationIndex(), newItem);
+		itineraryItems.insert(newItem, getAppendDestinationIndex());
 	}
 
 	@Override
@@ -316,8 +321,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		case UPDATE_DESTINATION_SCHEDULE:
 			if (resultCode == Activity.RESULT_OK) {
 				ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
-				itineraryItemList.add(getLastDestinationIndex(), scheduledDestination);
-				itineraryItems.insert(getLastDestination(), getLastDestinationIndex());
+				appendDestination(scheduledDestination);
 			}
 			break;
 		default:
@@ -328,8 +332,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 		Calendar arrivalTimeCalculator = Calendar.getInstance();
 		if (!itineraryItemList.isEmpty()) {
-			// TODO: Fix discrepancy between getLastDestination method and this lastDestination variable
-			ItineraryItem lastDestination = itineraryItemList.get(itineraryItemList.size() - 2);
+			ItineraryItem lastDestination = getFinalDestination();
 			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
 			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
 		} else {
