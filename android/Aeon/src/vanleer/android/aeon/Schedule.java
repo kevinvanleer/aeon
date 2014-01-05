@@ -129,19 +129,11 @@ public class Schedule implements Parcelable {
 	}
 
 	public void update(Date newArrivalTime) {
-		// Calendar newArrival = Calendar.getInstance();
-		// Calendar arrival = Calendar.getInstance();
-
-		// newArrival.setTime(newArrivalTime);
-		// arrival.setTime(arrivalTime);
-
-		// long offset = newArrival.getTimeInMillis() - arrival.getTimeInMillis();
-
 		setArrivalTime(newArrivalTime);
 
 		Calendar departure = Calendar.getInstance();
 		departure.setTime(arrivalTime);
-		// departureTime.setTime(departure.getTimeInMillis() + (stayDurationSec * 1000));
+
 		departure.add(Calendar.SECOND, stayDurationSec.intValue());
 		departureTime.setTime(departure.getTimeInMillis());
 	}

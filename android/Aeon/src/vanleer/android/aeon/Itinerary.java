@@ -343,9 +343,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (!itineraryItemList.isEmpty()) {
 			ItineraryItem lastDestination = getFinalDestination();
 			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
-			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
+			// arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
+			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
 		} else {
-			arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
+			// arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
+			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
 		}
 		newDestination.getSchedule().setArrivalTime(arrivalTimeCalculator.getTime());
 
