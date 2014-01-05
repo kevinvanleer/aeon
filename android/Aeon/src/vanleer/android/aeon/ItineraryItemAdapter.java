@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +64,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 
 				destinationName.setTextColor(defaultColors);
 
-				if (item.getName() == "Press to add new destination") {
+				if (item.getName() == parent.getContext().getString(R.string.add_destination_itinerary_item)) {
 					// HACK: Make this better
 					arrivalVicinity.setVisibility(View.GONE);
 					arrivalTime.setVisibility(View.GONE);

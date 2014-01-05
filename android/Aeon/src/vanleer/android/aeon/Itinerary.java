@@ -84,7 +84,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void initializeAddNewItineraryItem() {
-		addNewItemItem = new ItineraryItem("Press to add new destination");
+		addNewItemItem = new ItineraryItem(getString(R.string.add_destination_itinerary_item));
 		LayoutInflater vi = (LayoutInflater) this.getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = vi.inflate(R.layout.itinerary_item, null);
 
