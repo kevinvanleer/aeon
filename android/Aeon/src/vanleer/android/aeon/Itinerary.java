@@ -47,9 +47,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		setContentView(R.layout.itinerary);
 
 		// FOR TESTING
-		// currentLocation = new Location("test");
-		// currentLocation.setLatitude(38.477548);
-		// currentLocation.setLongitude(-91.051562);
+		currentLocation = new Location("test");
+		currentLocation.setLatitude(38.477548);
+		currentLocation.setLongitude(-91.051562);
 		// FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
@@ -216,6 +216,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryItems.notifyDataSetChanged();
 	}
 
+	void updateTimes() {
+		origin.getSchedule().setDepartureTime(new Date());
+
+		for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
+			itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
+		}
+
+		itineraryItems.notifyDataSetChanged();
+	}
+
 	private void initializeOrigin() {
 		origin = new ItineraryItem("My location (locating...)");
 		Schedule departNow = new Schedule();
@@ -248,14 +258,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 						now.setTime(new Date());
 					}
 
-					class OriginUpdater implements Runnable {
+					class ItineraryUpdater implements Runnable {
 						public void run() {
-							origin.getSchedule().setDepartureTime(new Date());
-							itineraryItems.notifyDataSetChanged();
+							updateTimes();
 						}
 					}
 
-					Itinerary.this.runOnUiThread(new OriginUpdater());
+					Itinerary.this.runOnUiThread(new ItineraryUpdater());
 
 					nextMinute.setTime(new Date());
 					nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);
