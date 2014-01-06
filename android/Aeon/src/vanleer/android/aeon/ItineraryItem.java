@@ -130,30 +130,32 @@ public final class ItineraryItem implements Parcelable {
 		String streetNumber = "";
 		String route = "";
 		String establishment = "";
+		String addressName = "Address unknown";
 
-		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
-		for (int i = 0; i < addressComponents.size(); ++i) {
-			JSONObject addressComponent = (JSONObject) addressComponents.get(i);
-			if (addressComponent != null) {
-				JSONArray componentTypes = (JSONArray) addressComponent.get("types");
-				for (int j = 0; j < componentTypes.size(); ++j) {
-					String componentType = (String) componentTypes.get(j);
-					if (componentType.equals("street_number")) {
-						streetNumber = (String) addressComponent.get("long_name");
-					} else if (componentType.equals("route")) {
-						route = (String) addressComponent.get("short_name");
-					} else if (componentType.equals("establishment")) {
-						establishment = (String) addressComponent.get("short_name");
+		if (googleGeocodingResult != null) {
+			JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
+			for (int i = 0; i < addressComponents.size(); ++i) {
+				JSONObject addressComponent = (JSONObject) addressComponents.get(i);
+				if (addressComponent != null) {
+					JSONArray componentTypes = (JSONArray) addressComponent.get("types");
+					for (int j = 0; j < componentTypes.size(); ++j) {
+						String componentType = (String) componentTypes.get(j);
+						if (componentType.equals("street_number")) {
+							streetNumber = (String) addressComponent.get("long_name");
+						} else if (componentType.equals("route")) {
+							route = (String) addressComponent.get("short_name");
+						} else if (componentType.equals("establishment")) {
+							establishment = (String) addressComponent.get("short_name");
+						}
 					}
 				}
 			}
-		}
 
-		String addressName;
-		if (!(route.isEmpty() || establishment.isEmpty())) {
-			addressName = (route + " " + establishment);
-		} else {
-			addressName = (streetNumber + " " + route).trim();
+			if (!(route.isEmpty() || establishment.isEmpty())) {
+				addressName = (route + " " + establishment);
+			} else {
+				addressName = (streetNumber + " " + route).trim();
+			}
 		}
 
 		return addressName;

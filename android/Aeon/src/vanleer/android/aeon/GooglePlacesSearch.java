@@ -24,35 +24,30 @@ import android.location.Location;
 import android.net.Uri;
 
 public final class GooglePlacesSearch {
-	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json"; 
-	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"; 
+	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
+	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 	private static final String GOOGLE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
-	private ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
-	private ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
+	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
+	private final ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
 	private static final ArrayList<String> placeTypes = new ArrayList<String>();
 
 	GooglePlacesSearch(String userApiKey, String userClientId) {
 		apiKey = userApiKey;
 
-		if(placeTypes.isEmpty())
-		{
+		if (placeTypes.isEmpty()) {
 			InitializePlaceTypes();
 		}
 	}
 
-	void PerformSearch(double latitude, double longitude,
-			double radius, String name, boolean sensor) {
+	void PerformSearch(double latitude, double longitude, double radius, String name, boolean sensor) {
 		String type = FindType(name);
-		if(type != null)
-		{
+		if (type != null) {
 			String[] types = new String[1];
 			types[0] = type;
 			PerformSearch(latitude, longitude, radius, types, "", sensor);
-		}
-		else
-		{
+		} else {
 			PerformSearch(latitude, longitude, radius, null, name, sensor);
 		}
 	}
@@ -61,18 +56,18 @@ public final class GooglePlacesSearch {
 		String inferredType = null;
 
 		name = name.toLowerCase();
-		if(name.endsWith("es")) {
+		if (name.endsWith("es")) {
 			name = name.substring(0, (name.length() - 2));
 		}
-		if(name.endsWith("s")) {
+		if (name.endsWith("s")) {
 			name = name.substring(0, (name.length() - 1));
 		}
 
 		Iterator<String> itr = placeTypes.iterator();
-		while(itr.hasNext()) {
+		while (itr.hasNext()) {
 			String type = itr.next();
-			if(name.compareTo(type.replace("_", " ")) == 0) {
-				inferredType = type; 
+			if (name.compareTo(type.replace("_", " ")) == 0) {
+				inferredType = type;
 				break;
 			}
 		}
@@ -80,20 +75,17 @@ public final class GooglePlacesSearch {
 		return inferredType;
 	}
 
-	void PerformSearch(double latitude, double longitude,
-			double radius, String[] types, boolean sensor) {
+	void PerformSearch(double latitude, double longitude, double radius, String[] types, boolean sensor) {
 		PerformSearch(latitude, longitude, radius, types, "", sensor);
 	}
 
-	void PerformSearch(double latitude, double longitude,
-			double radius, String[] types, String name, boolean sensor) {
+	void PerformSearch(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
 		ClearSearchResults();
 
 		PerformPlacesSearch(latitude, longitude, radius, types, name, sensor);
 		PerformGeocodingSearch(name, sensor);
 
-		if(places.size() > 0)
-		{
+		if (places.size() > 0) {
 			JSONObject distanceMatrixResults = GetDistances(latitude, longitude, sensor);
 			ParseDistanceMatrixResults(distanceMatrixResults);
 			Collections.sort(places, distanceCompare);
@@ -101,59 +93,54 @@ public final class GooglePlacesSearch {
 	}
 
 	private void ClearSearchResults() {
-		if(places != null) {
+		if (places != null) {
 			places.clear();
 		}
 	}
 
-	public void PerformPlacesSearch(double latitude, double longitude,
-			double radius, String[] types, String name, boolean sensor) {
+	public void PerformPlacesSearch(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
 		String url = BuildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
 		JSONObject placesSearchResults = PerformHttpGet(url);
 		AddPlacesResults(placesSearchResults);
 	}
-	
-	public ArrayList<String> performPlacesAutocomplete(String input, boolean sensor,
-			Double latitude, Double longitude, Double radius, String[] types, Long offset) {
-		String url = BuildGooglePlacesAutocompleteUrl(
-				input, sensor, latitude, longitude, radius, types, offset);
-		
+
+	public ArrayList<String> performPlacesAutocomplete(String input, boolean sensor, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+		String url = BuildGooglePlacesAutocompleteUrl(input, sensor, latitude, longitude, radius, types, offset);
+
 		JSONObject autocompleteResults = PerformHttpGet(url);
 		return GetResultsList(autocompleteResults);
 	}
-	
+
 	private ArrayList<String> GetResultsList(JSONObject autocompleteResults) {
 		ArrayList<String> results = new ArrayList<String>();
-		
-		if(autocompleteResults != null) {
+
+		if (autocompleteResults != null) {
 			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
-			if(resultArray != null) {
-				for(int index = 0; index < resultArray.size(); ++index) {
+			if (resultArray != null) {
+				for (int index = 0; index < resultArray.size(); ++index) {
 					JSONObject result = (JSONObject) resultArray.get(index);
-					if(result != null) {
+					if (result != null) {
 						results.add((String) result.get("description"));
 					}
 				}
 			}
 		}
-		
+
 		return results;
 	}
 
-	private String BuildGooglePlacesSearchUrl(double latitude,
-			double longitude, double radius, String[] types, String name,
-			boolean sensor) {
+	private String BuildGooglePlacesSearchUrl(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
-		
+
 		url += "?location=" + latitude + "," + longitude;
 		url += "&radius=" + radius;
 
-		if(types != null) {	
+		if (types != null) {
 			url += "&types=" + GetTypesUrlPart(types);
 		}
 
-		if(name != "") {
+		if (name != "") {
 			url += "&name=" + Uri.encode(name);
 		}
 
@@ -161,48 +148,44 @@ public final class GooglePlacesSearch {
 		url += "&key=" + apiKey;
 
 		return url;
-	} 
+	}
 
-	private String BuildGooglePlacesAutocompleteUrl(String input, boolean sensor, Double latitude,
-			Double longitude, Double radius, String[] types, Long offset) {
+	private String BuildGooglePlacesAutocompleteUrl(String input, boolean sensor, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
 		String url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
-		
-		if(input == null || input == "") {
-			throw new IllegalArgumentException(
-					"Places autocomplete search requires an input string");
+
+		if (input == null || input == "") {
+			throw new IllegalArgumentException("Places autocomplete search requires an input string");
 		}
-		
+
 		url += "?input=" + Uri.encode(input);
-		url += "&types=establishment"; 
-		if(types != null) {	
+		url += "&types=establishment";
+		if (types != null) {
 			url += "|" + GetTypesUrlPart(types);
 		}
-			
 
-		if((latitude != null) && (longitude != null))
-		{
+		if ((latitude != null) && (longitude != null)) {
 			url += "&location=" + latitude + "," + longitude;
 		}
-		
-		if(radius != null) {
+
+		if (radius != null) {
 			url += "&radius=" + radius;
 		}
 
-		if((offset != 0) && (offset != null)) {
+		if ((offset != 0) && (offset != null)) {
 			url += "&offset=" + offset;
 		}
-		
+
 		url += "&sensor=" + sensor;
 		url += "&key=" + apiKey;
-		
+
 		return url;
 	}
 
 	private String GetTypesUrlPart(String[] types) {
 		String typesUrlPart = "";
 
-		for(int i = 0; i < types.length; ++i) {
-			if(i > 0) {
+		for (int i = 0; i < types.length; ++i) {
+			if (i > 0) {
 				typesUrlPart += "|";
 			}
 
@@ -213,12 +196,12 @@ public final class GooglePlacesSearch {
 	}
 
 	private void AddPlacesResults(JSONObject placesSearchResults) {
-		if(placesSearchResults != null) {
+		if (placesSearchResults != null) {
 			JSONArray placesResultArray = (JSONArray) placesSearchResults.get("results");
-			if(placesResultArray != null) {
-				for(int index = 0; index < placesResultArray.size(); ++index) {
+			if (placesResultArray != null) {
+				for (int index = 0; index < placesResultArray.size(); ++index) {
 					JSONObject place = (JSONObject) placesResultArray.get(index);
-					if(place != null) {
+					if (place != null) {
 						places.add(new ItineraryItem(place));
 					}
 				}
@@ -233,12 +216,12 @@ public final class GooglePlacesSearch {
 	}
 
 	private void AddGeocodingResults(JSONObject geocodingSearchResults) {
-		if(geocodingSearchResults != null) {
+		if (geocodingSearchResults != null) {
 			JSONArray geocodeResultArray = (JSONArray) geocodingSearchResults.get("results");
-			if(geocodeResultArray != null) {
-				for(int index = 0; index < geocodeResultArray.size(); ++index) {
+			if (geocodeResultArray != null) {
+				for (int index = 0; index < geocodeResultArray.size(); ++index) {
 					JSONObject place = (JSONObject) geocodeResultArray.get(index);
-					if(place != null) {
+					if (place != null) {
 						places.add(new ItineraryItem(place));
 					}
 				}
@@ -252,34 +235,35 @@ public final class GooglePlacesSearch {
 	}
 
 	public String getReverseGeocodeDescription(final Location location, Boolean sensor) {
-		String bestDescription = "";
-		
+		String bestDescription = "Address unknown";
+
 		JSONObject placemark = getBestReverseGeocodeResult(location, sensor);
-		if(placemark != null) {					
+		if (placemark != null) {
 			bestDescription = (String) placemark.get("formatted_address");
 		}
-		
+
 		return bestDescription;
 	}
-	
+
 	public JSONObject getBestReverseGeocodeResult(final Location location, Boolean sensor) {
 		JSONObject placemark = null;
-		
-		JSONObject placemarks  = getReverseGeocodeResults(location, sensor);
-		if(placemarks != null) {
+
+		JSONObject placemarks = getReverseGeocodeResults(location, sensor);
+		if (placemarks != null) {
 			JSONArray resultArray = (JSONArray) placemarks.get("results");
-			if(resultArray != null) {
-				placemark = (JSONObject) resultArray.get(0);				
+			if (resultArray != null) {
+				if (resultArray.size() > 0) {
+					placemark = (JSONObject) resultArray.get(0);
+				}
 			}
 		}
 
 		return placemark;
 	}
-	
-	public JSONObject getReverseGeocodeResults(final Location location, Boolean sensor) {		
-		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) +
-				"," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
-		return PerformHttpGet(url);		
+
+	public JSONObject getReverseGeocodeResults(final Location location, Boolean sensor) {
+		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
+		return PerformHttpGet(url);
 	}
 
 	private JSONObject PerformHttpGet(String url) {
@@ -288,11 +272,11 @@ public final class GooglePlacesSearch {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpResponse response = httpClient.execute(new HttpGet(url));
 			StatusLine statusLine = response.getStatusLine();
-			if(statusLine.getStatusCode() == HttpStatus.SC_OK) {
+			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 				InputStream inStream = response.getEntity().getContent();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
-				jsonResponse = (JSONObject)JSONValue.parse(reader);
-			} 
+				jsonResponse = (JSONObject) JSONValue.parse(reader);
+			}
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -306,7 +290,7 @@ public final class GooglePlacesSearch {
 	private String BuildDistanceMatrixUrl(double latitude, double longitude, boolean sensor) {
 		String url = GOOGLE_DISTANCE_MATRIX_URL;
 		url += "?origins=" + latitude + "," + longitude;
-		String destinations = GetDestinationsUrlPart(); 
+		String destinations = GetDestinationsUrlPart();
 		url += "&destinations=" + Uri.encode(destinations);
 		url += "&sensor=" + sensor;
 		return url;
@@ -315,27 +299,27 @@ public final class GooglePlacesSearch {
 	private String GetDestinationsUrlPart() {
 		String destinations = "";
 		Iterator<ItineraryItem> placeIterator = places.iterator();
-		while(placeIterator.hasNext()) {
+		while (placeIterator.hasNext()) {
 			ItineraryItem place = placeIterator.next();
-			if(place != null) {
+			if (place != null) {
 				destinations += place.getLocation().getLatitude() + ",";
 				destinations += place.getLocation().getLongitude() + "|";
 			}
 		}
-		if(!destinations.isEmpty()) {
+		if (!destinations.isEmpty()) {
 			destinations = destinations.substring(0, destinations.length() - 1);
 		}
 		return destinations;
 	}
 
 	private void ParseDistanceMatrixResults(JSONObject distanceMatrix) {
-		if(distanceMatrix != null) {
+		if (distanceMatrix != null) {
 			JSONArray results = (JSONArray) distanceMatrix.get("rows");
 			JSONArray resultArray = (JSONArray) ((JSONObject) results.get(0)).get("elements");
-			if(resultArray != null) {
-				for(int index = 0; index < places.size(); ++index) {
+			if (resultArray != null) {
+				for (int index = 0; index < places.size(); ++index) {
 					JSONObject distance = (JSONObject) resultArray.get(index);
-					if(distance != null) {
+					if (distance != null) {
 						places.get(index).setDistance(distance);
 					}
 				}
@@ -354,11 +338,11 @@ public final class GooglePlacesSearch {
 	static String GetGeodeticString(Location location) {
 		String latSuffix = "° N";
 		String lngSuffix = "° E";
-		if(location.getLatitude() < 0) {
-			latSuffix = "° S";	
+		if (location.getLatitude() < 0) {
+			latSuffix = "° S";
 		}
-		if(location.getLongitude() < 0) {
-			lngSuffix = "° W";	
+		if (location.getLongitude() < 0) {
+			lngSuffix = "° W";
 		}
 
 		String latString = String.format("%1$.4f", Math.abs(location.getLatitude()));
@@ -368,8 +352,8 @@ public final class GooglePlacesSearch {
 	}
 
 	private void InitializePlaceTypes() {
-		//Levenshtein distance
-		//frej
+		// Levenshtein distance
+		// frej
 		placeTypes.add("accounting");
 		placeTypes.add("airport");
 		placeTypes.add("amusement_park");

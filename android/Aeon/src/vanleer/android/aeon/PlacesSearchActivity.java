@@ -4,6 +4,7 @@ import vanleer.util.UnfilteredArrayAdapter;
 
 import java.util.ArrayList;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -131,11 +132,20 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private void ConfigureSearchResultsListViewLongClickListener() {
 		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				Intent resultIntent = new Intent();
-				resultIntent.putExtra("itineraryItem", searchResultsList.get(position));
-				setResult(Activity.RESULT_OK, resultIntent);
-				finish();
-				return true;
+				// HACK: DO BETTER
+				if (locationText.getText() == "Address unknown") {
+					AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
+					builder.setTitle("Selected destination").setMessage("Route from current location not available.");
+					AlertDialog dialog = builder.create();
+					dialog.show();
+					return false;
+				} else {
+					Intent resultIntent = new Intent();
+					resultIntent.putExtra("itineraryItem", searchResultsList.get(position));
+					setResult(Activity.RESULT_OK, resultIntent);
+					finish();
+					return true;
+				}
 			}
 		});
 	}
