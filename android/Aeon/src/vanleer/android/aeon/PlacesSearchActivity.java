@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
@@ -136,6 +137,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				if (locationText.getText() == "Address unknown") {
 					AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 					builder.setTitle("Selected destination").setMessage("Route from current location not available.");
+					builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// Nothing to do
+						}
+					});
 					AlertDialog dialog = builder.create();
 					dialog.show();
 					return false;
