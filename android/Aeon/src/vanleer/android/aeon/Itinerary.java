@@ -35,11 +35,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private LocationManager locationManager;
 	private Location currentLocation = null;
 	private static final int GET_NEW_DESTINATION = 0;
-	private static final int UPDATE_DESTINATION_SCHEDULE = 1;
+	private static final int ADD_DESTINATION = 1;
+	private static final int UPDATE_DESTINATION = 2;
 	private ProgressDialog waitSpinner;
 	private boolean waitingForGps = false;
 	private ItineraryItem origin = null;
 	private ItineraryItem addNewItemItem = null;
+	private int selectedItemPosition = -1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -113,11 +115,20 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1));
 	}
 
+	class ItineraryUpdater implements Runnable {
+		public void run() {
+			updateTimes();
+		}
+	}
+
 	private void configureItineraryListViewLongClickListener() {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == (itineraryItemList.size() - 1)) {
 					startSearchActivity();
+				} else {
+					selectedItemPosition = position;
+					updateArrivalDepartureTimes(itineraryItemList.get(position));
 				}
 				return true;
 			}
@@ -258,12 +269,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 						now.setTime(new Date());
 					}
 
-					class ItineraryUpdater implements Runnable {
-						public void run() {
-							updateTimes();
-						}
-					}
-
 					Itinerary.this.runOnUiThread(new ItineraryUpdater());
 
 					nextMinute.setTime(new Date());
@@ -288,7 +293,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				myLocation = new ItineraryItem(currentLocation);
 			}
 
-			UpdateArrivalDepartureTimes(myLocation);
+			updateArrivalDepartureTimes(myLocation);
 		}
 	}
 
@@ -313,8 +318,22 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void appendDestination(ItineraryItem newItem) {
-		itineraryItemList.add(getAppendDestinationIndex(), newItem);
-		itineraryItems.insert(newItem, getAppendDestinationIndex());
+		insertDestination(getAppendDestinationIndex(), newItem);
+	}
+
+	private void removeDestination(int index) {
+		itineraryItems.remove(itineraryItemList.get(index));
+		itineraryItemList.remove(index);
+	}
+
+	private void insertDestination(int index, ItineraryItem destination) {
+		itineraryItemList.add(index, destination);
+		itineraryItems.insert(destination, index);
+	}
+
+	private void replaceDestination(int index, ItineraryItem destination) {
+		removeDestination(index);
+		insertDestination(index, destination);
 	}
 
 	@Override
@@ -324,35 +343,50 @@ public final class Itinerary extends Activity implements OnClickListener {
 		case GET_NEW_DESTINATION:
 			if (resultCode == Activity.RESULT_OK) {
 				ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
-				UpdateArrivalDepartureTimes(newDestination);
+				updateArrivalDepartureTimes(newDestination);
 			}
 			break;
-		case UPDATE_DESTINATION_SCHEDULE:
+		case ADD_DESTINATION:
 			if (resultCode == Activity.RESULT_OK) {
 				ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
 				appendDestination(scheduledDestination);
+			}
+			break;
+		case UPDATE_DESTINATION:
+			if (resultCode == Activity.RESULT_OK) {
+				ItineraryItem updatedDestination = (ItineraryItem) data.getParcelableExtra("destination");
+
+				if (selectedItemPosition != -1) {
+					replaceDestination(selectedItemPosition, updatedDestination);
+				}
+
+				selectedItemPosition = -1;
+
+				Itinerary.this.runOnUiThread(new ItineraryUpdater());
 			}
 			break;
 		default:
 		}
 	}
 
-	private void UpdateArrivalDepartureTimes(ItineraryItem newDestination) {
+	private void updateArrivalDepartureTimes(ItineraryItem newDestination) {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 		Calendar arrivalTimeCalculator = Calendar.getInstance();
-		if (!itineraryItemList.isEmpty()) {
-			ItineraryItem lastDestination = getFinalDestination();
-			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
-			// arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+		if (!itineraryItemList.contains(newDestination)) {
+			if (!itineraryItemList.isEmpty()) {
+				ItineraryItem lastDestination = getFinalDestination();
+				arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
+				arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+			} else {
+				arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+			}
+			newDestination.getSchedule().setArrivalTime(arrivalTimeCalculator.getTime());
+			startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
+			startActivityForResult(startDestinationSchedule, ADD_DESTINATION);
 		} else {
-			// arrivalTimeCalculator.setTimeInMillis(arrivalTimeCalculator.getTimeInMillis() + (newDestination.getTravelDuration() * 1000));
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+			startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
+			startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION);
 		}
-		newDestination.getSchedule().setArrivalTime(arrivalTimeCalculator.getTime());
-
-		startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
-		startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION_SCHEDULE);
 	}
 
 	public void onClick(View v) {

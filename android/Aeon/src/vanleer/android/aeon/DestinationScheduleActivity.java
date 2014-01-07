@@ -112,8 +112,16 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		timePickerDuration.setVisibility(wantVisible(checkBoxDuration));
 		checkBoxLastChecked = checkBoxDuration;
 
-		timePickerDuration.setCurrentHour(DEFAULT_DURATION_HOUR);
-		timePickerDuration.setCurrentMinute(DEFAULT_DURATION_MIN);
+		if (destination.getSchedule().getStayDuration() >= 0) {
+			long duration = destination.getSchedule().getStayDuration();
+			int hours = (int) (duration / 3600);
+			int minutes = (int) ((duration - (hours * 3600)) / 60);
+			timePickerDuration.setCurrentHour(hours);
+			timePickerDuration.setCurrentMinute(minutes);
+		} else {
+			timePickerDuration.setCurrentHour(DEFAULT_DURATION_HOUR);
+			timePickerDuration.setCurrentMinute(DEFAULT_DURATION_MIN);
+		}
 	}
 
 	private void InitalizeDepartureControls() {
@@ -125,9 +133,15 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		timePickerDepartureTime.setVisibility(wantVisible(checkBoxDepartureTime));
 
 		Calendar departureTimeCalculator = Calendar.getInstance();
-		departureTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
-		departureTimeCalculator.add(Calendar.HOUR_OF_DAY, DEFAULT_DURATION_HOUR);
-		departureTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
+
+		if (destination.getSchedule().getDepartureTime() != null) {
+			departureTimeCalculator.setTime(destination.getSchedule().getDepartureTime());
+		} else {
+			departureTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
+			departureTimeCalculator.add(Calendar.HOUR_OF_DAY, DEFAULT_DURATION_HOUR);
+			departureTimeCalculator.add(Calendar.MINUTE, DEFAULT_DURATION_MIN);
+		}
+
 		timePickerDepartureTime.setCurrentHour(departureTimeCalculator.get(Calendar.HOUR_OF_DAY));
 		timePickerDepartureTime.setCurrentMinute(departureTimeCalculator.get(Calendar.MINUTE));
 	}
@@ -198,7 +212,11 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 
 	private void calculateScheduling() {
 		Calendar timeConverter = Calendar.getInstance();
-		timeConverter.setTime(destination.getSchedule().getArrivalTime());
+		if (destination.getSchedule().getArrivalTime() != null) {
+			timeConverter.setTime(destination.getSchedule().getArrivalTime());
+		} else if (destination.getSchedule().getArrivalTime() != null) {
+			timeConverter.setTime(destination.getSchedule().getDepartureTime());
+		}
 
 		if (checkBoxArrivalTime.isChecked()) {
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerArrivalTime.getCurrentHour());
