@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import java.lang.Math;
 
 import org.apache.http.HttpResponse;
@@ -22,6 +23,7 @@ import org.json.simple.JSONValue;
 
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
@@ -266,24 +268,43 @@ public final class GooglePlacesSearch {
 		return PerformHttpGet(url);
 	}
 
-	private JSONObject PerformHttpGet(String url) {
+	private JSONObject PerformHttpGet(final String url) {
+		AsyncTask<String, Void, JSONObject> get = new AsyncTask<String, Void, JSONObject>() {
+			@Override
+			protected JSONObject doInBackground(String... arg0) {
+				JSONObject jsonResponse = null;
+				try {
+					HttpClient httpClient = new DefaultHttpClient();
+					HttpResponse response = httpClient.execute(new HttpGet(url));
+					StatusLine statusLine = response.getStatusLine();
+					if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+						InputStream inStream = response.getEntity().getContent();
+						BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
+						jsonResponse = (JSONObject) JSONValue.parse(reader);
+					}
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return jsonResponse;
+			}
+		};
+		get.execute(url);
+
 		JSONObject jsonResponse = null;
 		try {
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpResponse response = httpClient.execute(new HttpGet(url));
-			StatusLine statusLine = response.getStatusLine();
-			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-				InputStream inStream = response.getEntity().getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
-				jsonResponse = (JSONObject) JSONValue.parse(reader);
-			}
-		} catch (ClientProtocolException e) {
+			jsonResponse = get.get();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		return jsonResponse;
 	}
 
