@@ -65,7 +65,7 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public ItineraryItem(Location myLocation, Location previousLocation) {
-		updateLocation(myLocation);
+		this(myLocation);
 		// TODO: Something with previous location
 	}
 
