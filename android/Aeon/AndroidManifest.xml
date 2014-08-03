@@ -16,9 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Itinerary" android:label="@string/itinerary_title" />
-        <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" />
-        <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" />
+        <activity android:name=".Itinerary" android:label="@string/itinerary_title" android:configChanges="orientation" />
+        <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" android:configChanges="orientation" />
+        <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" android:configChanges="orientation" />
     </application>
     
 </manifest>
