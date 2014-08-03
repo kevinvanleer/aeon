@@ -45,7 +45,8 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				}
 
 				// TODO: Get type of transportation used
-				travelDistance.setText("Drive/Walk/Bike/Ride " + item.getFormattedDistance());
+				// travelDistance.setText("Drive/Walk/Bike/Ride " + item.getFormattedDistance());
+				travelDistance.setText("Drive " + item.getFormattedDistance());
 				travelTime.setText(" in " + item.getTravelDurationLongFormat());
 				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
 				arrivalTime.setText(" at " + item.getSchedule().getArrivalTimeString());

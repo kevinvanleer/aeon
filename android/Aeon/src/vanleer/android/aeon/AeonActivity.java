@@ -17,8 +17,8 @@ public class AeonActivity extends Activity implements OnClickListener {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		// planButton = (Button) findViewById(R.id.button_plan);
-		// planButton.setOnClickListener(this);
+		planButton = (Button) findViewById(R.id.button_plan);
+		planButton.setOnClickListener(this);
 
 		// Bypass main menu -- since only one button is programmed
 		Intent startItineraryOpen = new Intent(AeonActivity.this, Itinerary.class);

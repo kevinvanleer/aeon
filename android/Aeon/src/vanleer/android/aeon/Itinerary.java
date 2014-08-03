@@ -49,9 +49,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		setContentView(R.layout.itinerary);
 
 		// FOR TESTING
-		currentLocation = new Location("test");
-		currentLocation.setLatitude(38.477548);
-		currentLocation.setLongitude(-91.051562);
+		// currentLocation = new Location("test");
+		// currentLocation.setLatitude(38.477548);
+		// currentLocation.setLongitude(-91.051562);
 		// FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
