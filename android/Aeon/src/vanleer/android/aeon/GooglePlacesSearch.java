@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.lang.Math;
 
@@ -21,6 +22,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -33,11 +36,12 @@ public final class GooglePlacesSearch {
 	private String apiKey = null;
 	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
 	private final ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
+	private final Geocoder externalGeocoder;
 	private static final ArrayList<String> placeTypes = new ArrayList<String>();
 
-	GooglePlacesSearch(String userApiKey, String userClientId) {
+	GooglePlacesSearch(Geocoder geocoder, String userApiKey, String userClientId) {
 		apiKey = userApiKey;
-
+		externalGeocoder = geocoder;
 		if (placeTypes.isEmpty()) {
 			InitializePlaceTypes();
 		}
@@ -212,20 +216,25 @@ public final class GooglePlacesSearch {
 	}
 
 	private void PerformGeocodingSearch(String address, boolean sensor) {
-		String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor;
-		JSONObject geocodingSearchResults = PerformHttpGet(url);
+		/*
+		 * String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor; JSONObject geocodingSearchResults = PerformHttpGet(url);
+		 */
+		List<Address> geocodingSearchResults = null;
+		try {
+			geocodingSearchResults = externalGeocoder.getFromLocationName(address, 10);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		AddGeocodingResults(geocodingSearchResults);
 	}
 
-	private void AddGeocodingResults(JSONObject geocodingSearchResults) {
+	private void AddGeocodingResults(List<Address> geocodingSearchResults) {
 		if (geocodingSearchResults != null) {
-			JSONArray geocodeResultArray = (JSONArray) geocodingSearchResults.get("results");
-			if (geocodeResultArray != null) {
-				for (int index = 0; index < geocodeResultArray.size(); ++index) {
-					JSONObject place = (JSONObject) geocodeResultArray.get(index);
-					if (place != null) {
-						places.add(new ItineraryItem(place));
-					}
+			if (!geocodingSearchResults.isEmpty()) {
+				for (int index = 0; index < geocodingSearchResults.size(); ++index) {
+					Address place = geocodingSearchResults.get(index);
+					places.add(new ItineraryItem(place));
 				}
 			}
 		}
@@ -239,33 +248,42 @@ public final class GooglePlacesSearch {
 	public String getReverseGeocodeDescription(final Location location, Boolean sensor) {
 		String bestDescription = "Address unknown";
 
-		JSONObject placemark = getBestReverseGeocodeResult(location, sensor);
+		Address placemark = getBestReverseGeocodeResult(location, sensor);
 		if (placemark != null) {
-			bestDescription = (String) placemark.get("formatted_address");
+			// bestDescription = (String) placemark.get("formatted_address");
+			if (placemark.getMaxAddressLineIndex() >= 0) {
+				bestDescription = placemark.getAddressLine(0) + ", ";
+			}
+			bestDescription += placemark.getLocality();
 		}
 
 		return bestDescription;
 	}
 
-	public JSONObject getBestReverseGeocodeResult(final Location location, Boolean sensor) {
-		JSONObject placemark = null;
-
-		JSONObject placemarks = getReverseGeocodeResults(location, sensor);
-		if (placemarks != null) {
-			JSONArray resultArray = (JSONArray) placemarks.get("results");
-			if (resultArray != null) {
-				if (resultArray.size() > 0) {
-					placemark = (JSONObject) resultArray.get(0);
-				}
-			}
+	public Address getBestReverseGeocodeResult(final Location location, Boolean sensor) {
+		/*
+		 * JSONObject placemark = null; JSONObject placemarks = getReverseGeocodeResults(location, sensor); if (placemarks != null) { JSONArray resultArray = (JSONArray) placemarks.get("results"); if (resultArray != null) { if (resultArray.size() > 0) { placemark = (JSONObject) resultArray.get(0); } } } return placemark;
+		 */
+		Address placemark = null;
+		List<Address> addresses = getReverseGeocodeResults(location, sensor);
+		if (addresses.size() > 0) {
+			placemark = getReverseGeocodeResults(location, sensor).get(0);
 		}
 
 		return placemark;
 	}
 
-	public JSONObject getReverseGeocodeResults(final Location location, Boolean sensor) {
-		String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
-		return PerformHttpGet(url);
+	public List<Address> getReverseGeocodeResults(final Location location, Boolean sensor) {
+		List<Address> addressList = null;
+		try {
+			addressList = externalGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return addressList;
+		// String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
+		// return PerformHttpGet(url);
 	}
 
 	private JSONObject PerformHttpGet(final String url) {

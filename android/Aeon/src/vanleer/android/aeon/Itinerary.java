@@ -1,12 +1,17 @@
 package vanleer.android.aeon;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,6 +47,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryItem origin = null;
 	private ItineraryItem addNewItemItem = null;
 	private int selectedItemPosition = -1;
+	private Geocoder theGeocoder;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item, itineraryItemList);
 		itineraryListView = (ListView) findViewById(listViewId);
 		itineraryListView.setAdapter(itineraryItems);
+
+		// TODO: Use this to verify location service is available
+		// GooglePlayServicesUtil.isGooglePlayServicesAvailable();
+
+		theGeocoder = new Geocoder(this);
 
 		// Acquire a reference to the system Location Manager
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -222,7 +233,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateOrigin() {
 		origin.getSchedule().setDepartureTime(new Date());
 		if (currentLocation != null) {
-			origin.updateLocation(currentLocation);
+			origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
 		}
 		itineraryItems.notifyDataSetChanged();
 	}
@@ -243,7 +254,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		departNow.setDepartureTime(new Date());
 		origin.setSchedule(departNow);
 		if (currentLocation != null) {
-			origin.updateLocation(currentLocation);
+			origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
 		}
 		itineraryItemList.add(0, origin);
 		itineraryItems.insert(itineraryItemList.get(0), 0);
@@ -278,6 +289,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}.start();
 	}
 
+	private Address getLocationAddress(Location location) {
+		Address theAddress = null;
+		try {
+			theAddress = theGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1).get(0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return theAddress;
+	}
+
 	private void GetMyLocationInfo() {
 		if (currentLocation == null) {
 			waitForGps();
@@ -288,9 +310,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			try {
 				ItineraryItem lastDestination = getFinalDestination();
-				myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation());
+				myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation(), getLocationAddress(currentLocation));
 			} catch (IllegalStateException e) {
-				myLocation = new ItineraryItem(currentLocation);
+				myLocation = new ItineraryItem(currentLocation, getLocationAddress(currentLocation));
 			}
 
 			updateArrivalDepartureTimes(myLocation);

@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -45,6 +46,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private boolean searching = false;
 	private final Long searchRadius = (long) 5000000;
 	private UnfilteredArrayAdapter<String> suggestionList;
+	private Geocoder geocoder;
 
 	// 4812 Danielle CT Granite City IL 62040 38.74419380,-90.09839319999999
 	// lat=38.74419380
@@ -77,7 +79,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private void InitializeMembers() {
 		locationSensorImage = (ImageView) findViewById(R.id.imageView_currentLocation);
 		locationSensorImage.setVisibility(View.INVISIBLE);
-		googleSearch = new GooglePlacesSearch(apiKey, "");
+		geocoder = new Geocoder(this);
+		googleSearch = new GooglePlacesSearch(geocoder, apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
 		locationText.setText("Waiting for location...");
 		searchButton = (ImageButton) findViewById(R.id.imageButton_search);

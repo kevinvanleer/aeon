@@ -10,6 +10,7 @@ import vanleer.util.DistanceUnit;
 import vanleer.util.TimeFormat;
 
 import android.location.Location;
+import android.location.Address;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -17,6 +18,7 @@ public final class ItineraryItem implements Parcelable {
 	public DistanceUnit distanceUnit = DistanceUnit.MILES;
 	private JSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
+	private Address geocodingAddress = null;
 	private JSONObject googleDistanceMatrixResult = null;
 	private Location location;
 	private Long travelDurationSec;
@@ -27,6 +29,13 @@ public final class ItineraryItem implements Parcelable {
 	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
 	private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
+
+	public ItineraryItem(Address address) {
+		geocodingAddress = address;
+		name = getGeocodingName();
+		setLocation();
+		phoneNumber = "NONE";
+	}
 
 	public ItineraryItem(JSONObject searchResult) {
 		if (isGeocodingResult(searchResult)) {
@@ -55,8 +64,8 @@ public final class ItineraryItem implements Parcelable {
 		readFromParcel(in);
 	}
 
-	public ItineraryItem(Location myLocation) {
-		updateLocation(myLocation);
+	public ItineraryItem(Location myLocation, Address locationAddress) {
+		updateLocation(myLocation, locationAddress);
 		travelDurationSec = (long) 0;
 		distance = (long) 0;
 		times = null;
@@ -64,18 +73,21 @@ public final class ItineraryItem implements Parcelable {
 		phoneNumber = "NONE";
 	}
 
-	public ItineraryItem(Location myLocation, Location previousLocation) {
-		this(myLocation);
+	public ItineraryItem(Location myLocation, Location previousLocation, Address locationAddress) {
+		this(myLocation, locationAddress);
 		// TODO: Something with previous location
 	}
 
-	void updateLocation(Location newLocation) {
+	void updateLocation(Location newLocation, Address locationAddress) {
 		if (newLocation == null) {
 			throw new NullPointerException();
 		}
-		GooglePlacesSearch googleSearch = new GooglePlacesSearch(API_KEY, "");
+		if (locationAddress == null) {
+			throw new NullPointerException();
+		}
+
+		geocodingAddress = locationAddress;
 		location = newLocation;
-		googleGeocodingResult = googleSearch.getBestReverseGeocodeResult(location, true);
 		name = getGeocodingName();
 	}
 
@@ -88,6 +100,7 @@ public final class ItineraryItem implements Parcelable {
 
 	private void readFromParcel(Parcel in) {
 		googlePlaceResult = (JSONObject) in.readSerializable();
+		geocodingAddress = in.readParcelable(null);
 		googleGeocodingResult = (JSONObject) in.readSerializable();
 		googleDistanceMatrixResult = (JSONObject) in.readSerializable();
 		location = in.readParcelable(null);
@@ -101,6 +114,7 @@ public final class ItineraryItem implements Parcelable {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeSerializable(googlePlaceResult);
+		dest.writeParcelable(geocodingAddress, flags);
 		dest.writeSerializable(googleGeocodingResult);
 		dest.writeSerializable(googleDistanceMatrixResult);
 		dest.writeParcelable(location, flags);
@@ -132,7 +146,25 @@ public final class ItineraryItem implements Parcelable {
 		String establishment = "";
 		String addressName = "Address unknown";
 
-		if (googleGeocodingResult != null) {
+		if (geocodingAddress != null) {
+			// if (geocodingAddress.getFeatureName() != null) {
+			// addressName = geocodingAddress.getFeatureName();
+			if (geocodingAddress.getMaxAddressLineIndex() >= 1) {
+				addressName = geocodingAddress.getAddressLine(0);
+				addressName += ", " + geocodingAddress.getAddressLine(1);
+				// addressName += ", " + geocodingAddress.getAddressLine(2);
+			} else {
+				if (geocodingAddress.getMaxAddressLineIndex() >= 0) {
+					addressName = geocodingAddress.getAddressLine(0);
+				}
+				if (geocodingAddress.getLocality() != null) {
+					addressName += ", " + geocodingAddress.getLocality();
+				}
+				if (geocodingAddress.getAdminArea() != null) {
+					addressName += ", " + geocodingAddress.getAdminArea();
+				}
+			}
+		} else if (googleGeocodingResult != null) {
 			JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
 			for (int i = 0; i < addressComponents.size(); ++i) {
 				JSONObject addressComponent = (JSONObject) addressComponents.get(i);
@@ -170,6 +202,8 @@ public final class ItineraryItem implements Parcelable {
 
 		if (googlePlaceResult != null) {
 			vicinity = getPlaceVicinity();
+		} else if (geocodingAddress != null) {
+			vicinity = getGeocodingVicinity();
 		} else if (googleGeocodingResult != null) {
 			vicinity = getGeocodingVicinity();
 		} else {
@@ -180,33 +214,35 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	private String getGeocodingVicinity() {
-		if (googleGeocodingResult == null) {
-			// TODO: fail gracefully
-		}
+		String vicinity = null;
 
-		String city = "";
-		String state = "";
-		String zipCode = "";
-
-		JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
-		for (int i = 0; i < addressComponents.size(); ++i) {
-			JSONObject addressComponent = (JSONObject) addressComponents.get(i);
-			if (addressComponent != null) {
-				JSONArray componentTypes = (JSONArray) addressComponent.get("types");
-				for (int j = 0; j < componentTypes.size(); ++j) {
-					String componentType = (String) componentTypes.get(j);
-					if (componentType.equals("locality") || componentType.equals("sublocality")) {
-						city = (String) addressComponent.get("long_name");
-					} else if (componentType.equals("administrative_area_level_1")) {
-						state = (String) addressComponent.get("short_name");
-					} else if (componentType.equals("postal_code")) {
-						zipCode = (String) addressComponent.get("long_name");
+		if (geocodingAddress != null) {
+			vicinity = geocodingAddress.getAddressLine(1);
+		} else if (googleGeocodingResult != null) {
+			String city = "";
+			String state = "";
+			String zipCode = "";
+			JSONArray addressComponents = (JSONArray) googleGeocodingResult.get("address_components");
+			for (int i = 0; i < addressComponents.size(); ++i) {
+				JSONObject addressComponent = (JSONObject) addressComponents.get(i);
+				if (addressComponent != null) {
+					JSONArray componentTypes = (JSONArray) addressComponent.get("types");
+					for (int j = 0; j < componentTypes.size(); ++j) {
+						String componentType = (String) componentTypes.get(j);
+						if (componentType.equals("locality") || componentType.equals("sublocality")) {
+							city = (String) addressComponent.get("long_name");
+						} else if (componentType.equals("administrative_area_level_1")) {
+							state = (String) addressComponent.get("short_name");
+						} else if (componentType.equals("postal_code")) {
+							zipCode = (String) addressComponent.get("long_name");
+						}
 					}
 				}
 			}
+			vicinity = (city + ", " + state + " " + zipCode).trim();
 		}
 
-		return (city + ", " + state + " " + zipCode).trim();
+		return vicinity;
 	}
 
 	private String getPlaceVicinity() {
@@ -231,13 +267,17 @@ public final class ItineraryItem implements Parcelable {
 
 	private void setGeocodingLocation() {
 		location = new Location("Google Geocoding");
-
-		JSONObject jsonGeometry = (JSONObject) googleGeocodingResult.get("geometry");
-		if (jsonGeometry != null) {
-			JSONObject jsonLocation = (JSONObject) jsonGeometry.get("location");
-			if (jsonLocation != null) {
-				location.setLatitude((Double) jsonLocation.get("lat"));
-				location.setLongitude((Double) jsonLocation.get("lng"));
+		if (geocodingAddress != null) {
+			location.setLatitude(geocodingAddress.getLatitude());
+			location.setLongitude(geocodingAddress.getLongitude());
+		} else if (googleGeocodingResult != null) {
+			JSONObject jsonGeometry = (JSONObject) googleGeocodingResult.get("geometry");
+			if (jsonGeometry != null) {
+				JSONObject jsonLocation = (JSONObject) jsonGeometry.get("location");
+				if (jsonLocation != null) {
+					location.setLatitude((Double) jsonLocation.get("lat"));
+					location.setLongitude((Double) jsonLocation.get("lng"));
+				}
 			}
 		}
 	}
