@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import vanleer.util.TimeFormat;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

@@ -28,7 +28,8 @@ public final class ItineraryItem implements Parcelable {
 	private String phoneNumber;
 	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
-	private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
+
+	// private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 
 	public ItineraryItem(Address address) {
 		geocodingAddress = address;
@@ -83,6 +84,7 @@ public final class ItineraryItem implements Parcelable {
 			throw new NullPointerException();
 		}
 		if (locationAddress == null) {
+			// TODO: This requires every location to have an address
 			throw new NullPointerException();
 		}
 
