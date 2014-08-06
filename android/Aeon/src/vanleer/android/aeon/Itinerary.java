@@ -233,7 +233,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateOrigin() {
 		origin.getSchedule().setDepartureTime(new Date());
 		if (currentLocation != null) {
-			origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+			try {
+				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+			} catch (NullPointerException e) {
+				// TODO Address was null
+			}
 		}
 		itineraryItems.notifyDataSetChanged();
 	}
@@ -254,7 +258,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		departNow.setDepartureTime(new Date());
 		origin.setSchedule(departNow);
 		if (currentLocation != null) {
-			origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+			try {
+				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+			} catch (NullPointerException e) {
+				// TODO Address was null
+			}
 		}
 		itineraryItemList.add(0, origin);
 		itineraryItems.insert(itineraryItemList.get(0), 0);
@@ -292,7 +300,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private Address getLocationAddress(Location location) {
 		Address theAddress = null;
 		try {
-			theAddress = theGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1).get(0);
+			List<Address> addresses = theGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+			if (!addresses.isEmpty()) theAddress = addresses.get(0);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
