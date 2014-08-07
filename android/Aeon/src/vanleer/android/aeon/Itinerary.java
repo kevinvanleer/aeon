@@ -236,7 +236,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			try {
 				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
 			} catch (NullPointerException e) {
-				// TODO Address was null
+				// TODO Location was null
 			}
 		}
 		itineraryItems.notifyDataSetChanged();
@@ -261,7 +261,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			try {
 				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
 			} catch (NullPointerException e) {
-				// TODO Address was null
+				// TODO Location was null
 			}
 		}
 		itineraryItemList.add(0, origin);

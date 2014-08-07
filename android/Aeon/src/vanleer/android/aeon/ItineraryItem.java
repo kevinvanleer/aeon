@@ -84,13 +84,14 @@ public final class ItineraryItem implements Parcelable {
 			throw new NullPointerException();
 		}
 		if (locationAddress == null) {
-			// TODO: This requires every location to have an address
-			throw new NullPointerException();
+			geocodingAddress = null;
+			name = "Address unknown";
+		} else {
+			geocodingAddress = locationAddress;
+			name = getGeocodingName();
 		}
 
-		geocodingAddress = locationAddress;
 		location = newLocation;
-		name = getGeocodingName();
 	}
 
 	public void updateSchedule(Date departureTime) {
@@ -136,6 +137,10 @@ public final class ItineraryItem implements Parcelable {
 		}
 
 		return isGeocodingResult;
+	}
+
+	String setName(final String userDefinedName) {
+		return name = userDefinedName;
 	}
 
 	String getName() {
