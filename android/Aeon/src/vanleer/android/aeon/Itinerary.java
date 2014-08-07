@@ -131,7 +131,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	class ItineraryUpdater implements Runnable {
 		public void run() {
-			updateTimes();
+			if (origin.atLocation()) {
+				updateTimes();
+			}
 		}
 	}
 
@@ -281,13 +283,15 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	void updateTimes() {
-		origin.getSchedule().setDepartureTime(new Date());
+		if (origin.getSchedule().getDepartureTime().before(new Date())) {
+			origin.getSchedule().setDepartureTime(new Date());
 
-		for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
-			itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
+			for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
+				itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
+			}
+
+			itineraryItems.notifyDataSetChanged();
 		}
-
-		itineraryItems.notifyDataSetChanged();
 	}
 
 	private void initializeOrigin() {

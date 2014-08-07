@@ -28,9 +28,9 @@ public final class ItineraryItem implements Parcelable {
 	private String phoneNumber;
 	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
-	boolean enRoute = false;
-	boolean atLocation = false;
-	boolean locationExpired = false;
+	private boolean enRoute = false;
+	private boolean atLocation = false;
+	private boolean locationExpired = false;
 
 	// private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 
