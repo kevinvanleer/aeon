@@ -166,8 +166,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		currentLocation = location;
-		updateOrigin();
+		if (currentLocation == null) {
+			currentLocation = location;
+			updateOrigin();
+		}
 		if (waitingForGps) {
 			waitingForGps = false;
 		}
@@ -201,6 +203,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		case R.id.submenu_item_clear_itinerary_yes:
 			itineraryItems.clear();
 			itineraryItemList.clear();
+			initializeOrigin();
+			initializeAddNewItineraryItem();
 			break;
 		case R.id.menu_item_clear_itinerary:
 		case R.id.submenu_item_clear_itinerary_no:
