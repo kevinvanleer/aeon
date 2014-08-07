@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
@@ -40,6 +42,8 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView travelDistance = (TextView) v.findViewById(R.id.textView_travelDistance);
 				TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
 
+				setBackgroud(v, item);
+
 				if (defaultColors == null) {
 					defaultColors = destinationName.getTextColors();
 				}
@@ -54,6 +58,15 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				stayDuration.setText(" for " + item.getSchedule().getStayDurationLongFormat());
 				departureVicinity.setText("Depart from " + item.GetVicinity());
 				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
+
+				travelDistance.setEnabled(!item.locationExpired());
+				travelTime.setEnabled(!item.locationExpired());
+				arrivalVicinity.setEnabled(!item.locationExpired());
+				arrivalTime.setEnabled(!item.locationExpired());
+				destinationName.setEnabled(!item.locationExpired());
+				stayDuration.setEnabled(!item.locationExpired());
+				departureVicinity.setEnabled(!item.locationExpired());
+				departureTime.setEnabled(!item.locationExpired());
 
 				travelDistance.setVisibility(View.VISIBLE);
 				travelTime.setVisibility(View.VISIBLE);
@@ -75,8 +88,6 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);
 
-					// destinationName.setTextColor(Color.BLACK);
-					// destinationName.setBackgroundColor(Color.WHITE);
 				} else if (position == 0) {
 					arrivalVicinity.setVisibility(View.GONE);
 					arrivalTime.setVisibility(View.GONE);
@@ -98,5 +109,29 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		}
 
 		return v;
+	}
+
+	private void setBackgroud(View v, ItineraryItem item) {
+		TableRow travelInfoRow = (TableRow) v.findViewById(R.id.travelInfo);
+		TableRow arrivalInfoRow = (TableRow) v.findViewById(R.id.arrivalInfo);
+		TableRow destinationInfoRow = (TableRow) v.findViewById(R.id.destinationInfo);
+		TableRow departureInfoRow = (TableRow) v.findViewById(R.id.departureInfo);
+
+		if (item.enRoute()) {
+			// Apply gradients like this: http://stackoverflow.com/questions/6115715/how-do-i-programmatically-set-the-background-color-gradient-on-a-custom-title-ba
+			travelInfoRow.setBackgroundColor(Color.BLUE);
+		} else {
+			travelInfoRow.setBackgroundColor(Color.BLACK);
+		}
+
+		if (item.atLocation()) {
+			arrivalInfoRow.setBackgroundColor(Color.BLUE);
+			destinationInfoRow.setBackgroundColor(Color.BLUE);
+			departureInfoRow.setBackgroundColor(Color.BLUE);
+		} else {
+			arrivalInfoRow.setBackgroundColor(Color.BLACK);
+			destinationInfoRow.setBackgroundColor(Color.BLACK);
+			departureInfoRow.setBackgroundColor(Color.BLACK);
+		}
 	}
 }

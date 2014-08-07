@@ -28,6 +28,9 @@ public final class ItineraryItem implements Parcelable {
 	private String phoneNumber;
 	private String name;
 	private static final double MILES_PER_METER = 0.00062137119;
+	boolean enRoute = false;
+	boolean atLocation = false;
+	boolean locationExpired = false;
 
 	// private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 
@@ -113,6 +116,7 @@ public final class ItineraryItem implements Parcelable {
 		times = in.readParcelable(Schedule.class.getClassLoader());
 		phoneNumber = in.readString();
 		name = in.readString();
+		locationExpired = in.readByte() != 0;
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
@@ -127,6 +131,7 @@ public final class ItineraryItem implements Parcelable {
 		dest.writeParcelable(getSchedule(), flags);
 		dest.writeString(phoneNumber);
 		dest.writeString(name);
+		dest.writeByte((byte) (locationExpired ? 1 : 0));
 	}
 
 	private boolean isGeocodingResult(JSONObject result) {
@@ -139,12 +144,42 @@ public final class ItineraryItem implements Parcelable {
 		return isGeocodingResult;
 	}
 
-	String setName(final String userDefinedName) {
+	public String setName(final String userDefinedName) {
 		return name = userDefinedName;
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
+	}
+
+	public boolean enRoute() {
+		return enRoute;
+	}
+
+	public void setEnRoute() {
+		enRoute = true;
+		atLocation = !enRoute;
+		locationExpired = !enRoute;
+	}
+
+	public boolean atLocation() {
+		return atLocation;
+	}
+
+	public void setAtLocation() {
+		atLocation = true;
+		enRoute = !atLocation;
+		locationExpired = !atLocation;
+	}
+
+	public boolean locationExpired() {
+		return locationExpired;
+	}
+
+	public void setLocationExpired() {
+		locationExpired = true;
+		enRoute = !locationExpired;
+		atLocation = !locationExpired;
 	}
 
 	private String getGeocodingName() {

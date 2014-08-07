@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +48,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryItem origin = null;
 	private ItineraryItem addNewItemItem = null;
 	private int selectedItemPosition = -1;
-	private Geocoder theGeocoder;
+	private Geocoder theGeocoder = null;
+	private boolean travelling = false;
+	private int currentDestinationIndex = -1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -166,13 +169,44 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		if (currentLocation == null) {
-			currentLocation = location;
+		currentLocation = location;
+		if (origin.getLocation() == null) {
+			currentDestinationIndex = 0;
 			updateOrigin();
 		}
+
+		updateTravelStatus();
+
 		if (waitingForGps) {
 			waitingForGps = false;
 		}
+	}
+
+	private void updateTravelStatus() {
+		if (travelling) {
+			travelling = !haveArrived();
+			if (!travelling) {
+				itineraryItemList.get(currentDestinationIndex).setAtLocation();
+				itineraryItems.notifyDataSetChanged();
+			}
+		} else {
+			travelling = haveDeparted();
+			if (travelling) {
+				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
+				++currentDestinationIndex;
+				itineraryItemList.get(currentDestinationIndex).setEnRoute();
+				itineraryItems.notifyDataSetChanged();
+				// TODO: Display map
+			}
+		}
+	}
+
+	private boolean haveDeparted() {
+		return !travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) > 100);
+	}
+
+	private boolean haveArrived() {
+		return travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < 50);
 	}
 
 	@Override
@@ -258,6 +292,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void initializeOrigin() {
 		origin = new ItineraryItem("My location (locating...)");
+		origin.setAtLocation();
 		Schedule departNow = new Schedule();
 		departNow.setDepartureTime(new Date());
 		origin.setSchedule(departNow);
@@ -307,8 +342,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			List<Address> addresses = theGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
 			if (!addresses.isEmpty()) theAddress = addresses.get(0);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e("Itinerary", e.getMessage(), e);
 		}
 		return theAddress;
 	}
