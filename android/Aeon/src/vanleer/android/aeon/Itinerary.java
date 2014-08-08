@@ -313,6 +313,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		new Thread() {
 			@Override
 			public void run() {
+				// TODO: Change nextMinute to current location departure time plus one minute
 				Calendar nextMinute = Calendar.getInstance();
 				nextMinute.setTime(new Date());
 				nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);

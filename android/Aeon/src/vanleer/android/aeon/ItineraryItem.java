@@ -116,6 +116,8 @@ public final class ItineraryItem implements Parcelable {
 		times = in.readParcelable(Schedule.class.getClassLoader());
 		phoneNumber = in.readString();
 		name = in.readString();
+		enRoute = in.readByte() != 0;
+		atLocation = in.readByte() != 0;
 		locationExpired = in.readByte() != 0;
 	}
 
@@ -131,6 +133,8 @@ public final class ItineraryItem implements Parcelable {
 		dest.writeParcelable(getSchedule(), flags);
 		dest.writeString(phoneNumber);
 		dest.writeString(name);
+		dest.writeByte((byte) (enRoute ? 1 : 0));
+		dest.writeByte((byte) (atLocation ? 1 : 0));
 		dest.writeByte((byte) (locationExpired ? 1 : 0));
 	}
 
