@@ -29,6 +29,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
@@ -324,8 +325,7 @@ public final class GooglePlacesSearch {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e("GooglePlacesSearch", e.getMessage(), e);
 		}
 
 		return jsonResponse;
