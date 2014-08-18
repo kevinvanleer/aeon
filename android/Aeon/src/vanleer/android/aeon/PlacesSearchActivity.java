@@ -33,7 +33,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private SearchResultItemAdapter searchResults;
 	private ListView searchResultsListView;
 	private final int listViewId = R.id.listView_searchResults;
-	private final String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
+	// private final String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc"; // browser key
+	private final String apiKey = "AIzaSyB1tUOl_uSnOhbfztoaUhMdStYd1R3U3ys"; // android key
 	private Location currentLocation = null;
 	private ImageButton searchButton;
 	private TextView locationText;
@@ -162,19 +163,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private void ConfigureTextWatcher() {
 		searchText.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(final CharSequence s, int start, int before, int count) {
-				if (s.length() > 1) {
-					new AsyncTask<CharSequence, Void, ArrayList<String>>() {
-						@Override
-						protected ArrayList<String> doInBackground(CharSequence... arg0) {
-							return performAutocompleteSearch(s);
-						}
-
-						@Override
-						protected void onPostExecute(ArrayList<String> suggestions) {
-							updateAutocompleteChoices(suggestions);
-						}
-					}.execute(s);
-				}
+				/*
+				 * if (s.length() > 1) { new AsyncTask<CharSequence, Void, ArrayList<String>>() {
+				 * @Override protected ArrayList<String> doInBackground(CharSequence... arg0) { return performAutocompleteSearch(s); }
+				 * @Override protected void onPostExecute(ArrayList<String> suggestions) { updateAutocompleteChoices(suggestions); } }.execute(s); }
+				 */
 			}
 
 			public void afterTextChanged(Editable s) {
