@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +42,6 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				TextView departureTime = (TextView) v.findViewById(R.id.textView_departureTime);
 				TextView travelDistance = (TextView) v.findViewById(R.id.textView_travelDistance);
 				TextView travelTime = (TextView) v.findViewById(R.id.textView_travelTime);
-
-				setBackgroud(v, item);
 
 				if (defaultColors == null) {
 					defaultColors = destinationName.getTextColors();
@@ -105,6 +104,8 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				} else {
 
 				}
+
+				setBackgroud(v, item);
 			}
 		}
 
@@ -117,17 +118,29 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		TableRow destinationInfoRow = (TableRow) v.findViewById(R.id.destinationInfo);
 		TableRow departureInfoRow = (TableRow) v.findViewById(R.id.departureInfo);
 
+		GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[] { 0xff0b4496, 0xff000000 });
+		// gd.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+
 		if (item.enRoute()) {
 			// Apply gradients like this: http://stackoverflow.com/questions/6115715/how-do-i-programmatically-set-the-background-color-gradient-on-a-custom-title-ba
-			travelInfoRow.setBackgroundColor(Color.BLUE);
+
+			// float vcenter = (float) (travelInfoRow.getHeight() / 2.);
+			// float hcenter = (float) (travelInfoRow.getWidth() * 0.01);
+			// gd.setGradientCenter(hcenter, vcenter);
+
+			// travelInfoRow.setBackgroundColor(Color.BLUE);
+			travelInfoRow.setBackgroundDrawable(gd);
 		} else {
 			travelInfoRow.setBackgroundColor(Color.BLACK);
 		}
 
 		if (item.atLocation()) {
-			arrivalInfoRow.setBackgroundColor(Color.BLUE);
-			destinationInfoRow.setBackgroundColor(Color.BLUE);
-			departureInfoRow.setBackgroundColor(Color.BLUE);
+			arrivalInfoRow.setBackgroundDrawable(gd);
+			destinationInfoRow.setBackgroundDrawable(gd);
+			departureInfoRow.setBackgroundDrawable(gd);
+			// arrivalInfoRow.setBackgroundColor(Color.BLUE);
+			// destinationInfoRow.setBackgroundColor(Color.BLUE);
+			// departureInfoRow.setBackgroundColor(Color.BLUE);
 		} else {
 			arrivalInfoRow.setBackgroundColor(Color.BLACK);
 			destinationInfoRow.setBackgroundColor(Color.BLACK);
