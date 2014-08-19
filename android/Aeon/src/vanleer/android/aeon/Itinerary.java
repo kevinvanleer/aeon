@@ -7,6 +7,11 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +20,10 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -137,6 +145,54 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
+	class DepartureReminder implements Runnable {
+		private ItineraryItem origin = null;
+		private ItineraryItem destination = null;
+
+		public DepartureReminder(ItineraryItem origin, ItineraryItem destination) {
+			this.origin = origin;
+			this.destination = destination;
+		}
+
+		public void run() {
+			String message = "Depart from " + origin.getName() + " and head to " + destination.getName() + " at " + origin.getSchedule().getDepartureTimeString();
+
+			Builder timeToGoAlert = new AlertDialog.Builder(Itinerary.this);
+			timeToGoAlert.setMessage(message);
+			timeToGoAlert.setTitle("Reminder");
+			timeToGoAlert.setPositiveButton("ok", null); // CharSequence[] items = { "5", "10", "15", "30" };//timeToGo.setSingleChoiceItems(items, 0, null);
+			timeToGoAlert.show();
+
+			NotificationCompat.Builder timeToGoNotiBuilder = new NotificationCompat.Builder(Itinerary.this);
+			timeToGoNotiBuilder.setContentTitle("Time to leave");
+			String notiMessage = "Depart from " + origin.getName() + " and head to " + destination.getName();
+			timeToGoNotiBuilder.setContentText(notiMessage);
+			timeToGoNotiBuilder.setWhen(origin.getSchedule().getDepartureTime().getTime());
+			timeToGoNotiBuilder.setContentInfo(destination.getFormattedDistance());
+			timeToGoNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
+			timeToGoNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+
+			// TODO: Display either alert or notification not both
+			// TODO: Return to itinerary activity when notification touched
+			// TODO: Manage frequency of notifications/alerts
+
+			Intent result = new Intent(Itinerary.this, Itinerary.class);
+			// TaskStackBuilder stackBuilder = TaskStackBuilder.create(Itinerary.this);
+			// stackBuilder.addParentStack(Itinerary.class);
+			// stackBuilder.addNextIntent(result);
+			// PendingIntent pendingResult = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingResult = PendingIntent.getActivity(Itinerary.this, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
+
+			timeToGoNotiBuilder.setContentIntent(pendingResult);
+
+			// timeToGoNotiBuilder.setLargeIcon(R.drawable.arrive_launcher);
+
+			NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			// TODO: make enum for notification IDs
+			notiMgr.notify(0, timeToGoNotiBuilder.build());
+		}
+	}
+
 	private void configureItineraryListViewLongClickListener() {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -172,7 +228,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	protected void onNewLocation(Location location) {
 		currentLocation = location;
-		if (origin.getLocation() == null) {
+		if (origin.getLocation() == null || itineraryItemList.size() <= 2) {
 			currentDestinationIndex = 0;
 			updateOrigin();
 		}
@@ -196,6 +252,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (travelling) {
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
 				++currentDestinationIndex;
+				if (currentDestinationIndex > (itineraryItemList.size() - 2)) currentDestinationIndex = itineraryItemList.size() - 2;
 				itineraryItemList.get(currentDestinationIndex).setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
@@ -285,13 +342,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	void updateTimes() {
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
 			origin.getSchedule().setDepartureTime(new Date());
-
-			for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
-				itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
-			}
-
-			itineraryItems.notifyDataSetChanged();
 		}
+
+		for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
+			itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
+		}
+
+		itineraryItems.notifyDataSetChanged();
 	}
 
 	private void initializeOrigin() {
@@ -320,6 +377,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 				nextMinute.set(Calendar.SECOND, 0);
 
 				while (true) {
+					if (currentDestinationIndex >= 0) {
+						ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
+						Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
+						fiveMinutesBeforeDeparture.setTime(currentlyAt.getSchedule().getDepartureTime());
+						fiveMinutesBeforeDeparture.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) - 5);
+						if (fiveMinutesBeforeDeparture.getTimeInMillis() < (new Date()).getTime()) {
+							// if ((currentDestinationIndex + 1) < (itineraryItemList.size() - 2)) {
+							Itinerary.this.runOnUiThread(new DepartureReminder(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1)));
+							// }
+						}
+					}
+
 					Calendar now = Calendar.getInstance();
 					now.setTime(new Date());
 					while (now.getTimeInMillis() < nextMinute.getTimeInMillis()) {
@@ -432,6 +501,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				if (selectedItemPosition != -1) {
 					replaceDestination(selectedItemPosition, updatedDestination);
+				}
+
+				if (selectedItemPosition == 0) {
+					origin = updatedDestination;
 				}
 
 				selectedItemPosition = -1;
