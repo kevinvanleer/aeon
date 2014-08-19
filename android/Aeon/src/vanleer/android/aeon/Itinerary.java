@@ -172,7 +172,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	protected void onNewLocation(Location location) {
 		currentLocation = location;
-		if (origin.getLocation() == null) {
+		if (origin.getLocation() == null || itineraryItemList.size() <= 2) {
 			currentDestinationIndex = 0;
 			updateOrigin();
 		}
@@ -196,6 +196,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (travelling) {
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
 				++currentDestinationIndex;
+				if (currentDestinationIndex > (itineraryItemList.size() - 2)) currentDestinationIndex = itineraryItemList.size() - 2;
 				itineraryItemList.get(currentDestinationIndex).setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
@@ -285,13 +286,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	void updateTimes() {
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
 			origin.getSchedule().setDepartureTime(new Date());
-
-			for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
-				itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
-			}
-
-			itineraryItems.notifyDataSetChanged();
 		}
+
+		for (int i = 1; i < (itineraryItemList.size() - 1); ++i) {
+			itineraryItemList.get(i).updateSchedule(itineraryItemList.get(i - 1).getSchedule().getDepartureTime());
+		}
+
+		itineraryItems.notifyDataSetChanged();
 	}
 
 	private void initializeOrigin() {
@@ -432,6 +433,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				if (selectedItemPosition != -1) {
 					replaceDestination(selectedItemPosition, updatedDestination);
+				}
+
+				if (selectedItemPosition == 0) {
+					origin = updatedDestination;
 				}
 
 				selectedItemPosition = -1;
