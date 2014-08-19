@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -105,14 +106,14 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 
 				}
 
-				setBackgroud(v, item);
+				setCurrentItem(v, item);
 			}
 		}
 
 		return v;
 	}
 
-	private void setBackgroud(View v, ItineraryItem item) {
+	private void setCurrentItem(View v, ItineraryItem item) {
 		TableRow travelInfoRow = (TableRow) v.findViewById(R.id.travelInfo);
 		TableRow arrivalInfoRow = (TableRow) v.findViewById(R.id.arrivalInfo);
 		TableRow destinationInfoRow = (TableRow) v.findViewById(R.id.destinationInfo);
@@ -128,8 +129,9 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 			// float hcenter = (float) (travelInfoRow.getWidth() * 0.01);
 			// gd.setGradientCenter(hcenter, vcenter);
 
-			// travelInfoRow.setBackgroundColor(Color.BLUE);
 			travelInfoRow.setBackgroundDrawable(gd);
+			// travelInfoRow.setBackgroundColor(0xff0b4496);
+
 		} else {
 			travelInfoRow.setBackgroundColor(Color.BLACK);
 		}
@@ -138,9 +140,9 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 			arrivalInfoRow.setBackgroundDrawable(gd);
 			destinationInfoRow.setBackgroundDrawable(gd);
 			departureInfoRow.setBackgroundDrawable(gd);
-			// arrivalInfoRow.setBackgroundColor(Color.BLUE);
-			// destinationInfoRow.setBackgroundColor(Color.BLUE);
-			// departureInfoRow.setBackgroundColor(Color.BLUE);
+			// arrivalInfoRow.setBackgroundColor(0xff0b4496);
+			// destinationInfoRow.setBackgroundColor(0xff0b4496);
+			// departureInfoRow.setBackgroundColor(0xff0b4496);
 		} else {
 			arrivalInfoRow.setBackgroundColor(Color.BLACK);
 			destinationInfoRow.setBackgroundColor(Color.BLACK);
