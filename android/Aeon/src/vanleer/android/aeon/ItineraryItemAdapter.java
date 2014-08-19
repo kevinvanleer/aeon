@@ -113,6 +113,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		return v;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void setCurrentItem(View v, ItineraryItem item) {
 		TableRow travelInfoRow = (TableRow) v.findViewById(R.id.travelInfo);
 		TableRow arrivalInfoRow = (TableRow) v.findViewById(R.id.arrivalInfo);
