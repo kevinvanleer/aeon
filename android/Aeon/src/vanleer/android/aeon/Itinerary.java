@@ -7,10 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-
-import android.app.NotificationManager;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,9 +17,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +54,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private Geocoder theGeocoder = null;
 	private boolean travelling = false;
 	private int currentDestinationIndex = -1;
+	private PendingIntent pendingReminder;
+	private AlarmManager alarmManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -80,9 +77,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// GooglePlayServicesUtil.isGooglePlayServicesAvailable();
 
 		theGeocoder = new Geocoder(this);
-
-		// Acquire a reference to the system Location Manager
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+
 		LocationListener locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				// Called when a new location is found by the network location provider.
@@ -144,52 +141,42 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
-	class DepartureReminder implements Runnable {
-		private ItineraryItem origin = null;
-		private ItineraryItem destination = null;
+	private void setDepartureReminder(ItineraryItem origin, ItineraryItem destination) {
+		Intent reminder = new Intent(this, DepartureReminder.class);
+		reminder.putExtra("vanleer.android.aeon.departureReminderOrigin", origin);
+		reminder.putExtra("vanleer.android.aeon.departureReminderDestination", destination);
+		pendingReminder = PendingIntent.getService(this, R.id.departure_reminder_intent, reminder, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		public DepartureReminder(ItineraryItem origin, ItineraryItem destination) {
-			this.origin = origin;
-			this.destination = destination;
-		}
+		Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
+		fiveMinutesBeforeDeparture.setTime(origin.getSchedule().getDepartureTime());
+		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -5);
+		alarmManager.set(AlarmManager.RTC_WAKEUP, fiveMinutesBeforeDeparture.getTimeInMillis(), pendingReminder);
+	}
 
-		public void run() {
-			String message = "Depart from " + origin.getName() + " and head to " + destination.getName() + " at " + origin.getSchedule().getDepartureTimeString();
+	private void setDepartureAlarm(ItineraryItem origin, ItineraryItem destination) {
+		// TODO Auto-generated method stub
 
-			Builder timeToGoAlert = new AlertDialog.Builder(Itinerary.this);
-			timeToGoAlert.setMessage(message);
-			timeToGoAlert.setTitle("Reminder");
-			timeToGoAlert.setPositiveButton("ok", null); // CharSequence[] items = { "5", "10", "15", "30" };//timeToGo.setSingleChoiceItems(items, 0, null);
-			timeToGoAlert.show();
+	}
 
-			NotificationCompat.Builder timeToGoNotiBuilder = new NotificationCompat.Builder(Itinerary.this);
-			timeToGoNotiBuilder.setContentTitle("Time to leave");
-			String notiMessage = "Depart from " + origin.getName() + " and head to " + destination.getName();
-			timeToGoNotiBuilder.setContentText(notiMessage);
-			timeToGoNotiBuilder.setWhen(origin.getSchedule().getDepartureTime().getTime());
-			timeToGoNotiBuilder.setContentInfo(destination.getFormattedDistance());
-			timeToGoNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
-			timeToGoNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+	public void setAlerts(ItineraryItem origin, ItineraryItem destination) {
+		Log.d("Departure Alerts", "Setting alerts for departure from " + origin.getName());
+		setDepartureReminder(origin, destination);
+		setDepartureAlarm(origin, destination);
+	}
 
-			// TODO: Display either alert or notification not both
-			// TODO: Return to itinerary activity when notification touched
-			// TODO: Manage frequency of notifications/alerts
+	public void cancelAlerts() {
+		Log.d("Departure Alerts", "Cancelling current departure alerts");
+		cancelReminder();
+		cancelAlarm();
+	}
 
-			Intent result = new Intent(Itinerary.this, Itinerary.class);
-			// TaskStackBuilder stackBuilder = TaskStackBuilder.create(Itinerary.this);
-			// stackBuilder.addParentStack(Itinerary.class);
-			// stackBuilder.addNextIntent(result);
-			// PendingIntent pendingResult = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-			PendingIntent pendingResult = PendingIntent.getActivity(Itinerary.this, 0, result, PendingIntent.FLAG_UPDATE_CURRENT);
+	private void cancelReminder() {
+		alarmManager.cancel(pendingReminder);
+	}
 
-			timeToGoNotiBuilder.setContentIntent(pendingResult);
+	private void cancelAlarm() {
+		// TODO Auto-generated method stub
 
-			// timeToGoNotiBuilder.setLargeIcon(R.drawable.arrive_launcher);
-
-			NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			// TODO: make enum for notification IDs
-			notiMgr.notify(0, timeToGoNotiBuilder.build());
-		}
 	}
 
 	private void configureItineraryListViewLongClickListener() {
@@ -245,6 +232,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (!travelling) {
 				itineraryItemList.get(currentDestinationIndex).setAtLocation();
 				itineraryItems.notifyDataSetChanged();
+				setAlerts(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1));
 			}
 		} else {
 			travelling = haveDeparted();
@@ -363,8 +351,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// TODO Location was null
 			}
 		}
-		// itineraryItemList.add(0, origin);
-		// itineraryItems.insert(itineraryItemList.get(0), 0);
+
 		insertListItem(origin, 0);
 
 		new Thread() {
@@ -395,20 +382,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 
 			private void doStuff() {
-				ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
-
-				if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
-					Itinerary.this.runOnUiThread(new ItineraryUpdater());
-				}
-
 				if (currentDestinationIndex >= 0) {
-					Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
-					fiveMinutesBeforeDeparture.setTime(currentlyAt.getSchedule().getDepartureTime());
-					fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -5);
-					if (fiveMinutesBeforeDeparture.getTime().before(new Date())) {
-						// if ((currentDestinationIndex + 1) < (itineraryItemList.size() - 2)) {
-						Itinerary.this.runOnUiThread(new DepartureReminder(currentlyAt, itineraryItemList.get(currentDestinationIndex + 1)));
-						// }
+					ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
+
+					if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
+						Itinerary.this.runOnUiThread(new ItineraryUpdater());
 					}
 				}
 			}
@@ -514,6 +492,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				if (selectedItemPosition == 0) {
 					origin = updatedDestination;
+				}
+
+				if (currentDestinationIndex < (itineraryItemList.size() - 1)) {
+					if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
+						cancelAlerts();
+						setAlerts(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1));
+					}
 				}
 
 				selectedItemPosition = -1;
