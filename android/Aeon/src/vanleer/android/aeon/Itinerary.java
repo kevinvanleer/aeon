@@ -133,8 +133,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// destinationName.setTextColor(Color.BLACK);
 		// destinationName.setBackgroundColor(Color.WHITE);
 
-		itineraryItemList.add(addNewItemItem);
-		itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1));
+		appendListItem(addNewItemItem);
 	}
 
 	class ItineraryUpdater implements Runnable {
@@ -364,8 +363,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// TODO Location was null
 			}
 		}
-		itineraryItemList.add(0, origin);
-		itineraryItems.insert(itineraryItemList.get(0), 0);
+		// itineraryItemList.add(0, origin);
+		// itineraryItems.insert(itineraryItemList.get(0), 0);
+		insertListItem(origin, 0);
 
 		new Thread() {
 			@Override
@@ -466,22 +466,26 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void appendDestination(ItineraryItem newItem) {
-		insertDestination(getAppendDestinationIndex(), newItem);
+		insertListItem(newItem, getAppendDestinationIndex());
 	}
 
-	private void removeDestination(int index) {
+	private void appendListItem(ItineraryItem newItem) {
+		insertListItem(newItem, itineraryItemList.size());
+	}
+
+	private void removeListItem(int index) {
 		itineraryItems.remove(itineraryItemList.get(index));
 		itineraryItemList.remove(index);
 	}
 
-	private void insertDestination(int index, ItineraryItem destination) {
+	private void insertListItem(ItineraryItem destination, int index) {
 		itineraryItemList.add(index, destination);
 		itineraryItems.insert(destination, index);
 	}
 
-	private void replaceDestination(int index, ItineraryItem destination) {
-		removeDestination(index);
-		insertDestination(index, destination);
+	private void replaceListItem(ItineraryItem destination, int index) {
+		removeListItem(index);
+		insertListItem(destination, index);
 	}
 
 	@Override
@@ -505,7 +509,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				ItineraryItem updatedDestination = (ItineraryItem) data.getParcelableExtra("destination");
 
 				if (selectedItemPosition != -1) {
-					replaceDestination(selectedItemPosition, updatedDestination);
+					replaceListItem(updatedDestination, selectedItemPosition);
 				}
 
 				if (selectedItemPosition == 0) {
