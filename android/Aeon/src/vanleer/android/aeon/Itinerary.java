@@ -371,40 +371,45 @@ public final class Itinerary extends Activity implements OnClickListener {
 			@Override
 			public void run() {
 				// TODO: Change nextMinute to current location departure time plus one minute
-				Calendar nextMinute = Calendar.getInstance();
-				nextMinute.setTime(new Date());
-				nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);
-				nextMinute.set(Calendar.SECOND, 0);
 
 				while (true) {
-					if (currentDestinationIndex >= 0) {
-						ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
-						Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
-						fiveMinutesBeforeDeparture.setTime(currentlyAt.getSchedule().getDepartureTime());
-						fiveMinutesBeforeDeparture.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) - 5);
-						if (fiveMinutesBeforeDeparture.getTimeInMillis() < (new Date()).getTime()) {
-							// if ((currentDestinationIndex + 1) < (itineraryItemList.size() - 2)) {
-							Itinerary.this.runOnUiThread(new DepartureReminder(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1)));
-							// }
-						}
-					}
-
 					Calendar now = Calendar.getInstance();
 					now.setTime(new Date());
-					while (now.getTimeInMillis() < nextMinute.getTimeInMillis()) {
+
+					Calendar nextMinute = Calendar.getInstance();
+					nextMinute.setTime(now.getTime());
+					nextMinute.add(Calendar.MINUTE, 1);
+					nextMinute.set(Calendar.SECOND, 0);
+
+					if (now.getTime().before(nextMinute.getTime())) {
 						try {
 							sleep(nextMinute.getTimeInMillis() - now.getTimeInMillis());
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						now.setTime(new Date());
 					}
 
-					Itinerary.this.runOnUiThread(new ItineraryUpdater());
+					doStuff();
+				}
+			}
 
-					nextMinute.setTime(new Date());
-					nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);
+			private void doStuff() {
+				ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
+
+				if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
+					Itinerary.this.runOnUiThread(new ItineraryUpdater());
+				}
+
+				if (currentDestinationIndex >= 0) {
+					Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
+					fiveMinutesBeforeDeparture.setTime(currentlyAt.getSchedule().getDepartureTime());
+					fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -5);
+					if (fiveMinutesBeforeDeparture.getTime().before(new Date())) {
+						// if ((currentDestinationIndex + 1) < (itineraryItemList.size() - 2)) {
+						Itinerary.this.runOnUiThread(new DepartureReminder(currentlyAt, itineraryItemList.get(currentDestinationIndex + 1)));
+						// }
+					}
 				}
 			}
 		}.start();
