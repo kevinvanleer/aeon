@@ -163,7 +163,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Intent alarm = new Intent(this, DepartureAlarm.class);
 		alarm.putExtra("vanleer.android.aeon.departureAlarmOrigin", origin);
 		alarm.putExtra("vanleer.android.aeon.departureAlarmDestination", destination);
-		pendingAlarm = PendingIntent.getActivity(this, R.id.departure_alarm_intent, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
+		pendingAlarm = PendingIntent.getActivity(this, UPDATE_DESTINATION, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		alarmManager.set(AlarmManager.RTC_WAKEUP, origin.getSchedule().getDepartureTime().getTime(), pendingAlarm);
 	}
