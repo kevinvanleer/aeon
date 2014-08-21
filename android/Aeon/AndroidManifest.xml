@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="vanleer.android.aeon"
       android:versionCode="9"
-      android:versionName="0.2.3">
+      android:versionName="0.3.0">
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -16,9 +16,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Itinerary" android:label="@string/itinerary_title" android:configChanges="orientation" />
+        <activity android:name=".Itinerary" android:label="@string/itinerary_title"  android:launchMode="singleTop" android:configChanges="orientation" />
         <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" android:configChanges="orientation" />
         <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" android:configChanges="orientation" />
+        <activity android:name=".DepartureAlarm" android:configChanges="orientation" />
+        <service android:name=".DepartureReminder" />
     </application>
     
 </manifest>

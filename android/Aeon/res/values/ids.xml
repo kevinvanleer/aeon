@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="departure_reminder_intent" type="id"/>
+    <item name="departure_reminder_notification" type="id"/>
+    <item name="departure_alarm_intent" type="id"/>
+    
+</resources>

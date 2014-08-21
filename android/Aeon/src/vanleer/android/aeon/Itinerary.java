@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +53,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private Geocoder theGeocoder = null;
 	private boolean travelling = false;
 	private int currentDestinationIndex = -1;
+	private PendingIntent pendingReminder;
+	private AlarmManager alarmManager;
+	private PendingIntent pendingAlarm;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -72,9 +77,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// GooglePlayServicesUtil.isGooglePlayServicesAvailable();
 
 		theGeocoder = new Geocoder(this);
-
-		// Acquire a reference to the system Location Manager
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+
 		LocationListener locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				// Called when a new location is found by the network location provider.
@@ -125,8 +130,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// destinationName.setTextColor(Color.BLACK);
 		// destinationName.setBackgroundColor(Color.WHITE);
 
-		itineraryItemList.add(addNewItemItem);
-		itineraryItems.add(itineraryItemList.get(itineraryItemList.size() - 1));
+		appendListItem(addNewItemItem);
 	}
 
 	class ItineraryUpdater implements Runnable {
@@ -135,6 +139,53 @@ public final class Itinerary extends Activity implements OnClickListener {
 				updateTimes();
 			}
 		}
+	}
+
+	private void setDepartureReminder(ItineraryItem origin, ItineraryItem destination) {
+		int reminderAdvance = 5;
+
+		Intent reminder = new Intent(this, DepartureReminder.class);
+		reminder.putExtra("vanleer.android.aeon.departureReminderOrigin", origin);
+		reminder.putExtra("vanleer.android.aeon.departureReminderDestination", destination);
+		reminder.putExtra("vanleer.android.aeon.departureReminderAdvance", reminderAdvance);
+
+		pendingReminder = PendingIntent.getService(this, R.id.departure_reminder_intent, reminder, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
+		fiveMinutesBeforeDeparture.setTime(origin.getSchedule().getDepartureTime());
+		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -reminderAdvance);
+		alarmManager.set(AlarmManager.RTC_WAKEUP, fiveMinutesBeforeDeparture.getTimeInMillis(), pendingReminder);
+	}
+
+	private void setDepartureAlarm(ItineraryItem origin, ItineraryItem destination) {
+		// TODO Auto-generated method stub
+		Intent alarm = new Intent(this, DepartureAlarm.class);
+		alarm.putExtra("vanleer.android.aeon.departureAlarmOrigin", origin);
+		alarm.putExtra("vanleer.android.aeon.departureAlarmDestination", destination);
+		pendingAlarm = PendingIntent.getActivity(this, UPDATE_DESTINATION, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		alarmManager.set(AlarmManager.RTC_WAKEUP, origin.getSchedule().getDepartureTime().getTime(), pendingAlarm);
+	}
+
+	public void setAlerts(ItineraryItem origin, ItineraryItem destination) {
+		Log.d("Departure Alerts", "Setting alerts for departure from " + origin.getName());
+		setDepartureReminder(origin, destination);
+		setDepartureAlarm(origin, destination);
+	}
+
+	public void cancelAlerts() {
+		Log.d("Departure Alerts", "Cancelling current departure alerts");
+		cancelReminder();
+		cancelAlarm();
+	}
+
+	private void cancelReminder() {
+		alarmManager.cancel(pendingReminder);
+	}
+
+	private void cancelAlarm() {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void configureItineraryListViewLongClickListener() {
@@ -190,6 +241,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (!travelling) {
 				itineraryItemList.get(currentDestinationIndex).setAtLocation();
 				itineraryItems.notifyDataSetChanged();
+				setAlerts(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1));
 			}
 		} else {
 			travelling = haveDeparted();
@@ -308,35 +360,43 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// TODO Location was null
 			}
 		}
-		itineraryItemList.add(0, origin);
-		itineraryItems.insert(itineraryItemList.get(0), 0);
+
+		insertListItem(origin, 0);
 
 		new Thread() {
 			@Override
 			public void run() {
 				// TODO: Change nextMinute to current location departure time plus one minute
-				Calendar nextMinute = Calendar.getInstance();
-				nextMinute.setTime(new Date());
-				nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);
-				nextMinute.set(Calendar.SECOND, 0);
 
 				while (true) {
 					Calendar now = Calendar.getInstance();
 					now.setTime(new Date());
-					while (now.getTimeInMillis() < nextMinute.getTimeInMillis()) {
+
+					Calendar nextMinute = Calendar.getInstance();
+					nextMinute.setTime(now.getTime());
+					nextMinute.add(Calendar.MINUTE, 1);
+					nextMinute.set(Calendar.SECOND, 0);
+
+					if (now.getTime().before(nextMinute.getTime())) {
 						try {
 							sleep(nextMinute.getTimeInMillis() - now.getTimeInMillis());
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						now.setTime(new Date());
 					}
 
-					Itinerary.this.runOnUiThread(new ItineraryUpdater());
+					doStuff();
+				}
+			}
 
-					nextMinute.setTime(new Date());
-					nextMinute.set(Calendar.MINUTE, nextMinute.get(Calendar.MINUTE) + 1);
+			private void doStuff() {
+				if (currentDestinationIndex >= 0) {
+					ItineraryItem currentlyAt = itineraryItemList.get(currentDestinationIndex);
+
+					if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
+						Itinerary.this.runOnUiThread(new ItineraryUpdater());
+					}
 				}
 			}
 		}.start();
@@ -393,22 +453,26 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void appendDestination(ItineraryItem newItem) {
-		insertDestination(getAppendDestinationIndex(), newItem);
+		insertListItem(newItem, getAppendDestinationIndex());
 	}
 
-	private void removeDestination(int index) {
+	private void appendListItem(ItineraryItem newItem) {
+		insertListItem(newItem, itineraryItemList.size());
+	}
+
+	private void removeListItem(int index) {
 		itineraryItems.remove(itineraryItemList.get(index));
 		itineraryItemList.remove(index);
 	}
 
-	private void insertDestination(int index, ItineraryItem destination) {
+	private void insertListItem(ItineraryItem destination, int index) {
 		itineraryItemList.add(index, destination);
 		itineraryItems.insert(destination, index);
 	}
 
-	private void replaceDestination(int index, ItineraryItem destination) {
-		removeDestination(index);
-		insertDestination(index, destination);
+	private void replaceListItem(ItineraryItem destination, int index) {
+		removeListItem(index);
+		insertListItem(destination, index);
 	}
 
 	@Override
@@ -432,11 +496,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 				ItineraryItem updatedDestination = (ItineraryItem) data.getParcelableExtra("destination");
 
 				if (selectedItemPosition != -1) {
-					replaceDestination(selectedItemPosition, updatedDestination);
+					replaceListItem(updatedDestination, selectedItemPosition);
 				}
 
 				if (selectedItemPosition == 0) {
 					origin = updatedDestination;
+				}
+
+				if (currentDestinationIndex < (itineraryItemList.size() - 1)) {
+					if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
+						cancelAlerts();
+						setAlerts(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1));
+					}
 				}
 
 				selectedItemPosition = -1;
