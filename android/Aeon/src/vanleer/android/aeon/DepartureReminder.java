@@ -34,6 +34,7 @@ public class DepartureReminder extends Service {
 		timeToGoNotiBuilder.setContentInfo(destination.getFormattedDistance());
 		timeToGoNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
 		timeToGoNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		timeToGoNotiBuilder.setAutoCancel(true);
 
 		// TODO: Return to itinerary activity when notification touched
 
