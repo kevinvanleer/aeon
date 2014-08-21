@@ -56,6 +56,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private int currentDestinationIndex = -1;
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
+	private PendingIntent pendingAlarm;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -142,20 +143,29 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void setDepartureReminder(ItineraryItem origin, ItineraryItem destination) {
+		int reminderAdvance = 5;
+
 		Intent reminder = new Intent(this, DepartureReminder.class);
 		reminder.putExtra("vanleer.android.aeon.departureReminderOrigin", origin);
 		reminder.putExtra("vanleer.android.aeon.departureReminderDestination", destination);
+		reminder.putExtra("vanleer.android.aeon.departureReminderAdvance", reminderAdvance);
+
 		pendingReminder = PendingIntent.getService(this, R.id.departure_reminder_intent, reminder, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
 		fiveMinutesBeforeDeparture.setTime(origin.getSchedule().getDepartureTime());
-		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -5);
+		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -reminderAdvance);
 		alarmManager.set(AlarmManager.RTC_WAKEUP, fiveMinutesBeforeDeparture.getTimeInMillis(), pendingReminder);
 	}
 
 	private void setDepartureAlarm(ItineraryItem origin, ItineraryItem destination) {
 		// TODO Auto-generated method stub
+		Intent alarm = new Intent(this, DepartureAlarm.class);
+		alarm.putExtra("vanleer.android.aeon.departureAlarmOrigin", origin);
+		alarm.putExtra("vanleer.android.aeon.departureAlarmDestination", destination);
+		pendingAlarm = PendingIntent.getActivity(this, R.id.departure_alarm_intent, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
 
+		alarmManager.set(AlarmManager.RTC_WAKEUP, origin.getSchedule().getDepartureTime().getTime(), pendingAlarm);
 	}
 
 	public void setAlerts(ItineraryItem origin, ItineraryItem destination) {
