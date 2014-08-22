@@ -245,6 +245,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		} else {
 			travelling = haveDeparted();
 			if (travelling) {
+				cancelAlerts();
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
 				++currentDestinationIndex;
 				if (currentDestinationIndex > (itineraryItemList.size() - 2)) currentDestinationIndex = itineraryItemList.size() - 2;
