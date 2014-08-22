@@ -184,8 +184,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void cancelAlarm() {
-		// TODO Auto-generated method stub
-
+		alarmManager.cancel(pendingAlarm);
 	}
 
 	private void configureItineraryListViewLongClickListener() {
