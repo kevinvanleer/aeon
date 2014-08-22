@@ -210,6 +210,10 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 	}
 
 	private void calculateScheduling() {
+		timePickerArrivalTime.clearFocus();
+		timePickerDuration.clearFocus();
+		timePickerDepartureTime.clearFocus();
+
 		Calendar timeConverter = Calendar.getInstance();
 		if (destination.getSchedule().getArrivalTime() != null) {
 			timeConverter.setTime(destination.getSchedule().getArrivalTime());
