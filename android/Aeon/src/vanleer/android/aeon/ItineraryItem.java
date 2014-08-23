@@ -32,8 +32,6 @@ public final class ItineraryItem implements Parcelable {
 	private boolean atLocation = false;
 	private boolean locationExpired = false;
 
-	// private static final String API_KEY = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
-
 	public ItineraryItem(Address address) {
 		geocodingAddress = address;
 		name = getGeocodingName();
