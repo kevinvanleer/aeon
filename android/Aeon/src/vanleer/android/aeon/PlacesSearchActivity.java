@@ -108,7 +108,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			// TODO: locationManager.requestSingleUpdate(
 			// LocationManager.GPS_PROVIDER, locationListener, some looper thing);
 		} else {
-			locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+			locationText.setText(GooglePlacesSearch.getGeodeticString(currentLocation));
 			if (currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
 				locationSensorImage.setVisibility(View.VISIBLE);
 			}
@@ -212,7 +212,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		currentLocation = location;
 		locationSensorImage.setVisibility(View.VISIBLE);
 		MakeImageViewSquare(locationSensorImage);
-		locationText.setText(GooglePlacesSearch.GetGeodeticString(currentLocation));
+		locationText.setText(GooglePlacesSearch.getGeodeticString(currentLocation));
 		new AsyncTask<Void, Void, ArrayList<String>>() {
 			@Override
 			protected ArrayList<String> doInBackground(Void... arg0) {
@@ -313,13 +313,13 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void QuerySearchEngine() {
-		googleSearch.PerformSearch(currentLocation.getLatitude(), currentLocation.getLongitude(), searchRadius, searchText.getText().toString(), true);
+		googleSearch.performSearch(currentLocation.getLatitude(), currentLocation.getLongitude(), searchRadius, searchText.getText().toString(), true);
 		searching = false;
 	}
 
 	private void BuildResultsList() {
-		for (int i = 0; i < googleSearch.GetResultCount(); ++i) {
-			ItineraryItem newItem = googleSearch.GetPlace(i);
+		for (int i = 0; i < googleSearch.getResultCount(); ++i) {
+			ItineraryItem newItem = googleSearch.getPlace(i);
 			if (newItem != null) {
 				// newItem.SetDistance(currentLocation);
 				searchResultsList.add(newItem);
