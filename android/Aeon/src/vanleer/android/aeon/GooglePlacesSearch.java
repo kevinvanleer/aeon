@@ -34,8 +34,8 @@ import android.util.Log;
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
-	// private static final String GOOGLE_GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
+	private static final String GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json";
 	private String apiKey = null;
 	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
 	private final ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
@@ -190,6 +190,37 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
+	private String buildGoogleDirectionsUrl(Location origin, Location destination) {
+		return buildGoogleDirectionsUrl(origin, destination, null, "driving");
+	}
+
+	private String buildGoogleDirectionsUrl(Location origin, Location destination, ArrayList<Location> waypoints) {
+		return buildGoogleDirectionsUrl(origin, destination, waypoints, "driving");
+	}
+
+	private String buildGoogleDirectionsUrl(Location origin, Location destination, ArrayList<Location> waypoints, String mode) {
+		String url = GOOGLE_DIRECTIONS_URL;
+
+		if (origin == null || destination == null) {
+			throw new IllegalArgumentException("Places autocomplete search requires an input string");
+		}
+
+		url += "&origin=" + origin.getLatitude() + "," + origin.getLongitude();
+		url += "&destination=" + destination.getLatitude() + "," + destination.getLongitude();
+
+		if (waypoints != null) {
+			url += "&waypoints=";
+			for (Location waypoint : waypoints) {
+				url += waypoint.getLatitude() + "," + waypoint.getLongitude() + "|";
+			}
+			// url.
+		}
+
+		url += "&key=" + apiKey;
+
+		return url;
+	}
+
 	private String GetTypesUrlPart(String[] types) {
 		String typesUrlPart = "";
 
@@ -219,9 +250,6 @@ public final class GooglePlacesSearch {
 	}
 
 	private void PerformGeocodingSearch(String address, boolean sensor) {
-		/*
-		 * String url = GOOGLE_GEOCODING_URL + "?address=" + Uri.encode(address) + "&sensor=" + sensor; JSONObject geocodingSearchResults = PerformHttpGet(url);
-		 */
 		List<Address> geocodingSearchResults = null;
 		try {
 			geocodingSearchResults = externalGeocoder.getFromLocationName(address, 10);
@@ -264,9 +292,6 @@ public final class GooglePlacesSearch {
 	}
 
 	public Address getBestReverseGeocodeResult(final Location location, Boolean sensor) {
-		/*
-		 * JSONObject placemark = null; JSONObject placemarks = getReverseGeocodeResults(location, sensor); if (placemarks != null) { JSONArray resultArray = (JSONArray) placemarks.get("results"); if (resultArray != null) { if (resultArray.size() > 0) { placemark = (JSONObject) resultArray.get(0); } } } return placemark;
-		 */
 		Address placemark = null;
 		List<Address> addresses = getReverseGeocodeResults(location, sensor);
 		if (addresses.size() > 0) {
@@ -285,8 +310,6 @@ public final class GooglePlacesSearch {
 			e.printStackTrace();
 		}
 		return addressList;
-		// String url = (GOOGLE_GEOCODING_URL + "?latlng=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude()) + "&sensor=" + sensor.toString());
-		// return PerformHttpGet(url);
 	}
 
 	private JSONObject PerformHttpGet(final String url) {
