@@ -205,7 +205,7 @@ public final class GooglePlacesSearch {
 			throw new IllegalArgumentException("Places autocomplete search requires an input string");
 		}
 
-		url += "&origin=" + origin.getLatitude() + "," + origin.getLongitude();
+		url += "?origin=" + origin.getLatitude() + "," + origin.getLongitude();
 		url += "&destination=" + destination.getLatitude() + "," + destination.getLongitude();
 
 		if (waypoints != null) {
