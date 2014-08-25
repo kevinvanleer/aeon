@@ -223,6 +223,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	protected void onNewLocation(Location location) {
 		currentLocation = location;
+		locations.add(location);
 		if (origin.getLocation() == null || itineraryItemList.size() <= 2) {
 			currentDestinationIndex = 0;
 			updateOrigin();
@@ -276,18 +277,46 @@ public final class Itinerary extends Activity implements OnClickListener {
 		};
 	}
 
-	private boolean haveDeparted() {
-		boolean moving = itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
+	private boolean isInVicinity() {
 		float threshold = itineraryItemList.get(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
 		if (threshold < 100) threshold = 100;
-		return moving && !travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) > threshold);
+		return (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < threshold);
+
+	}
+
+	private boolean isMoving() {
+		return itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
+	}
+
+	private boolean newMethod() {
+		boolean retVal = false;
+
+		int locationsIndex = locations.size() - 4;
+		locationsIndex = (locationsIndex < 0) ? 0 : locationsIndex;
+
+		float distance = locations.get(locationsIndex).distanceTo(locations.get(locationsIndex + 1));
+		// locations.get(locationsIndex).distanceTo(locations.get(locationsIndex + 2));
+		distance += locations.get(locationsIndex + 1).distanceTo(locations.get(locationsIndex + 2));
+
+		if (distance < 100) {
+			return true;
+		} else {
+
+			long elapsedTime = locations.get(locationsIndex + 2).getTime() - locations.get(locationsIndex).getTime() / 1000;
+			if ((distance / elapsedTime) < 5) {
+				return true;
+			}
+		}
+
+		return retVal;
+	}
+
+	private boolean haveDeparted() {
+		return isMoving() && !travelling && !isInVicinity();
 	}
 
 	private boolean haveArrived() {
-		boolean moving = itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
-		float threshold = itineraryItemList.get(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
-		if (threshold < 100) threshold = 100;
-		return !moving && travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < threshold);
+		return !isMoving() && travelling && isInVicinity();
 	}
 
 	@Override
