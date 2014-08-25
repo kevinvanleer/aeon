@@ -4,10 +4,21 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import android.location.Address;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class DirectionsResult {
+public class DirectionsResult implements Parcelable {
 
 	private JSONObject rawJson = null;
+
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeSerializable(rawJson);
+	}
 
 	DirectionsResult(JSONObject rawJson) {
 		this.rawJson = rawJson;
