@@ -288,8 +288,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
 	}
 
-	private boolean newMethod() {
-		boolean retVal = false;
+	private boolean isLoitering() {
+		boolean loitering = false;
 
 		int locationsIndex = locations.size() - 4;
 		locationsIndex = (locationsIndex < 0) ? 0 : locationsIndex;
@@ -299,24 +299,24 @@ public final class Itinerary extends Activity implements OnClickListener {
 		distance += locations.get(locationsIndex + 1).distanceTo(locations.get(locationsIndex + 2));
 
 		if (distance < 100) {
-			return true;
+			loitering = true;
 		} else {
 
 			long elapsedTime = locations.get(locationsIndex + 2).getTime() - locations.get(locationsIndex).getTime() / 1000;
 			if ((distance / elapsedTime) < 5) {
-				return true;
+				loitering = true;
 			}
 		}
 
-		return retVal;
+		return loitering;
 	}
 
 	private boolean haveDeparted() {
-		return isMoving() && !travelling && !isInVicinity();
+		return !travelling && isMoving() && !isInVicinity();
 	}
 
 	private boolean haveArrived() {
-		return !isMoving() && travelling && isInVicinity();
+		return travelling && !isMoving() && isInVicinity();
 	}
 
 	@Override
