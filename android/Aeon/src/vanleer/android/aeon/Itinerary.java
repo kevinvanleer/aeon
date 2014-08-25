@@ -56,6 +56,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
+	private ArrayList<Location> locations;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
