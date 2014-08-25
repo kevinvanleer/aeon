@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -188,57 +189,6 @@ public final class GooglePlacesSearch {
 		url += "&key=" + apiKey;
 
 		return url;
-	}
-
-	private String buildGoogleDirectionsUrl(Location origin, Location destination) {
-		return buildGoogleDirectionsUrl(origin, destination, null, "driving");
-	}
-
-	private String buildGoogleDirectionsUrl(Location origin, Location destination, ArrayList<Location> waypoints) {
-		return buildGoogleDirectionsUrl(origin, destination, waypoints, "driving");
-	}
-
-	private String buildGoogleDirectionsUrl(Location origin, Location destination, ArrayList<Location> waypoints, String mode) {
-		String url = GOOGLE_DIRECTIONS_URL;
-
-		if (origin == null || destination == null) {
-			throw new IllegalArgumentException("Places autocomplete search requires an input string");
-		}
-
-		url += "?origin=" + origin.getLatitude() + "," + origin.getLongitude();
-		url += "&destination=" + destination.getLatitude() + "," + destination.getLongitude();
-
-		if (waypoints != null) {
-			url += "&waypoints=";
-			for (Location waypoint : waypoints) {
-				url += waypoint.getLatitude() + "," + waypoint.getLongitude() + "|";
-			}
-			url.substring(0, (url.length() - 1));
-		}
-
-		if (mode != null) url += "&mode=" + mode;
-		url += "&key=" + apiKey;
-
-		return url;
-	}
-
-	public DirectionsResult performDirectionsQuery(Location origin, Location destination) {
-		String url = buildGoogleDirectionsUrl(origin, destination);
-		return new DirectionsResult(performHttpGet(url));
-	}
-
-	public ArrayList<String> performDirectionsQuery(Location origin, Location destination, ArrayList<Location> waypoints) {
-		String url = buildGoogleDirectionsUrl(origin, destination, waypoints);
-
-		JSONObject directionsResults = performHttpGet(url);
-		return getResultsList(directionsResults);
-	}
-
-	public ArrayList<String> performDirectionsQuery(Location origin, Location destination, ArrayList<Location> waypoints, String mode) {
-		String url = buildGoogleDirectionsUrl(origin, destination, waypoints, mode);
-
-		JSONObject directionsResults = performHttpGet(url);
-		return getResultsList(directionsResults);
 	}
 
 	private String getTypesUrlPart(String[] types) {
