@@ -56,7 +56,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
-	private ArrayList<Location> locations;
+	private final ArrayList<Location> locations = new ArrayList<Location>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -301,8 +301,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (distance < 100) {
 			loitering = true;
 		} else {
-
-			long elapsedTime = locations.get(locationsIndex + 2).getTime() - locations.get(locationsIndex).getTime() / 1000;
+			long elapsedTime = (locations.get(locationsIndex + 2).getTime() - locations.get(locationsIndex).getTime() / 1000);
 			if ((distance / elapsedTime) < 5) {
 				loitering = true;
 			}
@@ -312,11 +311,21 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		return !travelling && isMoving() && !isInVicinity();
+		if (locations.size() < 3) {
+			return !travelling && isMoving() && !isInVicinity();
+		} else {
+			// TODO: Temporary, shouldn't just assume that we are loitering at the intended destination
+			return !travelling && ((isMoving() && !isInVicinity()) || !isLoitering());
+		}
 	}
 
 	private boolean haveArrived() {
-		return travelling && !isMoving() && isInVicinity();
+		if (locations.size() < 3) {
+			return travelling && !isMoving() && isInVicinity();
+		} else {
+			// TODO: Temporary, shouldn't just assume that we are loitering at the intended destination
+			return travelling && ((!isMoving() && isInVicinity()) || isLoitering());
+		}
 	}
 
 	@Override
