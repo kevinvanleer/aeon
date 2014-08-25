@@ -36,7 +36,6 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-	private static final String GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json";
 	private String apiKey = null;
 	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
 	private final ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
