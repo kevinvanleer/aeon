@@ -235,7 +235,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateTravelStatus() {
-		if (travelling) {
+		if (travelling) { // arriving TODO: unreadable -> refactor
 			travelling = !haveArrived();
 			if (!travelling) {
 				itineraryItemList.get(currentDestinationIndex).setAtLocation();
@@ -244,9 +244,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 		} else {
 			travelling = haveDeparted();
-			if (travelling) {
+			if (travelling) { // departing TODO: unreadable -> refactor
 				cancelAlerts();
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
+				getDirections();
 				++currentDestinationIndex;
 				if (currentDestinationIndex > (itineraryItemList.size() - 2)) currentDestinationIndex = itineraryItemList.size() - 2;
 				itineraryItemList.get(currentDestinationIndex).setEnRoute();
@@ -256,12 +257,36 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
+	private void getDirections() {
+		new GoogleDirectionsGiver(itineraryItemList.get(currentDestinationIndex).getLocation(), itineraryItemList.get(currentDestinationIndex + 1).getLocation()) {
+			@Override
+			protected void onPostExecute(DirectionsResult result) {
+				Address destinationAddress = result.getDestination();
+				Location destinationLocation = itineraryItemList.get(currentDestinationIndex).getLocation();
+				float[] distance = new float[1];
+				Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
+				Bundle locationExtras = new Bundle();
+				locationExtras.putParcelable("address", result);
+				locationExtras.putFloat("distance", distance[0]);
+				destinationLocation.setExtras(locationExtras);
+				String logMsg = "Destination is " + distance[0] + " from the nearest road";
+				Log.i("Destination", logMsg);
+			}
+		};
+	}
+
 	private boolean haveDeparted() {
-		return !travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) > 100);
+		boolean moving = itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
+		float threshold = itineraryItemList.get(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
+		if (threshold < 100) threshold = 100;
+		return moving && !travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) > threshold);
 	}
 
 	private boolean haveArrived() {
-		return travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < 50);
+		boolean moving = itineraryItemList.get(currentDestinationIndex).getLocation().getSpeed() > 5;
+		float threshold = itineraryItemList.get(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
+		if (threshold < 100) threshold = 100;
+		return !moving && travelling && (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < threshold);
 	}
 
 	@Override
