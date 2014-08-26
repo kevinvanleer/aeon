@@ -41,7 +41,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryItemAdapter itineraryItems;
 	private final boolean loggedIntoGoogle = /* false */true; // for debugging
 	private LocationManager locationManager;
-	private Location currentLocation = null;
 	private static final int GET_NEW_DESTINATION = 0;
 	private static final int ADD_DESTINATION = 1;
 	private static final int UPDATE_DESTINATION = 2;
@@ -51,7 +50,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryItem addNewItemItem = null;
 	private int selectedItemPosition = -1;
 	private Geocoder theGeocoder = null;
-	private boolean travelling = false;
+	private boolean traveling = false;
 	private int currentDestinationIndex = -1;
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
@@ -64,9 +63,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		setContentView(R.layout.itinerary);
 
 		// FOR TESTING
-		// currentLocation = new Location("test");
-		// currentLocation.setLatitude(38.477548);
-		// currentLocation.setLongitude(-91.051562);
+		// currentLocation() = new Location("test");
+		// currentLocation().setLatitude(38.477548);
+		// currentLocation().setLongitude(-91.051562);
 		// FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
@@ -103,6 +102,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 		configureItineraryListViewLongClickListener();
 		initializeOrigin();
 		initializeAddNewItineraryItem();
+	}
+
+	private Location currentLocation() {
+		Location currentLocation = null;
+		if (!locations.isEmpty()) {
+			currentLocation = locations.get(locations.size() - 1);
+		}
+		return currentLocation;
 	}
 
 	private void initializeAddNewItineraryItem() {
@@ -208,7 +215,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		new Thread() {
 			@Override
 			public void run() {
-				while (currentLocation == null) {
+				while (currentLocation() == null) {
 					try {
 						sleep(1);
 					} catch (InterruptedException e) {
@@ -222,7 +229,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		currentLocation = location;
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItemList.size() <= 2) {
 			currentDestinationIndex = 0;
@@ -237,16 +243,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateTravelStatus() {
-		if (travelling) { // arriving TODO: unreadable -> refactor
-			travelling = !haveArrived();
-			if (!travelling) {
+		if (traveling) { // arriving TODO: unreadable -> refactor
+			traveling = !haveArrived();
+			if (!traveling) {
 				itineraryItemList.get(currentDestinationIndex).setAtLocation();
 				itineraryItems.notifyDataSetChanged();
 				setAlerts(itineraryItemList.get(currentDestinationIndex), itineraryItemList.get(currentDestinationIndex + 1));
 			}
 		} else {
-			travelling = haveDeparted();
-			if (travelling) { // departing TODO: unreadable -> refactor
+			traveling = haveDeparted();
+			if (traveling) { // departing TODO: unreadable -> refactor
 				cancelAlerts();
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
 				getDirections();
@@ -280,7 +286,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private boolean isInVicinity() {
 		float threshold = itineraryItemList.get(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
 		if (threshold < 100) threshold = 100;
-		return (currentLocation.distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < threshold);
+		return (currentLocation().distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < threshold);
 
 	}
 
@@ -289,19 +295,26 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isLoitering() {
+		if (locations.size() == 0) {
+			throw new IllegalStateException("No locations have been received.");
+		}
+
 		boolean loitering = false;
 
-		int locationsIndex = locations.size() - 4;
+		final int SIZE = 5;
+		int sampleSize = locations.size() < SIZE ? locations.size() : SIZE;
+		int locationsIndex = locations.size() - sampleSize;
 		locationsIndex = (locationsIndex < 0) ? 0 : locationsIndex;
 
-		float distance = locations.get(locationsIndex).distanceTo(locations.get(locationsIndex + 1));
-		// locations.get(locationsIndex).distanceTo(locations.get(locationsIndex + 2));
-		distance += locations.get(locationsIndex + 1).distanceTo(locations.get(locationsIndex + 2));
+		float distance = 0;
+		for (int i = 0; i < (sampleSize - 1); ++i) {
+			distance += locations.get(locationsIndex + i).distanceTo(locations.get(locationsIndex + i + 1));
+		}
 
 		if (distance < 100) {
 			loitering = true;
 		} else {
-			long elapsedTime = (locations.get(locationsIndex + 2).getTime() - locations.get(locationsIndex).getTime() / 1000);
+			long elapsedTime = (locations.get(locations.size() - 1).getTime() - locations.get(locationsIndex).getTime() / 1000);
 			if ((distance / elapsedTime) < 5) {
 				loitering = true;
 			}
@@ -311,21 +324,27 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		if (locations.size() < 3) {
-			return !travelling && isMoving() && !isInVicinity();
-		} else {
-			// TODO: Temporary, shouldn't just assume that we are loitering at the intended destination
-			return !travelling && ((isMoving() && !isInVicinity()) || !isLoitering());
-		}
+		return (!traveling && isMoving() && !isInVicinity());
 	}
 
 	private boolean haveArrived() {
-		if (locations.size() < 3) {
-			return travelling && !isMoving() && isInVicinity();
-		} else {
-			// TODO: Temporary, shouldn't just assume that we are loitering at the intended destination
-			return travelling && ((!isMoving() && isInVicinity()) || isLoitering());
+		boolean arrived = (traveling && !isMoving() && isInVicinity());
+
+		if (!arrived && traveling) {
+			if (isLoitering()) {
+				// add loiter location as unplanned stop or intended destination
+				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
+				if (currentLocation().distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < 1000) {
+					// assume intended destination with 1 km
+					// adjust destination
+					itineraryItemList.get(currentDestinationIndex).setLocation(currentLocation());
+					arrived = true;
+				} else {
+					// add destination
+				}
+			}
 		}
+		return arrived;
 	}
 
 	@Override
@@ -378,7 +397,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Intent startItineraryOpen = new Intent(Itinerary.this, PlacesSearchActivity.class);
 
 		if (itineraryItemList.isEmpty()) {
-			startItineraryOpen.putExtra("location", currentLocation);
+			startItineraryOpen.putExtra("location", currentLocation());
 		} else {
 			ItineraryItem lastDestination = getFinalDestination();
 			startItineraryOpen.putExtra("location", lastDestination.getLocation());
@@ -389,9 +408,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateOrigin() {
 		origin.getSchedule().setDepartureTime(new Date());
-		if (currentLocation != null) {
+		if (currentLocation() != null) {
 			try {
-				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
 			}
@@ -417,9 +436,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Schedule departNow = new Schedule();
 		departNow.setDepartureTime(new Date());
 		origin.setSchedule(departNow);
-		if (currentLocation != null) {
+		if (currentLocation() != null) {
 			try {
-				origin.updateLocation(currentLocation, getLocationAddress(currentLocation));
+				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
 			}
@@ -478,7 +497,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void GetMyLocationInfo() {
-		if (currentLocation == null) {
+		if (currentLocation() == null) {
 			waitForGps();
 		} else {
 			ItineraryItem myLocation = null;
@@ -487,9 +506,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			try {
 				ItineraryItem lastDestination = getFinalDestination();
-				myLocation = new ItineraryItem(currentLocation, lastDestination.getLocation(), getLocationAddress(currentLocation));
+				myLocation = new ItineraryItem(currentLocation(), lastDestination.getLocation(), getLocationAddress(currentLocation()));
 			} catch (IllegalStateException e) {
-				myLocation = new ItineraryItem(currentLocation, getLocationAddress(currentLocation));
+				myLocation = new ItineraryItem(currentLocation(), getLocationAddress(currentLocation()));
 			}
 
 			updateArrivalDepartureTimes(myLocation);

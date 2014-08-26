@@ -301,6 +301,10 @@ public final class ItineraryItem implements Parcelable {
 		return location;
 	}
 
+	void setLocation(Location location) {
+		this.location = location;
+	}
+
 	void setLocation() {
 		if (googlePlaceResult != null) {
 			setPlaceLocation();
