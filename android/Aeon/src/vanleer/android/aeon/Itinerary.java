@@ -323,7 +323,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		boolean departed = itineraryItemList.get(currentDestinationIndex).atLocation();
+		// boolean departed = itineraryItemList.get(currentDestinationIndex).atLocation();
+		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation().hasSpeed()) {
 			departed &= isMoving();
@@ -332,7 +333,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveArrived() {
-		boolean arrived = itineraryItemList.get(currentDestinationIndex).enRoute();
+
+		// boolean arrived = itineraryItemList.get(currentDestinationIndex).enRoute();
+		boolean arrived = traveling;
 		arrived &= isInVicinity();
 		if (currentLocation().hasSpeed()) {
 			arrived &= !isMoving();
