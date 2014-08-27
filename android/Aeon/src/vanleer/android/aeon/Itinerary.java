@@ -256,8 +256,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				cancelAlerts();
 				itineraryItemList.get(currentDestinationIndex).setLocationExpired();
 				getDirections();
-				++currentDestinationIndex;
-				if (currentDestinationIndex > (itineraryItemList.size() - 2)) currentDestinationIndex = itineraryItemList.size() - 2;
+				if (currentDestinationIndex < (itineraryItemList.size() - 2)) ++currentDestinationIndex;
 				itineraryItemList.get(currentDestinationIndex).setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
@@ -324,11 +323,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		return (!traveling && isMoving() && !isInVicinity());
+		boolean departed = !traveling;
+		departed &= isMoving();
+		departed &= !isInVicinity();
+		return departed;
 	}
 
-	private boolean haveArrived() {
-		boolean arrived = (traveling && !isMoving() && isInVicinity());
+	private boolean haveArrived() {		
+		boolean arrived = traveling;
+		arrived &= !isMoving();
+		arrived &= isInVicinity();
 
 		if (!arrived && traveling) {
 			if (isLoitering()) {
@@ -337,7 +341,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 				if (currentLocation().distanceTo(itineraryItemList.get(currentDestinationIndex).getLocation()) < 1000) {
 					// assume intended destination with 1 km
 					// adjust destination
-					itineraryItemList.get(currentDestinationIndex).setLocation(currentLocation());
+					ItineraryItem currentItem = itineraryItemList.get(currentDestinationIndex);
+					currentItem.setLocation(currentLocation());
+					replaceListItem(currentItem, currentDestinationIndex);
 					arrived = true;
 				} else {
 					// add destination
