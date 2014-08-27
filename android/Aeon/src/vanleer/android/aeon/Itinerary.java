@@ -289,6 +289,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isMoving() {
+		if (!itineraryItems.getItem(currentDestinationIndex).getLocation().hasSpeed()) {
+			throw new IllegalStateException("No speed set for this location");
+		}
 		return itineraryItems.getItem(currentDestinationIndex).getLocation().getSpeed() > 5;
 	}
 
@@ -332,7 +335,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveArrived() {
-
 		// boolean arrived = itineraryItems.getItem(currentDestinationIndex).enRoute();
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
