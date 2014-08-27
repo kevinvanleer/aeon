@@ -1,7 +1,5 @@
 package vanleer.android.aeon;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -14,13 +12,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
-
-	private final ArrayList<ItineraryItem> destinationList;
 	private ColorStateList defaultColors = null;
 
-	public ItineraryItemAdapter(Context context, int textViewResourceId, ArrayList<ItineraryItem> items) {
+	public ItineraryItemAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
-		destinationList = items;
 	}
 
 	@Override
@@ -30,8 +25,9 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 			LayoutInflater vi = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.itinerary_item, null);
 		}
-		if (!destinationList.isEmpty()) {
-			ItineraryItem item = destinationList.get(position);
+
+		if (!this.isEmpty()) {
+			ItineraryItem item = this.getItem(position);
 
 			if (item != null) {
 				TextView destinationName = (TextView) v.findViewById(R.id.textView_destinationName);
@@ -95,7 +91,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					stayDuration.setVisibility(View.GONE);
 
 					departureVicinity.setText("Start from " + item.GetVicinity());
-				} else if (position == (destinationList.size() - 1)) {
+				} else if (position == (this.getCount() - 1)) {
 					stayDuration.setVisibility(View.GONE);
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);

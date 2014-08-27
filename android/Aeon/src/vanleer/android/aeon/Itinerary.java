@@ -69,7 +69,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// FOR TESTING
 
 		itineraryItemList = new ArrayList<ItineraryItem>();
-		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item, itineraryItemList);
+		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item);
 		itineraryListView = (ListView) findViewById(listViewId);
 		itineraryListView.setAdapter(itineraryItems);
 
