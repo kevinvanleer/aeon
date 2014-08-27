@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -245,18 +246,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			traveling = !haveArrived();
 			if (!traveling) {
-				itineraryItems.getItem(currentDestinationIndex).setAtLocation();
+				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
-				setAlerts(itineraryItems.getItem(currentDestinationIndex), itineraryItems.getItem(currentDestinationIndex + 1));
+				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
 			}
 		} else {
 			traveling = haveDeparted();
 			if (traveling) { // departing TODO: unreadable -> refactor
 				cancelAlerts();
-				itineraryItems.getItem(currentDestinationIndex).setLocationExpired();
+				currentDestination().setLocationExpired();
 				getDirections();
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) ++currentDestinationIndex;
-				itineraryItems.getItem(currentDestinationIndex).setEnRoute();
+				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
 			}
@@ -264,11 +265,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void getDirections() {
-		new GoogleDirectionsGiver(itineraryItems.getItem(currentDestinationIndex).getLocation(), itineraryItems.getItem(currentDestinationIndex + 1).getLocation()) {
+		new GoogleDirectionsGiver(currentDestination().getLocation(), itineraryItems.getItem(currentDestinationIndex + 1).getLocation()) {
 			@Override
 			protected void onPostExecute(DirectionsResult result) {
 				Address destinationAddress = result.getDestination();
-				Location destinationLocation = itineraryItems.getItem(currentDestinationIndex).getLocation();
+				Location destinationLocation = currentDestination().getLocation();
 				float[] distance = new float[1];
 				Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
 				Bundle locationExtras = new Bundle();
@@ -282,20 +283,77 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isInVicinity() {
-		float threshold = itineraryItems.getItem(currentDestinationIndex).getLocation().getExtras().getFloat("distance");
+		float threshold = currentDestination().getLocation().getExtras().getFloat("distance");
 		if (threshold < 100) threshold = 100;
-		return (currentLocation().distanceTo(itineraryItems.getItem(currentDestinationIndex).getLocation()) < threshold);
+		return (currentLocation().distanceTo(currentDestination().getLocation()) < threshold);
 
 	}
 
 	private boolean isMoving() {
-		if (!itineraryItems.getItem(currentDestinationIndex).getLocation().hasSpeed()) {
+		if (!currentDestination().getLocation().hasSpeed()) {
 			throw new IllegalStateException("No speed set for this location");
 		}
-		return itineraryItems.getItem(currentDestinationIndex).getLocation().getSpeed() > 5;
+		return currentDestination().getLocation().getSpeed() > 5;
+	}
+
+	private ItineraryItem currentDestination() {
+		return itineraryItems.getItem(currentDestinationIndex);
 	}
 
 	private boolean isLoitering() {
+		if (locations.size() == 0) {
+			throw new IllegalStateException("No locations have been received.");
+		}
+		boolean loitering = false;
+
+		Location item = null;
+		Location previousItem = null;
+		int locationCount = 0;
+		float totalTime = 0;
+		float totalLat = 0;
+		float totalLng = 0;
+		for (ListIterator<Location> iterator = locations.listIterator(locations.size()); iterator.hasPrevious(); item = iterator.previous()) {
+			if (previousItem != null) {
+				float d2p_m = item.distanceTo(previousItem);
+				float time_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
+				float speed_m_s = (d2p_m / time_s);
+
+				if (speed_m_s > 5) {
+					break;
+				}
+
+				++locationCount;
+				totalLat += item.getLatitude();
+				totalLng += item.getLongitude();
+				totalTime += time_s;
+
+				// float d2c_m = item.distanceTo(currentLocation());
+				// float d2d_m = currentDestination().getLocation().distanceTo(item);
+
+			}
+			previousItem = item;
+
+			float averageLat = totalLat / locationCount;
+			float averageLng = totalLng / locationCount;
+			float[] distance = new float[1];
+
+			double distanceThreshold = totalTime;
+			Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
+			if (distance[1] < distanceThreshold) {
+				loitering = true;
+			}
+
+			Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
+			if (distance[1] < distanceThreshold) {
+				// assume user is loitering at intended destination
+			}
+
+		}
+
+		return loitering;
+	}
+
+	private boolean isLoitering_old() {
 		if (locations.size() == 0) {
 			throw new IllegalStateException("No locations have been received.");
 		}
@@ -315,7 +373,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (distance < 100) {
 			loitering = true;
 		} else {
-			long elapsedTime = (locations.get(locations.size() - 1).getTime() - locations.get(locationsIndex).getTime() / 1000);
+			float elapsedTime = ((locations.get(locations.size() - 1).getTime() - locations.get(locationsIndex).getTime()) / 1000.f);
 			if ((distance / elapsedTime) < 5) {
 				loitering = true;
 			}
@@ -325,7 +383,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		// boolean departed = itineraryItems.getItem(currentDestinationIndex).atLocation();
+		// boolean departed = currentDestination().atLocation();
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation().hasSpeed()) {
@@ -335,7 +393,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveArrived() {
-		// boolean arrived = itineraryItems.getItem(currentDestinationIndex).enRoute();
+		// boolean arrived = currentDestination().enRoute();
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
 		if (currentLocation().hasSpeed()) {
@@ -346,12 +404,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (isLoitering()) {
 				// add loiter location as unplanned stop or intended destination
 				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
-				if (currentLocation().distanceTo(itineraryItems.getItem(currentDestinationIndex).getLocation()) < 1000) {
+				if (currentLocation().distanceTo(currentDestination().getLocation()) < 1000) {
 					// assume intended destination with 1 km
 					// adjust destination
-					ItineraryItem currentItem = itineraryItems.getItem(currentDestinationIndex);
-					currentItem.setLocation(currentLocation());
-					replaceListItem(currentItem, currentDestinationIndex);
+					currentDestination().setLocation(currentLocation());
 					arrived = true;
 				} else {
 					// add destination
@@ -490,7 +546,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			private void doStuff() {
 				if (currentDestinationIndex >= 0) {
-					ItineraryItem currentlyAt = itineraryItems.getItem(currentDestinationIndex);
+					ItineraryItem currentlyAt = currentDestination();
 
 					if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
@@ -602,7 +658,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				if (currentDestinationIndex < (itineraryItems.getCount() - 1)) {
 					if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
 						cancelAlerts();
-						setAlerts(itineraryItems.getItem(currentDestinationIndex), itineraryItems.getItem(currentDestinationIndex + 1));
+						setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
 					}
 				}
 
