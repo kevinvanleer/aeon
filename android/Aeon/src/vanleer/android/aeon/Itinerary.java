@@ -227,7 +227,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		// if(locations.size() > 1000) locations.remove(0);
+		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
 			currentDestinationIndex = 0;
