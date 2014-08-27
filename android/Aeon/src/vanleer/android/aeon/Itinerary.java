@@ -418,7 +418,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateOrigin() {
-		origin.getSchedule().setDepartureTime(new Date());
+		if (origin.getSchedule().getDepartureTime().before(new Date())) {
+			origin.getSchedule().setDepartureTime(new Date());
+		}
 		if (currentLocation() != null) {
 			try {
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
