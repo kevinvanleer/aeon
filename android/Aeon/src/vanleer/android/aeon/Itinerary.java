@@ -339,12 +339,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			double distanceThreshold = totalTime;
 			Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
-			if (distance[1] < distanceThreshold) {
+			if (distance[0] < distanceThreshold) {
 				loitering = true;
 			}
 
 			Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
-			if (distance[1] < distanceThreshold) {
+			if (distance[0] < distanceThreshold) {
 				// assume user is loitering at intended destination
 			}
 
