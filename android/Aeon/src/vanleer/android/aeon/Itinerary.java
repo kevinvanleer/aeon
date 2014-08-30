@@ -246,6 +246,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			traveling = !haveArrived();
 			if (!traveling) {
+				Log.v("Travel Status", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
 				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
@@ -257,6 +258,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				currentDestination().setLocationExpired();
 				getDirections();
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) ++currentDestinationIndex;
+				Log.v("Travel Status", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
@@ -285,7 +287,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private boolean isInVicinity() {
 		float threshold = currentDestination().getLocation().getExtras().getFloat("distance");
 		if (threshold < 100) threshold = 100;
-		return (currentLocation().distanceTo(currentDestination().getLocation()) < threshold);
+		float distance = currentLocation().distanceTo(currentDestination().getLocation());
+		Log.v("Vicinity Detection", "Distance threshold:" + threshold);
+		Log.v("Vicinity Detection", "Distance to destination:" + distance);
+		return (distance < threshold);
 
 	}
 
@@ -309,7 +314,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Location item = null;
 		Location previousItem = null;
 		int locationCount = 0;
-		float totalTime = 0;
+		float totalTime_s = 0;
 		float totalLat = 0;
 		float totalLng = 0;
 		for (ListIterator<Location> iterator = locations.listIterator(locations.size()); iterator.hasPrevious(); item = iterator.previous()) {
@@ -319,13 +324,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 				float speed_m_s = (d2p_m / time_s);
 
 				if (speed_m_s > 5) {
+					Log.v("Loiter Detection", "Found " + locationCount + "fixes with speeds less than 5 m/s.");
 					break;
 				}
 
 				++locationCount;
 				totalLat += item.getLatitude();
 				totalLng += item.getLongitude();
-				totalTime += time_s;
+				totalTime_s += time_s;
 
 				// float d2c_m = item.distanceTo(currentLocation());
 				// float d2d_m = currentDestination().getLocation().distanceTo(item);
@@ -333,19 +339,25 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 			previousItem = item;
 
-			float averageLat = totalLat / locationCount;
-			float averageLng = totalLng / locationCount;
-			float[] distance = new float[1];
+			if (totalTime_s > 60.) {
+				Log.v("Loiter Detection", "Speed less than 5 m/s for more than 1 minute.");
+				float averageLat = totalLat / locationCount;
+				float averageLng = totalLng / locationCount;
+				float[] distance = new float[1];
 
-			double distanceThreshold = totalTime;
-			Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
-			if (distance[0] < distanceThreshold) {
-				loitering = true;
-			}
+				double distanceThreshold = totalTime_s;
+				Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
+				Log.v("Loiter Detection", "Distance threshold is " + distanceThreshold);
+				Log.v("Loiter Detection", "User is " + distance[0] + " m from average loiter location.");
+				if (distance[0] < distanceThreshold) {
+					Log.d("Loiter Detection", "User is loitering.");
+					loitering = true;
+				}
 
-			Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
-			if (distance[0] < distanceThreshold) {
-				// assume user is loitering at intended destination
+				Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
+				if (distance[0] < distanceThreshold) {
+					// assume user is loitering at intended destination
+				}
 			}
 
 		}
@@ -387,6 +399,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation().hasSpeed()) {
+			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
 			departed &= isMoving();
 		}
 		return departed;
@@ -397,10 +410,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
 		if (currentLocation().hasSpeed()) {
+			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
 			arrived &= !isMoving();
 		}
 
 		if (!arrived && traveling) {
+			Log.v("Arrival Detection", "Initial arrival criteria failed.  Attempting to detect loiter.");
 			if (isLoitering()) {
 				// add loiter location as unplanned stop or intended destination
 				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
