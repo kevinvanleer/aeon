@@ -285,8 +285,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isInVicinity() {
-		float threshold = currentDestination().getLocation().getExtras().getFloat("distance");
-		if (threshold < 100) threshold = 100;
+		Bundle extras = currentDestination().getLocation().getExtras();
+		float threshold = 0.f;
+		if (extras != null) {
+			threshold = extras.getFloat("distance");
+		}
+		if (threshold < 100.f) threshold = 100.f;
 		float distance = currentLocation().distanceTo(currentDestination().getLocation());
 		Log.v("Vicinity Detection", "Distance threshold:" + threshold);
 		Log.v("Vicinity Detection", "Distance to destination:" + distance);
