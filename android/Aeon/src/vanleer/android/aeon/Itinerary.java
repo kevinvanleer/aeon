@@ -231,7 +231,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		Log.v("Itinerary", "New location received.");
+		// Log.v("Itinerary", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
@@ -248,16 +248,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateTravelStatus() {
 		if (traveling) { // arriving TODO: unreadable -> refactor
-			traveling = !haveArrived();
-			if (!traveling) {
+			if (haveArrived()) {
+				traveling = false;
 				Log.v("Travel Status", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
 				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
 			}
 		} else {
-			traveling = haveDeparted();
-			if (traveling) { // departing TODO: unreadable -> refactor
+			if (haveDeparted()) { // departing TODO: unreadable -> refactor
+				traveling = true;
 				cancelAlerts();
 				currentDestination().setLocationExpired();
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
@@ -298,10 +298,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 		if (threshold < 100.f) threshold = 100.f;
 		float distance = currentLocation().distanceTo(currentDestination().getLocation());
-		Log.v("Vicinity Detection", "Distance threshold:" + threshold);
+		Log.v("Vicinity Detection", "Vicinity threshold:" + threshold);
 		Log.v("Vicinity Detection", "Distance to destination:" + distance);
 		return (distance < threshold);
-
 	}
 
 	private boolean isMoving() {
@@ -316,7 +315,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isLoitering() {
-		if (locations.size() == 0) {
+		if (locations.isEmpty()) {
 			throw new IllegalStateException("No locations have been received.");
 		}
 		boolean loitering = false;
