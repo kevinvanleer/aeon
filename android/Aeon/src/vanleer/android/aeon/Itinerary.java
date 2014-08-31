@@ -228,6 +228,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
+		Log.v("Itinerary", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
@@ -497,11 +498,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateOrigin() {
+		Log.v("Itinerary", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
+			Log.v("updateOrigin", "Updating origin departure time.");
 			origin.getSchedule().setDepartureTime(new Date());
 		}
 		if (currentLocation() != null) {
 			try {
+				Log.v("updateOrigin", "Updating origin location.");
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
@@ -511,7 +515,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	void updateTimes() {
+		Log.v("Itinerary", "Updating times.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
+			Log.v("updateTimes", "Updating origin departure time.");
 			origin.getSchedule().setDepartureTime(new Date());
 		}
 
