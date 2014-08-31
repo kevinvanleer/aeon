@@ -307,7 +307,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (!currentDestination().getLocation().hasSpeed()) {
 			throw new IllegalStateException("No speed set for this location");
 		}
-		return currentDestination().getLocation().getSpeed() > 5;
+		return currentLocation().getSpeed() > 5.f;
 	}
 
 	private ItineraryItem currentDestination() {
@@ -409,7 +409,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		departed &= !isInVicinity();
 		if (currentLocation().hasSpeed()) {
 			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
-			// departed &= isMoving();
+			departed &= isMoving();
 		}
 		return departed;
 	}
@@ -420,7 +420,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		arrived &= isInVicinity();
 		if (currentLocation().hasSpeed()) {
 			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
-			// arrived &= !isMoving();
+			arrived &= !isMoving();
 		}
 
 		if (!arrived && traveling) {
