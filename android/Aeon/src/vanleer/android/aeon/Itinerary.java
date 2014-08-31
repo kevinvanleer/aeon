@@ -9,6 +9,7 @@ import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -187,6 +188,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void cancelReminder() {
+		NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notiMgr.cancel(R.id.departure_reminder_notification);
 		alarmManager.cancel(pendingReminder);
 	}
 
