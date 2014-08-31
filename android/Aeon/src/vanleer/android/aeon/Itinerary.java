@@ -256,8 +256,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (traveling) { // departing TODO: unreadable -> refactor
 				cancelAlerts();
 				currentDestination().setLocationExpired();
-				getDirections();
-				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) ++currentDestinationIndex;
+				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
+					getDirections();
+					++currentDestinationIndex;
+				}
 				Log.v("Travel Status", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
