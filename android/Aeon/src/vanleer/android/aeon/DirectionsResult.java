@@ -11,6 +11,24 @@ public class DirectionsResult implements Parcelable {
 
 	private JSONObject rawJson = null;
 
+	DirectionsResult(JSONObject rawJson) {
+		this.rawJson = rawJson;
+	}
+
+	public DirectionsResult(Parcel in) {
+		this.rawJson = (JSONObject) in.readSerializable();
+	}
+
+	public static final Parcelable.Creator<DirectionsResult> CREATOR = new Parcelable.Creator<DirectionsResult>() {
+		public DirectionsResult createFromParcel(Parcel in) {
+			return new DirectionsResult(in);
+		}
+
+		public DirectionsResult[] newArray(int size) {
+			return new DirectionsResult[size];
+		}
+	};
+
 	public int describeContents() {
 		// TODO Auto-generated method stub
 		return 0;
@@ -18,10 +36,6 @@ public class DirectionsResult implements Parcelable {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeSerializable(rawJson);
-	}
-
-	DirectionsResult(JSONObject rawJson) {
-		this.rawJson = rawJson;
 	}
 
 	public int getRouteCount() {
