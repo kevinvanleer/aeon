@@ -356,51 +356,58 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Location previousItem = null;
 		int locationCount = 0;
 		float totalTime_s = 0;
-		float totalLat = 0;
-		float totalLng = 0;
-		for (ListIterator<Location> iterator = locations.listIterator(locations.size()); iterator.hasPrevious(); item = iterator.previous()) {
-			if (previousItem != null) {
-				float d2p_m = item.distanceTo(previousItem);
-				float time_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
-				float speed_m_s = (d2p_m / time_s);
+		double totalLat = 0;
+		double totalLng = 0;
 
+		ListIterator<Location> iterator = locations.listIterator(locations.size());
+		while (iterator.hasPrevious()) {
+			item = iterator.previous();
+			if (iterator.hasPrevious()) {
+				previousItem = locations.get(iterator.previousIndex());
+
+				float d2p_m = item.distanceTo(previousItem);
+				// TODO: Use getElapsedRealtimeNanos -- but requires API 17
+				float timeDelta_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
+				float speed_m_s = (d2p_m / timeDelta_s);
+				Log.d("Aeon", "Performing loiter calculations; d2p_m=" + d2p_m + ", times_s=" + timeDelta_s + ", speed_m_s=" + speed_m_s + ", item::time=" + item.getTime() + ", previousItem::time=" + previousItem.getTime());
 				if (speed_m_s > 5) {
-					Log.v("Aeon", "Found " + locationCount + "fixes with speeds less than 5 m/s.");
+					Log.v("Aeon", "Found " + locationCount + " fixes with speeds less than 5 m/s.");
 					break;
 				}
 
 				++locationCount;
 				totalLat += item.getLatitude();
 				totalLng += item.getLongitude();
-				totalTime_s += time_s;
+				totalTime_s += timeDelta_s;
 
+				// TODO: incorporate these stats???
 				// float d2c_m = item.distanceTo(currentLocation());
 				// float d2d_m = currentDestination().getLocation().distanceTo(item);
-
 			}
-			previousItem = item;
+		}
 
-			if (totalTime_s > 60.) {
-				Log.v("Aeon", "Speed less than 5 m/s for more than 1 minute.");
-				float averageLat = totalLat / locationCount;
-				float averageLng = totalLng / locationCount;
-				float[] distance = new float[1];
+		if (totalTime_s > 60.) {
+			Log.v("Aeon", "Speed less than 5 m/s for more than 1 minute.");
+			double averageLat = totalLat / locationCount;
+			double averageLng = totalLng / locationCount;
+			float[] distance = new float[1];
+			Log.v("Aeon", "averageLat=" + averageLat + "; averageLng=" + averageLng);
 
-				double distanceThreshold = totalTime_s;
-				Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
-				Log.v("Aeon", "Distance threshold is " + distanceThreshold);
-				Log.v("Aeon", "User is " + distance[0] + " m from average loiter location.");
-				if (distance[0] < distanceThreshold) {
-					Log.d("Aeon", "User is loitering.");
-					loitering = true;
-				}
-
-				Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
-				if (distance[0] < distanceThreshold) {
-					// assume user is loitering at intended destination
-				}
+			double distanceThreshold = totalTime_s;
+			Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
+			Log.v("Aeon", "Distance threshold is " + distanceThreshold);
+			Log.v("Aeon", "User is " + distance[0] + " m from average loiter location.");
+			if (distance[0] < distanceThreshold) {
+				Log.d("Aeon", "User is loitering.");
+				loitering = true;
 			}
 
+			Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
+			if (distance[0] < distanceThreshold) {
+				// assume user is loitering at intended destination
+			}
+		} else {
+			Log.v("Aeon", "User has not loitered for " + totalTime_s + " seconds.");
 		}
 
 		return loitering;
