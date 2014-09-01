@@ -44,8 +44,8 @@ public class DirectionsResult implements Parcelable {
 		if (rawJson == null) {
 			throw new NullPointerException();
 		}
-		if (getStatus() != "OK") {
-			throw new IllegalStateException("No speed set for this location");
+		if (getStatus().compareTo("OK") != 0) {
+			throw new IllegalStateException("Directions result returned " + getStatus());
 		}
 		return (JSONArray) rawJson.get("routes");
 	}
