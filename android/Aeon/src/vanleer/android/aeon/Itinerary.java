@@ -254,12 +254,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
 				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
+				updateArrivalTime(currentDestination());
 			}
 		} else {
 			if (haveDeparted()) { // departing TODO: unreadable -> refactor
 				traveling = true;
 				cancelAlerts();
 				currentDestination().setLocationExpired();
+				updateDepartureTime(currentDestination());
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					getDirections();
 					++currentDestinationIndex;
@@ -270,6 +272,22 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// TODO: Display map
 			}
 		}
+	}
+
+	private void updateDepartureTime(ItineraryItem currentDestination) {
+		currentDestination.getSchedule().setDepartureTime(new Date());
+		updateTimes();
+	}
+
+	private void updateArrivalTime(ItineraryItem currentDestination) {
+		Schedule thisSchedule = currentDestination.getSchedule();
+		thisSchedule.setArrivalTime(new Date());
+		if (thisSchedule.isDepartureTimeFlexible()) {
+			thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
+		} else {
+			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+		}
+		updateTimes();
 	}
 
 	private void getDirections() {
@@ -518,12 +536,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	void updateTimes() {
 		Log.v("Itinerary", "Updating times.");
-		if (origin.getSchedule().getDepartureTime().before(new Date())) {
-			Log.v("updateTimes", "Updating origin departure time.");
-			origin.getSchedule().setDepartureTime(new Date());
+		if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
+			Log.v("updateTimes", "Updating current destination departure time.");
+			currentDestination().getSchedule().setDepartureTime(new Date());
 		}
 
-		for (int i = 1; i < (itineraryItems.getCount() - 1); ++i) {
+		for (int i = (currentDestinationIndex + 1); i < (itineraryItems.getCount() - 1); ++i) {
 			itineraryItems.getItem(i).updateSchedule(itineraryItems.getItem(i - 1).getSchedule().getDepartureTime());
 		}
 

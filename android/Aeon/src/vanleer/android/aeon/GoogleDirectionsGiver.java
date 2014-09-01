@@ -36,6 +36,7 @@ public class GoogleDirectionsGiver extends AsyncTask<String, Void, DirectionsRes
 
 	@Override
 	protected DirectionsResult doInBackground(String... urls) {
+		// TODO: Something special when query fails
 		return new DirectionsResult(performHttpGet(urls[0]));
 	}
 
