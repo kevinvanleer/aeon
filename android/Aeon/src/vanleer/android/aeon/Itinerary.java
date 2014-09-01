@@ -306,14 +306,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 			protected void onPostExecute(DirectionsResult result) {
 				Address destinationAddress = result.getDestination();
 				Location destinationLocation = currentDestination().getLocation();
-				float[] distance = new float[1];
-				Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
-				Bundle locationExtras = new Bundle();
-				locationExtras.putParcelable("address", result);
-				locationExtras.putFloat("distance", distance[0]);
-				destinationLocation.setExtras(locationExtras);
-				String logMsg = "Destination is " + distance[0] + " from the nearest road";
-				Log.i("Destination", logMsg);
+				if (destinationAddress != null && destinationLocation != null) {
+					float[] distance = new float[1];
+					Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
+					Bundle locationExtras = new Bundle();
+					locationExtras.putParcelable("address", result);
+					locationExtras.putFloat("distance", distance[0]);
+					destinationLocation.setExtras(locationExtras);
+					String logMsg = "Destination is " + distance[0] + " from the nearest road";
+					Log.i("Destination", logMsg);
+				} else {
+					// TODO: Probably something to do here
+				}
 			}
 		};
 	}
