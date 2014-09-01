@@ -336,7 +336,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean isMoving() {
-		if (!currentDestination().getLocation().hasSpeed()) {
+		if (!currentLocation().hasSpeed()) {
 			throw new IllegalStateException("No speed set for this location");
 		}
 		return currentLocation().getSpeed() > 5.f;
@@ -436,12 +436,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		Location currentLocation = new Location(currentLocation());
 		// boolean departed = currentDestination().atLocation();
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
-		if (currentLocation.hasSpeed()) {
-			Log.v("Aeon", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
+		if (currentLocation().hasSpeed()) {
+			Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
 			departed &= isMoving();
 		} else {
 			Log.v("Aeon", "No speed parameter for this location.");
@@ -454,9 +453,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// boolean arrived = currentDestination().enRoute();
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
-		Location currentLocation = new Location(currentLocation());
-		if (currentLocation.hasSpeed()) {
-			Log.v("Aeon", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
+		if (currentLocation().hasSpeed()) {
+			Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
 			arrived &= !isMoving();
 		} else {
 			Log.v("Aeon", "No speed parameter for this location.");
@@ -467,10 +465,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (isLoitering()) {
 				// add loiter location as unplanned stop or intended destination
 				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
-				if (currentLocation.distanceTo(currentDestination().getLocation()) < 1000) {
+				if (currentLocation().distanceTo(currentDestination().getLocation()) < 1000) {
 					// assume intended destination with 1 km
 					// adjust destination
-					currentDestination().setLocation(currentLocation);
+					currentDestination().setLocation(currentLocation());
 					arrived = true;
 				} else {
 					// add destination
