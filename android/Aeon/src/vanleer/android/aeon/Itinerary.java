@@ -436,14 +436,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
-		Location currentLocation = currentLocation();
+		Location currentLocation = new Location(currentLocation());
 		// boolean departed = currentDestination().atLocation();
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation.hasSpeed()) {
 			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			departed &= isMoving();
+		} else {
+			Log.v("Aeon", "No speed parameter for this location.");
 		}
+
 		return departed;
 	}
 
@@ -451,10 +454,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// boolean arrived = currentDestination().enRoute();
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
-		Location currentLocation = currentLocation();
+		Location currentLocation = new Location(currentLocation());
 		if (currentLocation.hasSpeed()) {
 			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			arrived &= !isMoving();
+		} else {
+			Log.v("Aeon", "No speed parameter for this location.");
 		}
 
 		if (!arrived && traveling) {
@@ -472,6 +477,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				}
 			}
 		}
+
 		return arrived;
 	}
 
