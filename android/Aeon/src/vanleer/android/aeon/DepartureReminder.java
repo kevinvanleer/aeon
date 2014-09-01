@@ -17,7 +17,7 @@ public class DepartureReminder extends Service {
 
 	@Override
 	public void onCreate() {
-		Log.d("Departure Notification", "Created departure notification service");
+		Log.d("Aeon", "Created departure notification service");
 		notiMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 	}
 
@@ -51,7 +51,7 @@ public class DepartureReminder extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d("Departure Notification", "Received start id " + startId + ": " + intent);
+		Log.d("Aeon", "Received start id " + startId + ": " + intent);
 		showNotification(intent.getExtras());
 		return START_NOT_STICKY;
 	}

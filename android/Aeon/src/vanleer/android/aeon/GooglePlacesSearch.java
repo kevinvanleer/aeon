@@ -316,7 +316,7 @@ public final class GooglePlacesSearch {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TimeoutException e) {
-			Log.e("GooglePlacesSearch", e.getMessage(), e);
+			Log.e("Aeon", e.getMessage(), e);
 		}
 
 		return jsonResponse;

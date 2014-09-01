@@ -176,13 +176,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	public void setAlerts(ItineraryItem origin, ItineraryItem destination) {
-		Log.d("Departure Alerts", "Setting alerts for departure from " + origin.getName());
+		Log.d("Aeon", "Setting alerts for departure from " + origin.getName());
 		setDepartureReminder(origin, destination);
 		setDepartureAlarm(origin, destination);
 	}
 
 	public void cancelAlerts() {
-		Log.d("Departure Alerts", "Cancelling current departure alerts");
+		Log.d("Aeon", "Cancelling current departure alerts");
 		cancelReminder();
 		cancelAlarm();
 	}
@@ -231,7 +231,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		// Log.v("Itinerary", "New location received.");
+		// Log.v("Aeon", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
@@ -250,7 +250,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			if (haveArrived()) {
 				traveling = false;
-				Log.v("Travel Status", "User arrived at " + currentDestination().getName());
+				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
 				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
@@ -266,7 +266,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 					getDirections();
 					++currentDestinationIndex;
 				}
-				Log.v("Travel Status", "User has departed for " + currentDestination().getName());
+				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
@@ -314,7 +314,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 					locationExtras.putFloat("distance", distance[0]);
 					destinationLocation.setExtras(locationExtras);
 					String logMsg = "Destination is " + distance[0] + " from the nearest road";
-					Log.i("Destination", logMsg);
+					Log.i("Aeon", logMsg);
 				} else {
 					// TODO: Probably something to do here
 				}
@@ -330,8 +330,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 		if (threshold < 100.f) threshold = 100.f;
 		float distance = currentLocation().distanceTo(currentDestination().getLocation());
-		Log.v("Vicinity Detection", "Vicinity threshold:" + threshold);
-		Log.v("Vicinity Detection", "Distance to destination:" + distance);
+		Log.v("Aeon", "Vicinity threshold:" + threshold);
+		Log.v("Aeon", "Distance to destination:" + distance);
 		return (distance < threshold);
 	}
 
@@ -365,7 +365,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				float speed_m_s = (d2p_m / time_s);
 
 				if (speed_m_s > 5) {
-					Log.v("Loiter Detection", "Found " + locationCount + "fixes with speeds less than 5 m/s.");
+					Log.v("Aeon", "Found " + locationCount + "fixes with speeds less than 5 m/s.");
 					break;
 				}
 
@@ -381,17 +381,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 			previousItem = item;
 
 			if (totalTime_s > 60.) {
-				Log.v("Loiter Detection", "Speed less than 5 m/s for more than 1 minute.");
+				Log.v("Aeon", "Speed less than 5 m/s for more than 1 minute.");
 				float averageLat = totalLat / locationCount;
 				float averageLng = totalLng / locationCount;
 				float[] distance = new float[1];
 
 				double distanceThreshold = totalTime_s;
 				Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
-				Log.v("Loiter Detection", "Distance threshold is " + distanceThreshold);
-				Log.v("Loiter Detection", "User is " + distance[0] + " m from average loiter location.");
+				Log.v("Aeon", "Distance threshold is " + distanceThreshold);
+				Log.v("Aeon", "User is " + distance[0] + " m from average loiter location.");
 				if (distance[0] < distanceThreshold) {
-					Log.d("Loiter Detection", "User is loitering.");
+					Log.d("Aeon", "User is loitering.");
 					loitering = true;
 				}
 
@@ -441,7 +441,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation.hasSpeed()) {
-			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
+			Log.v("Aeon", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			departed &= isMoving();
 		} else {
 			Log.v("Aeon", "No speed parameter for this location.");
@@ -456,14 +456,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 		arrived &= isInVicinity();
 		Location currentLocation = new Location(currentLocation());
 		if (currentLocation.hasSpeed()) {
-			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
+			Log.v("Aeon", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			arrived &= !isMoving();
 		} else {
 			Log.v("Aeon", "No speed parameter for this location.");
 		}
 
 		if (!arrived && traveling) {
-			Log.v("Arrival Detection", "Initial arrival criteria failed.  Attempting to detect loiter.");
+			Log.v("Aeon", "Initial arrival criteria failed.  Attempting to detect loiter.");
 			if (isLoitering()) {
 				// add loiter location as unplanned stop or intended destination
 				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
@@ -540,14 +540,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateOrigin() {
-		Log.v("Itinerary", "Updating origin.");
+		Log.v("Aeon", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
-			Log.v("updateOrigin", "Updating origin departure time.");
+			Log.v("Aeon", "Updating origin departure time.");
 			origin.getSchedule().setDepartureTime(new Date());
 		}
 		if (currentLocation() != null) {
 			try {
-				Log.v("updateOrigin", "Updating origin location.");
+				Log.v("Aeon", "Updating origin location.");
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
@@ -557,9 +557,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	void updateTimes() {
-		Log.v("Itinerary", "Updating times.");
+		Log.v("Aeon", "Updating times.");
 		if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
-			Log.v("updateTimes", "Updating current destination departure time.");
+			Log.v("Aeon", "Updating current destination departure time.");
 			currentDestination().getSchedule().setDepartureTime(new Date());
 		}
 
@@ -631,7 +631,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			List<Address> addresses = theGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
 			if (!addresses.isEmpty()) theAddress = addresses.get(0);
 		} catch (IOException e) {
-			Log.e("Itinerary", e.getMessage(), e);
+			Log.e("Aeon", e.getMessage(), e);
 		}
 		return theAddress;
 	}
