@@ -436,11 +436,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private boolean haveDeparted() {
+		Location currentLocation = currentLocation();
 		// boolean departed = currentDestination().atLocation();
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
-		if (currentLocation().hasSpeed()) {
-			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
+		if (currentLocation.hasSpeed()) {
+			Log.v("Departure Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			departed &= isMoving();
 		}
 		return departed;
@@ -450,8 +451,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// boolean arrived = currentDestination().enRoute();
 		boolean arrived = traveling;
 		arrived &= isInVicinity();
-		if (currentLocation().hasSpeed()) {
-			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
+		Location currentLocation = currentLocation();
+		if (currentLocation.hasSpeed()) {
+			Log.v("Arrival Detection", "Location has speed parameter. <" + currentLocation.getSpeed() + ">");
 			arrived &= !isMoving();
 		}
 
@@ -460,10 +462,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (isLoitering()) {
 				// add loiter location as unplanned stop or intended destination
 				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
-				if (currentLocation().distanceTo(currentDestination().getLocation()) < 1000) {
+				if (currentLocation.distanceTo(currentDestination().getLocation()) < 1000) {
 					// assume intended destination with 1 km
 					// adjust destination
-					currentDestination().setLocation(currentLocation());
+					currentDestination().setLocation(currentLocation);
 					arrived = true;
 				} else {
 					// add destination
