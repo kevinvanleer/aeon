@@ -275,7 +275,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateDepartureTime(ItineraryItem currentDestination) {
-		currentDestination.getSchedule().setDepartureTime(new Date());
+		Schedule thisSchedule = currentDestination.getSchedule();
+		thisSchedule.setDepartureTime(new Date());
+		thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 		updateTimes();
 	}
 
