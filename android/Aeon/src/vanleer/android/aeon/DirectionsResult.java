@@ -29,7 +29,7 @@ public class DirectionsResult implements Parcelable {
 		int routeCount = 0;
 
 		JSONArray routeArray = getRoutes();
-		if (routeArray != null || getStatus() != "OK") {
+		if ((routeArray != null) && (getStatus() == "OK")) {
 			routeCount = routeArray.size();
 		}
 
@@ -44,12 +44,18 @@ public class DirectionsResult implements Parcelable {
 		if (rawJson == null) {
 			throw new NullPointerException();
 		}
-
+		if (getStatus() != "OK") {
+			throw new IllegalStateException("No speed set for this location");
+		}
 		return (JSONArray) rawJson.get("routes");
 	}
 
 	public String getSummary() {
-		return getSummary((JSONObject) getRoutes().get(0));
+		String summary = null;
+		if (getRouteCount() > 0) {
+			summary = getSummary((JSONObject) getRoutes().get(0));
+		}
+		return summary;
 	}
 
 	public String getSummary(JSONObject route) {
@@ -77,7 +83,11 @@ public class DirectionsResult implements Parcelable {
 	}
 
 	public Address getOrigin() {
-		return getOrigin((JSONObject) getRoutes().get(0));
+		Address address = null;
+		if (getRouteCount() > 0) {
+			address = getOrigin((JSONObject) getRoutes().get(0));
+		}
+		return address;
 	}
 
 	public Address getOrigin(JSONObject route) {
@@ -99,7 +109,11 @@ public class DirectionsResult implements Parcelable {
 	}
 
 	public Address getDestination() {
-		return getDestination((JSONObject) getRoutes().get(0));
+		Address address = null;
+		if (getRouteCount() > 0) {
+			address = getDestination((JSONObject) getRoutes().get(0));
+		}
+		return address;
 	}
 
 	public Address getDestination(JSONObject route) {
@@ -120,8 +134,12 @@ public class DirectionsResult implements Parcelable {
 		return destinationAddress;
 	}
 
-	public int getRouteDuration() {
-		return getRouteDuration((JSONObject) getRoutes().get(0));
+	public Integer getRouteDuration() {
+		Integer duration = null;
+		if (getRouteCount() > 0) {
+			duration = getRouteDuration((JSONObject) getRoutes().get(0));
+		}
+		return duration;
 	}
 
 	public Integer getRouteDuration(JSONObject route) {
@@ -149,7 +167,11 @@ public class DirectionsResult implements Parcelable {
 	}
 
 	public int getRouteDistance() {
-		return getRouteDistance((JSONObject) getRoutes().get(0));
+		Integer distance = null;
+		if (getRouteCount() > 0) {
+			distance = getRouteDistance((JSONObject) getRoutes().get(0));
+		}
+		return distance;
 	}
 
 	public Integer getRouteDistance(JSONObject route) {
