@@ -277,17 +277,25 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateDepartureTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
 		thisSchedule.setDepartureTime(new Date());
-		thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+
+		if (thisSchedule.getArrivalTime() != null) {
+			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+		}
 		updateTimes();
 	}
 
 	private void updateArrivalTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
 		thisSchedule.setArrivalTime(new Date());
+
 		if (thisSchedule.isDepartureTimeFlexible()) {
-			thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
+			if (thisSchedule.getStayDuration() != null) {
+				thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
+			}
 		} else {
-			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+			if (thisSchedule.getDepartureTime() != null) {
+				thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+			}
 		}
 		updateTimes();
 	}
