@@ -43,7 +43,7 @@ public class DirectionsResult implements Parcelable {
 		int routeCount = 0;
 
 		JSONArray routeArray = getRoutes();
-		if ((routeArray != null) && (getStatus() == "OK")) {
+		if ((routeArray != null) && (getStatus().compareTo("OK") == 0)) {
 			routeCount = routeArray.size();
 		}
 
@@ -148,20 +148,20 @@ public class DirectionsResult implements Parcelable {
 		return destinationAddress;
 	}
 
-	public Integer getRouteDuration() {
-		Integer duration = null;
+	public Long getRouteDuration() {
+		Long duration = null;
 		if (getRouteCount() > 0) {
 			duration = getRouteDuration((JSONObject) getRoutes().get(0));
 		}
 		return duration;
 	}
 
-	public Integer getRouteDuration(JSONObject route) {
+	public Long getRouteDuration(JSONObject route) {
 		if (route == null) {
 			throw new NullPointerException();
 		}
 
-		int duration = 0;
+		Long duration = Long.valueOf(0);
 		JSONArray legs = getLegs(route);
 
 		for (Object obj : legs) {
@@ -172,28 +172,28 @@ public class DirectionsResult implements Parcelable {
 		return duration;
 	}
 
-	private Integer getLegDuration(JSONObject leg) {
+	private Long getLegDuration(JSONObject leg) {
 		if (leg == null) {
 			throw new NullPointerException();
 		}
 
-		return (Integer) ((JSONObject) leg.get("duration")).get("value");
+		return (Long) ((JSONObject) leg.get("duration")).get("value");
 	}
 
-	public int getRouteDistance() {
-		Integer distance = null;
+	public Long getRouteDistance() {
+		Long distance = null;
 		if (getRouteCount() > 0) {
 			distance = getRouteDistance((JSONObject) getRoutes().get(0));
 		}
 		return distance;
 	}
 
-	public Integer getRouteDistance(JSONObject route) {
+	public Long getRouteDistance(JSONObject route) {
 		if (route == null) {
 			throw new NullPointerException();
 		}
 
-		int distance = 0;
+		Long distance = Long.valueOf(0);
 		JSONArray legs = getLegs(route);
 
 		for (Object obj : legs) {
@@ -204,11 +204,11 @@ public class DirectionsResult implements Parcelable {
 		return distance;
 	}
 
-	private Integer getLegDistance(JSONObject leg) {
+	private Long getLegDistance(JSONObject leg) {
 		if (leg == null) {
 			throw new NullPointerException();
 		}
 
-		return (Integer) ((JSONObject) leg.get("distance")).get("value");
+		return (Long) ((JSONObject) leg.get("distance")).get("value");
 	}
 }
