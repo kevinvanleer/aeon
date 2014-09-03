@@ -215,6 +215,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		timePickerDepartureTime.clearFocus();
 
 		Calendar timeConverter = Calendar.getInstance();
+		timeConverter.set(Calendar.SECOND, 0);
 		if (destination.getSchedule().getArrivalTime() != null) {
 			timeConverter.setTime(destination.getSchedule().getArrivalTime());
 		} else if (destination.getSchedule().getArrivalTime() != null) {
