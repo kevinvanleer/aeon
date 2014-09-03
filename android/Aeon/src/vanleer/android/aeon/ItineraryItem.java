@@ -2,6 +2,8 @@ package vanleer.android.aeon;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,8 +13,11 @@ import vanleer.util.TimeFormat;
 
 import android.location.Location;
 import android.location.Address;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public final class ItineraryItem implements Parcelable {
 	public DistanceUnit distanceUnit = DistanceUnit.MILES;
@@ -77,7 +82,19 @@ public final class ItineraryItem implements Parcelable {
 
 	public ItineraryItem(Location myLocation, Location previousLocation, Address locationAddress) {
 		this(myLocation, locationAddress);
-		// TODO: Something with previous location
+		new GoogleDirectionsGiver(previousLocation, myLocation) {
+			@Override
+			protected void onPostExecute(DirectionsResult result) {
+				if (result.getRouteDuration() != null) {
+					travelDurationSec = result.getRouteDuration();
+				}
+				if (result.getRouteDistance() != null) {
+					distance = result.getRouteDistance();
+				}
+
+				Log.v("Aeon", "Updated itinerary item duration and distance.");
+			}
+		};
 	}
 
 	void updateLocation(Location newLocation, Address locationAddress) {
