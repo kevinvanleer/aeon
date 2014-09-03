@@ -162,16 +162,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
 		fiveMinutesBeforeDeparture.setTime(origin.getSchedule().getDepartureTime());
 		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -reminderAdvance);
+		Log.d("Aeon", "Setting departure reminder from " + origin.getName() + " at " + fiveMinutesBeforeDeparture.getTime().toString());
 		alarmManager.set(AlarmManager.RTC_WAKEUP, fiveMinutesBeforeDeparture.getTimeInMillis(), pendingReminder);
 	}
 
 	private void setDepartureAlarm(ItineraryItem origin, ItineraryItem destination) {
-		// TODO Auto-generated method stub
 		Intent alarm = new Intent(this, DepartureAlarm.class);
 		alarm.putExtra("vanleer.android.aeon.departureAlarmOrigin", origin);
 		alarm.putExtra("vanleer.android.aeon.departureAlarmDestination", destination);
 		pendingAlarm = PendingIntent.getActivity(this, UPDATE_DESTINATION, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
-
+		Log.d("Aeon", "Setting departure alarm from " + origin.getName() + " at " + origin.getSchedule().getDepartureTime().toString());
 		alarmManager.set(AlarmManager.RTC_WAKEUP, origin.getSchedule().getDepartureTime().getTime(), pendingAlarm);
 	}
 
@@ -253,8 +253,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
-				setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
 				updateArrivalTime(currentDestination());
+				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
+					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
+				}
 			}
 		} else {
 			if (haveDeparted()) { // departing TODO: unreadable -> refactor
@@ -729,7 +731,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 					origin = updatedDestination;
 				}
 
-				if (currentDestinationIndex < (itineraryItems.getCount() - 1)) {
+				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
 						cancelAlerts();
 						setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
