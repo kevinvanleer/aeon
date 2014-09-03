@@ -312,11 +312,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 					float[] distance = new float[1];
 					Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
 					Bundle locationExtras = new Bundle();
-					locationExtras.putParcelable("address", result);
+					// TODO: Exception thrown when trying to unmarshal this bundle because of DirectionsResult
+					// locationExtras.putParcelable("address", result);
 					locationExtras.putFloat("distance", distance[0]);
 					destinationLocation.setExtras(locationExtras);
 					String logMsg = "Destination is " + distance[0] + " from the nearest road";
-					Log.i("Aeon", logMsg);
+					Log.v("Aeon", logMsg);
 				} else {
 					// TODO: Probably something to do here
 				}
@@ -667,7 +668,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			throw new IllegalStateException("The destination list has not been initialize correctly.");
 		}
 
-		return (itineraryItems.getCount() - 2); // was -1
+		return (itineraryItems.getCount() - 2);
 	}
 
 	private ItineraryItem getFinalDestination() {
