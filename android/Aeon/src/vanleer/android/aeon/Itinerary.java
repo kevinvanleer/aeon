@@ -143,9 +143,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	class ItineraryUpdater implements Runnable {
 		public void run() {
-			if (origin.atLocation()) {
-				updateTimes();
-			}
+			// if (currentDestination().atLocation()) {
+			updateTimes();
+			// }
 		}
 	}
 
@@ -276,6 +276,21 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
+	void updateTimes() {
+		Log.v("Aeon", "Updating times.");
+		if (currentDestination().atLocation()) {
+			if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
+				Log.v("Aeon", "Updating current destination departure time while at location.");
+				updateDepartureTime(currentDestination());
+			}
+		} else if (currentDestination().enRoute()) {
+			if (currentDestination().getSchedule().getArrivalTime().before(new Date())) {
+				Log.v("Aeon", "Updating current destination departure time while en route.");
+				updateArrivalTime(currentDestination());
+			}
+		}
+	}
+
 	private void updateDepartureTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
 		thisSchedule.setDepartureTime(new Date());
@@ -283,7 +298,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (thisSchedule.getArrivalTime() != null) {
 			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 		}
-		updateTimes();
+		updateSchedules();
 	}
 
 	private void updateArrivalTime(ItineraryItem currentDestination) {
@@ -292,14 +307,26 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		if (thisSchedule.isDepartureTimeFlexible()) {
 			if (thisSchedule.getStayDuration() != null) {
-				thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
+				Calendar newDeparture = Calendar.getInstance();
+				newDeparture.setTime(new Date());
+				newDeparture.add(Calendar.SECOND, thisSchedule.getStayDuration().intValue());
+				thisSchedule.setDepartureTime(newDeparture.getTime());
+				// thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
 			}
 		} else {
 			if (thisSchedule.getDepartureTime() != null) {
 				thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 			}
 		}
-		updateTimes();
+		updateSchedules();
+	}
+
+	void updateSchedules() {
+		for (int i = (currentDestinationIndex + 1); i < (itineraryItems.getCount() - 1); ++i) {
+			itineraryItems.getItem(i).updateSchedule(itineraryItems.getItem(i - 1).getSchedule().getDepartureTime());
+		}
+
+		itineraryItems.notifyDataSetChanged();
 	}
 
 	private void getDirections() {
@@ -564,20 +591,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryItems.notifyDataSetChanged();
 	}
 
-	void updateTimes() {
-		Log.v("Aeon", "Updating times.");
-		if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
-			Log.v("Aeon", "Updating current destination departure time.");
-			currentDestination().getSchedule().setDepartureTime(new Date());
-		}
-
-		for (int i = (currentDestinationIndex + 1); i < (itineraryItems.getCount() - 1); ++i) {
-			itineraryItems.getItem(i).updateSchedule(itineraryItems.getItem(i - 1).getSchedule().getDepartureTime());
-		}
-
-		itineraryItems.notifyDataSetChanged();
-	}
-
 	private void initializeOrigin() {
 		origin = new ItineraryItem("My location (locating...)");
 		origin.setAtLocation();
@@ -623,9 +636,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			private void doStuff() {
 				if (currentDestinationIndex >= 0) {
-					ItineraryItem currentlyAt = currentDestination();
-
-					if (currentlyAt.getSchedule().getDepartureTime().before(new Date())) {
+					if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
 					}
 				}
@@ -740,8 +751,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				}
 
 				selectedItemPosition = -1;
-
-				Itinerary.this.runOnUiThread(new ItineraryUpdater());
+				updateTimes();
 			}
 			break;
 		default:
