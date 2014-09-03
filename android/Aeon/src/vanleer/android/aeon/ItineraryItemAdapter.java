@@ -91,12 +91,14 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					stayDuration.setVisibility(View.GONE);
 
 					departureVicinity.setText("Start from " + item.GetVicinity());
-				} else if (position == (this.getCount() - 1)) {
+
+				} else if (position == (this.getCount() - 2)) {
 					stayDuration.setVisibility(View.GONE);
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);
 
 					arrivalVicinity.setText("End at " + item.GetVicinity());
+
 				} else {
 
 				}
