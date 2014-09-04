@@ -50,7 +50,14 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
 				arrivalTime.setText(" at " + item.getSchedule().getArrivalTimeString());
 				destinationName.setText(item.getName());
-				stayDuration.setText(" for " + item.getSchedule().getStayDurationLongFormat());
+
+				// stayDuration.setText(" for " + item.getSchedule().getStayDurationLongFormat());
+				String duration = item.getSchedule().getStayDurationLongFormat();
+				if (!duration.equals("briefly")) {
+					duration = " for " + duration;
+				}
+				stayDuration.setText(duration);
+
 				departureVicinity.setText("Depart from " + item.GetVicinity());
 				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
 

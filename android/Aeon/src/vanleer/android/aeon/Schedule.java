@@ -6,6 +6,7 @@ import java.util.Date;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import vanleer.util.TimeFormat;
 
@@ -281,7 +282,17 @@ public class Schedule implements Parcelable {
 	}
 
 	public String getStayDurationLongFormat() {
-		return TimeFormat.format(getStayDuration() * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		if (getStayDuration() == null) {
+			Log.e("Aeon", "Invalid stay duration value, cannot produce long format");
+			throw new NullPointerException();
+		}
+
+		String duration = "briefly";
+		if (getStayDuration() > 0) {
+			duration = TimeFormat.format(getStayDuration() * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		}
+
+		return duration;
 	}
 
 	public void setArrivalTime(Date time) {
