@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -82,19 +84,27 @@ public final class ItineraryItem implements Parcelable {
 
 	public ItineraryItem(Location myLocation, Location previousLocation, Address locationAddress) {
 		this(myLocation, locationAddress);
-		new GoogleDirectionsGiver(previousLocation, myLocation) {
-			@Override
-			protected void onPostExecute(DirectionsResult result) {
-				if (result.getRouteDuration() != null) {
-					travelDurationSec = result.getRouteDuration();
-				}
-				if (result.getRouteDistance() != null) {
-					distance = result.getRouteDistance();
-				}
+		try {
+			GoogleDirectionsGiver giver = new GoogleDirectionsGiver(previousLocation, myLocation);
 
-				Log.v("Aeon", "Updated itinerary item duration and distance.");
+			// TODO: Don't require synchronous waiting here
+			DirectionsResult result = giver.get(5, TimeUnit.SECONDS);
+			if (result.getRouteDuration() != null) {
+				travelDurationSec = result.getRouteDuration();
 			}
-		};
+			if (result.getRouteDistance() != null) {
+				distance = result.getRouteDistance();
+			}
+		} catch (TimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	void updateLocation(Location newLocation, Address locationAddress) {

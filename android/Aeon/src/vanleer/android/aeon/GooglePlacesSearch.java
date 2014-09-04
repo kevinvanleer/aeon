@@ -262,8 +262,10 @@ public final class GooglePlacesSearch {
 	public Address getBestReverseGeocodeResult(final Location location, Boolean sensor) {
 		Address placemark = null;
 		List<Address> addresses = getReverseGeocodeResults(location, sensor);
-		if (addresses.size() > 0) {
-			placemark = getReverseGeocodeResults(location, sensor).get(0);
+		if (addresses != null) {
+			if (addresses.size() > 0) {
+				placemark = getReverseGeocodeResults(location, sensor).get(0);
+			}
 		}
 
 		return placemark;
