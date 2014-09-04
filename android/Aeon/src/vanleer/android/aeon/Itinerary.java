@@ -291,9 +291,29 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
+	private Date nearestMinute() {
+		return nearestMinute(new Date());
+	}
+
+	private Date nearestMinute(Date date) {
+		Calendar nearestMinute = Calendar.getInstance();
+		nearestMinute.setTime(date);
+
+		// int delta = 0;
+		// if (nearestMinute.get(Calendar.SECOND) < 30) {
+		// delta = 0;
+		// } else {
+		// delta = 1;
+		// }
+		// nearestMinute.add(Calendar.MINUTE, delta);
+		nearestMinute.set(Calendar.SECOND, 0);
+
+		return nearestMinute.getTime();
+	}
+
 	private void updateDepartureTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.setDepartureTime(new Date());
+		thisSchedule.setDepartureTime(nearestMinute());
 
 		if (thisSchedule.getArrivalTime() != null) {
 			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
@@ -303,7 +323,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateArrivalTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.setArrivalTime(new Date());
+		thisSchedule.setArrivalTime(nearestMinute());
 
 		if (thisSchedule.isDepartureTimeFlexible()) {
 			if (thisSchedule.getStayDuration() != null) {
@@ -577,7 +597,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.v("Aeon", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
 			Log.v("Aeon", "Updating origin departure time.");
-			origin.getSchedule().setDepartureTime(new Date());
+			origin.getSchedule().setDepartureTime(nearestMinute());
 		}
 		if (currentLocation() != null) {
 			try {
@@ -594,7 +614,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		origin = new ItineraryItem("My location (locating...)");
 		origin.setAtLocation();
 		Schedule departNow = new Schedule();
-		departNow.setDepartureTime(new Date());
+		departNow.setDepartureTime(nearestMinute());
 		origin.setSchedule(departNow);
 		if (currentLocation() != null) {
 			try {
