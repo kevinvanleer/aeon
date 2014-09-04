@@ -120,7 +120,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		return new LocationListener() {
 			public void onLocationChanged(Location location) {
 				makeUseOfNewLocation(location);
-				locationManager.removeUpdates(this);
+				if (getString(R.string.address_unknown).equals(locationText.getText())) {
+					locationManager.removeUpdates(this);
+				}
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -138,7 +140,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				// HACK: DO BETTER
-				if (locationText.getText() == getString(R.string.address_unknown)) {
+				if (getString(R.string.address_unknown).equals(locationText.getText())) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 					builder.setTitle("Selected destination").setMessage("Route from current location not available.");
 					builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
