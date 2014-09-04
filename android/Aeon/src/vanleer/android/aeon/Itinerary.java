@@ -308,10 +308,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (thisSchedule.isDepartureTimeFlexible()) {
 			if (thisSchedule.getStayDuration() != null) {
 				Calendar newDeparture = Calendar.getInstance();
-				newDeparture.setTime(new Date());
+				newDeparture.setTime(thisSchedule.getArrivalTime());
 				newDeparture.add(Calendar.SECOND, thisSchedule.getStayDuration().intValue());
 				thisSchedule.setDepartureTime(newDeparture.getTime());
-				// thisSchedule.setDepartureTime(new Date(thisSchedule.getArrivalTime().getTime() + (thisSchedule.getStayDuration() * 1000)));
 			}
 		} else {
 			if (thisSchedule.getDepartureTime() != null) {
@@ -618,8 +617,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 					Calendar nextMinute = Calendar.getInstance();
 					nextMinute.setTime(now.getTime());
-					nextMinute.add(Calendar.MINUTE, 1);
 					nextMinute.set(Calendar.SECOND, 0);
+					nextMinute.add(Calendar.MINUTE, 1);
 
 					if (now.getTime().before(nextMinute.getTime())) {
 						try {
