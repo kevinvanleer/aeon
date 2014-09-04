@@ -26,4 +26,6 @@
     <string name="my_location_icon">My location icon</string>
     <string name="add_destination_itinerary_item">Next destination</string>
     <string name="ok">OK</string>
+    <string name="waiting_for_location">Waiting for location...</string>
+    <string name="address_unknown">Address unknown</string>
 </resources>

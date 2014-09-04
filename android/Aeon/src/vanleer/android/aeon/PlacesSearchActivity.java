@@ -82,7 +82,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		geocoder = new Geocoder(this);
 		googleSearch = new GooglePlacesSearch(geocoder, apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
-		locationText.setText("Waiting for location...");
+		locationText.setText(R.string.waiting_for_location);
 		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
 		searchButton.setOnClickListener(this);
 		suggestionList = new UnfilteredArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
@@ -120,6 +120,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		return new LocationListener() {
 			public void onLocationChanged(Location location) {
 				makeUseOfNewLocation(location);
+				locationManager.removeUpdates(this);
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -137,7 +138,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				// HACK: DO BETTER
-				if (locationText.getText() == "Address unknown") {
+				if (locationText.getText() == getString(R.string.address_unknown)) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 					builder.setTitle("Selected destination").setMessage("Route from current location not available.");
 					builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
