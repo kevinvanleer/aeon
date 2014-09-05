@@ -202,7 +202,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == (itineraryItems.getCount() - 1)) {
 					startSearchActivity();
-				} else {
+				} else if (position >= currentDestinationIndex) {
 					selectedItemPosition = position;
 					updateSchedule(itineraryItems.getItem(position));
 				}
