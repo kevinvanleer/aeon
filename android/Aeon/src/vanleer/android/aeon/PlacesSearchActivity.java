@@ -120,7 +120,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		return new LocationListener() {
 			public void onLocationChanged(Location location) {
 				makeUseOfNewLocation(location);
-				if (getString(R.string.address_unknown).equals(locationText.getText())) {
+				if (!getString(R.string.address_unknown).equals(locationText.getText())) {
 					locationManager.removeUpdates(this);
 				}
 			}
