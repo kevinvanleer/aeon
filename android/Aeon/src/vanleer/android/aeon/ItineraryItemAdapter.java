@@ -47,7 +47,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				// travelDistance.setText("Drive/Walk/Bike/Ride " + item.getFormattedDistance());
 				travelDistance.setText("Drive " + item.getFormattedDistance());
 				travelTime.setText(" in " + item.getTravelDurationLongFormat());
-				arrivalVicinity.setText("Arrive at " + item.GetVicinity());
+				arrivalVicinity.setText("Arrive at " + item.getVicinity());
 				arrivalTime.setText(" at " + item.getSchedule().getArrivalTimeString());
 				destinationName.setText(item.getName());
 
@@ -58,7 +58,7 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				}
 				stayDuration.setText(duration);
 
-				departureVicinity.setText("Depart from " + item.GetVicinity());
+				departureVicinity.setText("Depart from " + item.getVicinity());
 				departureTime.setText(" at " + item.getSchedule().getDepartureTimeString());
 
 				travelDistance.setEnabled(!item.locationExpired());
@@ -97,14 +97,14 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 					travelTime.setVisibility(View.GONE);
 					stayDuration.setVisibility(View.GONE);
 
-					departureVicinity.setText("Start from " + item.GetVicinity());
+					departureVicinity.setText("Start from " + item.getVicinity());
 
 				} else if (position == (this.getCount() - 2)) {
 					stayDuration.setVisibility(View.GONE);
 					departureVicinity.setVisibility(View.GONE);
 					departureTime.setVisibility(View.GONE);
 
-					arrivalVicinity.setText("End at " + item.GetVicinity());
+					arrivalVicinity.setText("End at " + item.getVicinity());
 
 				} else {
 

@@ -268,7 +268,7 @@ public final class ItineraryItem implements Parcelable {
 		return (String) googlePlaceResult.get("name");
 	}
 
-	String GetVicinity() {
+	String getVicinity() {
 		String vicinity;
 
 		if (googlePlaceResult != null) {

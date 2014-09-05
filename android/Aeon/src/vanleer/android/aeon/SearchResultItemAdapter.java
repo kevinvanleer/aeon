@@ -36,7 +36,7 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 					name.setText(item.getName());
 				}
 				if (vicinity != null) {
-					vicinity.setText(item.GetVicinity());
+					vicinity.setText(item.getVicinity());
 				}
 				if(distance != null) {
 					distance.setText(item.getFormattedDistance());
