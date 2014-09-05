@@ -1,5 +1,8 @@
 package vanleer.android.aeon;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -142,12 +145,22 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		}
 
 		if (item.atLocation()) {
-			arrivalInfoRow.setBackgroundDrawable(gd);
-			destinationInfoRow.setBackgroundDrawable(gd);
-			departureInfoRow.setBackgroundDrawable(gd);
-			// arrivalInfoRow.setBackgroundColor(0xff0b4496);
-			// destinationInfoRow.setBackgroundColor(0xff0b4496);
-			// departureInfoRow.setBackgroundColor(0xff0b4496);
+			if (item.getSchedule().isArrivalTime()) {
+				arrivalInfoRow.setBackgroundDrawable(gd);
+				// arrivalInfoRow.setBackgroundColor(0xff0b4496);
+				destinationInfoRow.setBackgroundColor(Color.BLACK);
+				departureInfoRow.setBackgroundColor(Color.BLACK);
+			} else if (item.getSchedule().isDepartureTime()) {
+				departureInfoRow.setBackgroundDrawable(gd);
+				// departureInfoRow.setBackgroundColor(0xff0b4496);
+				arrivalInfoRow.setBackgroundColor(Color.BLACK);
+				destinationInfoRow.setBackgroundColor(Color.BLACK);
+			} else {
+				destinationInfoRow.setBackgroundDrawable(gd);
+				// destinationInfoRow.setBackgroundColor(0xff0b4496);
+				arrivalInfoRow.setBackgroundColor(Color.BLACK);
+				departureInfoRow.setBackgroundColor(Color.BLACK);
+			}
 		} else {
 			arrivalInfoRow.setBackgroundColor(Color.BLACK);
 			destinationInfoRow.setBackgroundColor(Color.BLACK);

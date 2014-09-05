@@ -253,7 +253,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
 				itineraryItems.notifyDataSetChanged();
-				updateArrivalTime(currentDestination());
+				updateArrivalTimeAndSchedules(currentDestination());
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
 				}
@@ -263,7 +263,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				traveling = true;
 				cancelAlerts();
 				currentDestination().setLocationExpired();
-				updateDepartureTime(currentDestination());
+				updateDepartureTimeAndSchedules(currentDestination());
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					getDirections();
 					++currentDestinationIndex;
@@ -289,6 +289,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 				updateArrivalTime(currentDestination());
 			}
 		}
+
+		updateSchedules();
 	}
 
 	private Date nearestMinute() {
@@ -311,6 +313,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return nearestMinute.getTime();
 	}
 
+	private void updateDepartureTimeAndSchedules(ItineraryItem currentDestination) {
+		updateDepartureTime(currentDestination);
+		updateSchedules();
+	}
+
 	private void updateDepartureTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
 		thisSchedule.setDepartureTime(nearestMinute());
@@ -318,6 +325,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (thisSchedule.getArrivalTime() != null) {
 			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 		}
+	}
+
+	private void updateArrivalTimeAndSchedules(ItineraryItem currentDestination) {
+		updateArrivalTime(currentDestination);
 		updateSchedules();
 	}
 
@@ -337,7 +348,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 				thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 			}
 		}
-		updateSchedules();
 	}
 
 	void updateSchedules() {
@@ -346,6 +356,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 
 		itineraryItems.notifyDataSetChanged();
+		Log.v("Aeon", "Updating itinerary list view.");
 	}
 
 	private void getDirections() {
@@ -627,6 +638,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		insertListItem(origin, 0);
 
 		new Thread() {
+			boolean triggerNextPass = false;
+
 			@Override
 			public void run() {
 				// TODO: Change nextMinute to current location departure time plus one minute
@@ -655,7 +668,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			private void doStuff() {
 				if (currentDestinationIndex >= 0) {
-					if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
+					if (triggerNextPass) {
+						Itinerary.this.runOnUiThread(new ItineraryUpdater());
+						Log.v("Aeon", "Updating itinerary on trigger.");
+						triggerNextPass = false;
+					} else if (currentDestination().getSchedule().isArrivalTime()) {
+						Log.v("Aeon", "Setting itinerary next pass update trigger.");
+						triggerNextPass = true;
+					} else if (currentDestination().getSchedule().isDepartureTime()) {
+						Itinerary.this.runOnUiThread(new ItineraryUpdater());
+						Log.v("Aeon", "Updating itinerary prior to departure.");
+					} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
 					}
 				}

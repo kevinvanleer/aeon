@@ -477,6 +477,31 @@ public class Schedule implements Parcelable {
 		maxStayDurationSec = seconds;
 	}
 
+	public boolean isArrivalTime() {
+		if (getArrivalTime() == null) return false;
+
+		return areSameMinute(new Date(), getArrivalTime());
+	}
+
+	public boolean isDepartureTime() {
+		if (getDepartureTime() == null) return false;
+
+		return areSameMinute(new Date(), getDepartureTime());
+	}
+
+	static private boolean areSameMinute(Date time1, Date time2) {
+		if (time1 == null || time2 == null) return false;
+
+		Calendar minuteCalculator = Calendar.getInstance();
+		minuteCalculator.setTime(time1);
+		minuteCalculator.set(Calendar.SECOND, 0);
+		minuteCalculator.set(Calendar.MILLISECOND, 0);
+
+		long delta = time2.getTime() - minuteCalculator.getTime().getTime();
+
+		return ((delta <= 60000) && (delta >= 0));
+	}
+
 	public int describeContents() {
 		return 0;
 	}
