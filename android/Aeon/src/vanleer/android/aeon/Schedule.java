@@ -477,6 +477,18 @@ public class Schedule implements Parcelable {
 		maxStayDurationSec = seconds;
 	}
 
+	public boolean isArrivalTime(int offset) {
+		if (getArrivalTime() == null) return false;
+
+		Calendar offsetArrivalTime = Calendar.getInstance();
+		offsetArrivalTime.setTime(getArrivalTime());
+		offsetArrivalTime.set(Calendar.SECOND, 0);
+		offsetArrivalTime.set(Calendar.MILLISECOND, 0);
+		offsetArrivalTime.add(Calendar.MINUTE, offset);
+
+		return areSameMinute(new Date(), offsetArrivalTime.getTime());
+	}
+
 	public boolean isArrivalTime() {
 		if (getArrivalTime() == null) return false;
 

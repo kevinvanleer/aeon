@@ -638,8 +638,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		insertListItem(origin, 0);
 
 		new Thread() {
-			boolean triggerNextPass = false;
-
 			@Override
 			public void run() {
 				// TODO: Change nextMinute to current location departure time plus one minute
@@ -668,18 +666,15 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			private void doStuff() {
 				if (currentDestinationIndex >= 0) {
-					if (triggerNextPass) {
+					if (currentDestination().getSchedule().isArrivalTime(1)) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
-						Log.v("Aeon", "Updating itinerary on trigger.");
-						triggerNextPass = false;
-					} else if (currentDestination().getSchedule().isArrivalTime()) {
-						Log.v("Aeon", "Setting itinerary next pass update trigger.");
-						triggerNextPass = true;
+						Log.v("Aeon", "Updating itinerary to highlight stay duration.");
 					} else if (currentDestination().getSchedule().isDepartureTime()) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
 						Log.v("Aeon", "Updating itinerary prior to departure.");
 					} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
 						Itinerary.this.runOnUiThread(new ItineraryUpdater());
+						Log.v("Aeon", "Updating itinerary after departure time expiration.");
 					}
 				}
 			}
