@@ -111,6 +111,8 @@ public class ScheduleTest extends TestCase {
 		long arrivalTime = testSchedule.getArrivalTime().getTime();
 		long departureTime = testSchedule.getDepartureTime().getTime();
 		long stayDurationMs = testSchedule.getStayDuration() * 1000;
+		assertTrue(stayDurationMs == (30 * 60 * 1000));
+		assertTrue(testSchedule.getArrivalTime() != testSchedule.getDepartureTime());
 		assertTrue(arrivalTime == (departureTime - stayDurationMs));
 	}
 
