@@ -7,13 +7,14 @@ import vanleer.android.aeon.PlacesSearchActivity;
 import vanleer.android.aeon.R;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 
 public class DestinationSearchTest extends ActivityInstrumentationTestCase2<PlacesSearchActivity> {
 	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 	static final int TIMEOUT_MS = 20000;
-	
+
 	public DestinationSearchTest() {
 		super(TARGET_PACKAGE_ID, PlacesSearchActivity.class);
 	}
@@ -76,9 +77,20 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		checkDistanceOrder(resultsListView);
 	}
 
-	/*
-	 * public void testEstablishmentAddressSearch() { EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999); solo.enterText(0, "2100 Locust Street, St Louis MO"); solo.clickOnImageButton(0); assertTrue(solo.waitForText("The Schlafly Tap Room", 1, TIMEOUT_MS)); ArrayList<ListView> listViews = solo.getCurrentListViews(); ListView resultsListView = listViews.get(0); long distance = 0; for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) { ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex); assertTrue(distance < result.GetDistance()); distance = result.GetDistance(); } }
-	 */
+	/*-public void testEstablishmentAddressSearch() {
+		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
+		solo.enterText(0, "2100 Locust Street, St Louis MO");
+		solo.clickOnImageButton(0);
+		assertTrue(solo.waitForText("The Schlafly Tap Room", 1, TIMEOUT_MS));
+		ArrayList<ListView> listViews = solo.getCurrentListViews();
+		ListView resultsListView = listViews.get(0);
+		long distance = 0;
+		for (int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
+			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
+			assertTrue(distance < result.GetDistance());
+			distance = result.GetDistance();
+		}
+	}*/
 
 	public void testMultipleSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);

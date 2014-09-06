@@ -95,7 +95,22 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		return (findView(id).getVisibility() == View.VISIBLE);
 	}
 
-	/*
-	 * Will have to use this method for real device testing? public void sendGpsLocation(double latitude, double longitude) { final String TEST_PROVIDER = "testGps"; LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE); locationManager.addTestProvider(TEST_PROVIDER, false, false, false, false, false, false, false, Criteria.POWER_LOW, Criteria.ACCURACY_FINE); locationManager.setTestProviderEnabled(TEST_PROVIDER, true); locationManager.setTestProviderStatus(TEST_PROVIDER, LocationProvider.AVAILABLE, null, System.currentTimeMillis()); Location mockLocation = new Location(TEST_PROVIDER); mockLocation.setLatitude(latitude); mockLocation.setLongitude(longitude); mockLocation.setTime(System.currentTimeMillis()); mockLocation.setSpeed(0); mockLocation.setAccuracy(25); mockLocation.setAltitude(0); mockLocation.setBearing(0); locationManager.setTestProviderLocation(TEST_PROVIDER, mockLocation); }
-	 */
+	/*- Will have to use this method for real device testing?
+	public void sendGpsLocation(double latitude, double longitude) {
+		final String TEST_PROVIDER = "testGps";
+		LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+		locationManager.addTestProvider(TEST_PROVIDER, false, false, false, false, false, false, false, Criteria.POWER_LOW, Criteria.ACCURACY_FINE);
+		locationManager.setTestProviderEnabled(TEST_PROVIDER, true);
+		locationManager.setTestProviderStatus(TEST_PROVIDER, LocationProvider.AVAILABLE, null, System.currentTimeMillis());
+		Location mockLocation = new Location(TEST_PROVIDER);
+		mockLocation.setLatitude(latitude);
+		mockLocation.setLongitude(longitude);
+		mockLocation.setTime(System.currentTimeMillis());
+		mockLocation.setSpeed(0);
+		mockLocation.setAccuracy(25);
+		mockLocation.setAltitude(0);
+		mockLocation.setBearing(0);
+		locationManager.setTestProviderLocation(TEST_PROVIDER, mockLocation);
+	}*/
+
 }
