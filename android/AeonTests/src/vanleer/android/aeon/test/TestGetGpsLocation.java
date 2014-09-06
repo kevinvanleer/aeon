@@ -36,7 +36,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		solo.clickOnText("Google Search");
 		solo.assertCurrentActivity("PlacesSearch is not the current activity.", PlacesSearchActivity.class);
 		assertTrue(isViewVisible(R.id.imageView_currentLocation));
-		assertTrue(solo.waitForText("4812 Danielle"));
+		assertTrue(solo.waitForText("Danielle"));
 	}
 
 	public void testUpdateGpsLocationPreSearch() {
@@ -48,7 +48,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		solo.assertCurrentActivity("PlacesSearch is not the current activity.", PlacesSearchActivity.class);
 		assertFalse(isViewVisible(R.id.imageView_currentLocation));
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		assertTrue(solo.waitForText("4812 Danielle"));
+		assertTrue(solo.waitForText("Danielle"));
 		assertTrue(isViewVisible(R.id.imageView_currentLocation));
 	}
 
@@ -63,7 +63,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		solo.enterText(0, "church");
 		solo.clickOnImageButton(0);
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		assertTrue(solo.waitForText("4812 Danielle"));
+		assertTrue(solo.waitForText("Danielle"));
 		assertTrue(isViewVisible(R.id.imageView_currentLocation));
 	}
 
@@ -74,7 +74,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		solo.sendKey(Solo.MENU);
 		solo.clickOnText("Add");
 		solo.clickOnText("My Location");
-		assertTrue(solo.waitForText("4812 Danielle"));
+		assertTrue(solo.waitForText("Danielle"));
 	}
 
 	public void testAddMyLocationBeforeGpsFix() {
@@ -84,7 +84,7 @@ public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinera
 		solo.clickOnText("Add");
 		solo.clickOnText("My Location");
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		assertTrue(solo.waitForText("4812 Danielle"));
+		assertTrue(solo.waitForText("Danielle"));
 	}
 
 	View findView(int id) {
