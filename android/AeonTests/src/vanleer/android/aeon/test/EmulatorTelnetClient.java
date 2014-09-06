@@ -11,17 +11,16 @@ public final class EmulatorTelnetClient {
 		try {
 			Socket socket = new Socket("10.0.2.2", 5554);
 			Writer w = new OutputStreamWriter(socket.getOutputStream());
-			String str = "geo fix " + longitude + " " + latitude ;
+			String str = "geo fix " + longitude + " " + latitude;
 			w.write(str + "\r\n");
 			w.flush();
-		}
-		catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			throw new RuntimeException(e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
 	static void unlockScreen() {
 		try {
 			Socket socket = new Socket("10.0.2.2", 5554);
@@ -29,11 +28,9 @@ public final class EmulatorTelnetClient {
 			String str = "event send EV_KEY:KEY_MENU:1 EV_KEY:KEY_MENU:0";
 			w.write(str + "\r\n");
 			w.flush();
-		}
-		catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			throw new RuntimeException(e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

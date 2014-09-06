@@ -105,13 +105,13 @@ public class ScheduleTest extends TestCase {
 	public void testUpdate() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
-		Date now = new Date();
-		privateAccess.setDepartureTime(now);
+		privateAccess.setDepartureTime(new Date());
 		privateAccess.setStayDuration((long) (30 * 60));
-		testSchedule.update(now);
+		testSchedule.update(new Date());
+		long arrivalTime = testSchedule.getArrivalTime().getTime();
 		long departureTime = testSchedule.getDepartureTime().getTime();
 		long stayDurationMs = testSchedule.getStayDuration() * 1000;
-		assertTrue(now.getTime() == (departureTime - stayDurationMs));
+		assertTrue(arrivalTime == (departureTime - stayDurationMs));
 	}
 
 	public void testGetArrivalTime() {

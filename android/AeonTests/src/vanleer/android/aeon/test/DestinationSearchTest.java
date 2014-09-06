@@ -1,6 +1,6 @@
 package vanleer.android.aeon.test;
 
-import com.jayway.android.robotium.solo.Solo;
+import com.robotium.solo.Solo;
 
 import vanleer.android.aeon.ItineraryItem;
 import vanleer.android.aeon.PlacesSearchActivity;
@@ -23,36 +23,31 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		EmulatorTelnetClient.unlockScreen();
 		solo = new Solo(getInstrumentation(), getActivity());
 	}
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		solo.finishOpenedActivities();
 	}
-	
+
 	View findView(int id) {
 		return solo.getCurrentActivity().findViewById(id);
 	}
-	
+
 	void checkDistanceOrder(ListView tested) {
 		Long distance = (long) 0;
-		for(int itemIndex = 0; itemIndex < tested.getCount(); ++itemIndex) {
+		for (int itemIndex = 0; itemIndex < tested.getCount(); ++itemIndex) {
 			ItineraryItem result = (ItineraryItem) tested.getItemAtPosition(itemIndex);
-			if(distance == null)
-			{
+			if (distance == null) {
 				assertTrue(result.getDistance() == null);
-			}			
-			else if(result.getDistance() != null)
-			{
+			} else if (result.getDistance() != null) {
 				assertTrue(distance <= result.getDistance());
 				distance = result.getDistance();
-			}
-			else
-			{
+			} else {
 				distance = null;
 			}
 		}
 	}
-	
+
 	public void testCategorySearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "church");
@@ -61,7 +56,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testNameSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
@@ -70,7 +65,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testAddressSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "4812 Danielle CT 62040");
@@ -80,22 +75,11 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
-	/*public void testEstablishmentAddressSearch() {
-		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
-		solo.enterText(0, "2100 Locust Street, St Louis MO");
-		solo.clickOnImageButton(0);
-		assertTrue(solo.waitForText("The Schlafly Tap Room", 1, TIMEOUT_MS));
-		ArrayList<ListView> listViews = solo.getCurrentListViews();
-		ListView resultsListView = listViews.get(0);
-		long distance = 0;
-		for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) {
-			ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex);
-			assertTrue(distance < result.GetDistance());
-			distance = result.GetDistance();			
-		}
-	}*/
-	
+
+	/*
+	 * public void testEstablishmentAddressSearch() { EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999); solo.enterText(0, "2100 Locust Street, St Louis MO"); solo.clickOnImageButton(0); assertTrue(solo.waitForText("The Schlafly Tap Room", 1, TIMEOUT_MS)); ArrayList<ListView> listViews = solo.getCurrentListViews(); ListView resultsListView = listViews.get(0); long distance = 0; for(int itemIndex = 0; itemIndex < resultsListView.getCount(); ++itemIndex) { ItineraryItem result = (ItineraryItem) resultsListView.getItemAtPosition(itemIndex); assertTrue(distance < result.GetDistance()); distance = result.GetDistance(); } }
+	 */
+
 	public void testMultipleSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
@@ -113,11 +97,11 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		solo.enterText(0, "1975 Krenning 63013");
 		solo.clickOnImageButton(0);
 		assertTrue(solo.waitForText("1975 Krenning Rd", 1, TIMEOUT_MS));
-		
+
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testRepeatedSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "Schlafly Bottleworks");
@@ -132,11 +116,11 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		solo.enterText(0, "1975 Krenning 63013");
 		solo.clickOnImageButton(0);
 		solo.waitForDialogToClose(TIMEOUT_MS);
-		
+
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testInvalidCategorySearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "real estate gency");
@@ -145,7 +129,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testInvalidNameSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "63013");
@@ -154,7 +138,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testInvalidSearch() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "bibbleh");
@@ -163,7 +147,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		ListView resultsListView = (ListView) findView(R.id.listView_searchResults);
 		checkDistanceOrder(resultsListView);
 	}
-	
+
 	public void testPreLocatedSearchAutoComplete() {
 		EmulatorTelnetClient.sendLocation(38.74419380, -90.09839319999999);
 		solo.enterText(0, "sch");
@@ -172,7 +156,7 @@ public class DestinationSearchTest extends ActivityInstrumentationTestCase2<Plac
 		solo.enterText(0, "nu");
 		assertTrue(solo.waitForText("Schnucks", 0, TIMEOUT_MS));
 	}
-	
+
 	public void testPostLocatedSearchAutoComplete() {
 		solo.enterText(0, "sch");
 		assertTrue(solo.waitForText("Schiphol", 0, TIMEOUT_MS));
