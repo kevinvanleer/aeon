@@ -53,18 +53,74 @@ public class ScheduleTest extends TestCase {
 	}
 
 	public void testIsArrivalTimeFlexible() {
-		fail("Not yet implemented");
-		// original
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinArrivalTime(new Date(1));
+		privateAccess.setArrivalTime(new Date(5));
+		privateAccess.setMaxArrivalTime(new Date(10));
+
+		assertTrue(testSchedule.isArrivalTimeFlexible());
 	}
 
 	public void testIsDepartureTimeFlexible() {
-		fail("Not yet implemented");
-		// original
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinDepartureTime(new Date(1));
+		privateAccess.setDepartureTime(new Date(5));
+		privateAccess.setMaxDepartureTime(new Date(10));
+
+		assertTrue(testSchedule.isDepartureTimeFlexible());
+
 	}
 
 	public void testIsStayDurationFlexible() {
-		fail("Not yet implemented");
-		// original
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinStayDuration((long) 1);
+		privateAccess.setStayDuration((long) 5);
+		privateAccess.setMaxStayDuration((long) 10);
+
+		assertTrue(testSchedule.isStayDurationFlexible());
+
+	}
+
+	public void testIsDateFlexible_null_argument() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Date validMin = new Date(1);
+		Date validTime = new Date(5);
+		Date validMax = new Date(10);
+
+		assertTrue(privateAccess.isDateFlexible(null, null, null));
+		assertTrue(privateAccess.isDateFlexible(null, validMin, validMax));
+		assertTrue(privateAccess.isDateFlexible(validTime, null, validMax));
+		assertTrue(privateAccess.isDateFlexible(validTime, validMin, null));
+	}
+
+	public void testIsDateFlexible_true() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Date validMin = new Date(1);
+		Date validTime = new Date(5);
+		Date validMax = new Date(10);
+
+		assertTrue(privateAccess.isDateFlexible(validMin, validTime, validMax));
+	}
+
+	public void testIsDateFlexible_false() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Date validMin = new Date(5);
+		Date validTime = new Date(5);
+		Date validMax = new Date(5);
+
+		assertFalse(privateAccess.isDateFlexible(validMin, validTime, validMax));
 	}
 
 	public void testIsArrivalTimeValidDate() {
