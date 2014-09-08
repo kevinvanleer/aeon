@@ -2,9 +2,15 @@ package vanleer.android.aeon;
 
 import java.util.Date;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 import junit.framework.TestCase;
 
 public class ScheduleTest extends TestCase {
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
 
 	protected static void tearDownAfterClass() throws Exception {
 
@@ -123,19 +129,78 @@ public class ScheduleTest extends TestCase {
 		assertFalse(privateAccess.isDateFlexible(validMin, validTime, validMax));
 	}
 
-	public void testIsArrivalTimeValidDate() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateValid_null() {
+		Schedule testSchedule = new Schedule();
+
+		try {
+			testSchedule.isDateValid(null, null, null);
+			fail("NullPointerException expected.");
+		} catch (NullPointerException e) {
+			// test passed
+		}
 	}
 
-	public void testIsArrivalTimeValid() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateValid_invalid() {
+		Schedule testSchedule = new Schedule();
+
+		Date minTime = new Date(5);
+		Date time = new Date(1);
+		Date maxTime = new Date(10);
+
+		assertFalse(testSchedule.isDateValid(time, minTime, maxTime));
 	}
 
-	public void testIsDepartureTimeValidDate() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateValid_flexible() {
+		Schedule testSchedule = new Schedule();
+
+		Date minTime = new Date(1);
+		Date time = new Date(5);
+		Date maxTime = new Date(10);
+
+		assertTrue(testSchedule.isDateValid(time, minTime, maxTime));
+	}
+
+	public void testIsDateValid_hard() {
+		Schedule testSchedule = new Schedule();
+
+		Date minTime = new Date(5);
+		Date time = new Date(5);
+		Date maxTime = new Date(5);
+
+		assertTrue(testSchedule.isDateValid(time, minTime, maxTime));
+	}
+
+	public void testIsArrivalTimeValid_invalid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinArrivalTime(new Date(1));
+		privateAccess.setArrivalTime(new Date(11));
+		privateAccess.setMaxArrivalTime(new Date(10));
+
+		assertFalse(testSchedule.isArrivalTimeValid());
+	}
+
+	public void testIsArrivalTimeValid_flexible() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinArrivalTime(new Date(1));
+		privateAccess.setArrivalTime(new Date(5));
+		privateAccess.setMaxArrivalTime(new Date(10));
+
+		assertTrue(testSchedule.isArrivalTimeValid());
+	}
+
+	public void testIsArrivalTimeValid_hard() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		privateAccess.setMinArrivalTime(new Date(5));
+		privateAccess.setArrivalTime(new Date(5));
+		privateAccess.setMaxArrivalTime(new Date(5));
+
+		assertTrue(testSchedule.isArrivalTimeValid());
 	}
 
 	public void testIsDepartureTimeValid() {
@@ -143,7 +208,7 @@ public class ScheduleTest extends TestCase {
 		// original
 	}
 
-	public void testIsStayDurationValidLong() {
+	public void testIsDurationValid() {
 		fail("Not yet implemented");
 		// original
 	}
@@ -317,33 +382,65 @@ public class ScheduleTest extends TestCase {
 		fail("Not yet implemented");
 	}
 
-	public void testIsDateInBounds_IllegalArgument() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateInBounds_throw() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		try {
+			privateAccess.isDateInBounds(null, null, null);
+			fail("NullPointerException expected");
+		} catch (NullPointerException e) {
+			// test passed
+		}
 	}
 
-	public void testIsDateInBounds_MinMax() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateInBounds_no_min_no_max() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertTrue(privateAccess.isDateInBounds(new Date(1), null, null));
 	}
 
-	public void testIsDateInBounds_OnlyMax() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateInBounds_only_max_valid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertTrue(privateAccess.isDateInBounds(new Date(1), null, new Date(2)));
 	}
 
-	public void testIsDateInBounds_OnlyMin() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateInBounds_only_max_invalid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertFalse(privateAccess.isDateInBounds(new Date(3), null, new Date(2)));
 	}
 
-	public void testIsDurationInBounds_null() {
-		fail("Not yet implemented");
-		// original
+	public void testIsDateInBounds_only_min_valid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertTrue(privateAccess.isDateInBounds(new Date(2), new Date(1), null));
+	}
+
+	public void testIsDateInBounds_only_min_invalid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertFalse(privateAccess.isDateInBounds(new Date(3), new Date(4), null));
+	}
+
+	public void testIsDurationInBounds_valid() {
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertTrue(privateAccess.isDateInBounds(new Date(6), new Date(4), new Date(8)));
 	}
 
 	public void testIsDurationInBounds_invalid() {
-		fail("Not yet implemented");
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		assertFalse(privateAccess.isDateInBounds(new Date(3), new Date(4), new Date(8)));
 	}
 
 	public void testIsDurationInBounds_less_than_min() {
