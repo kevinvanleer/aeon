@@ -17,9 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -28,6 +26,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -288,7 +287,7 @@ public final class GooglePlacesSearch {
 			protected JSONObject doInBackground(String... arg0) {
 				JSONObject jsonResponse = null;
 				try {
-					HttpClient httpClient = new DefaultHttpClient();
+					AndroidHttpClient httpClient = AndroidHttpClient.newInstance("aeon");
 					HttpResponse response = httpClient.execute(new HttpGet(url));
 					StatusLine statusLine = response.getStatusLine();
 					if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
@@ -296,6 +295,8 @@ public final class GooglePlacesSearch {
 						BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
 						jsonResponse = (JSONObject) JSONValue.parse(reader);
 					}
+					response.getEntity().consumeContent();
+					httpClient.close();
 				} catch (ClientProtocolException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
