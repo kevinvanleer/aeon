@@ -140,6 +140,11 @@ public class ScheduleTest extends TestCase {
 		}
 	}
 
+	public void testIsDateValid_no_limits() {
+		Schedule testSchedule = new Schedule();
+		assertTrue(testSchedule.isDateValid(new Date(), null, null));
+	}
+
 	public void testIsDateValid_invalid() {
 		Schedule testSchedule = new Schedule();
 
@@ -304,8 +309,15 @@ public class ScheduleTest extends TestCase {
 	}
 
 	public void testSetHardArrivalTime() {
-		fail("Not yet implemented");
-		// original
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Date theDate = new Date(100);
+		privateAccess.setHardArrivalTime(theDate);
+		assertTrue(privateAccess.getArrivalTime().equals(theDate));
+		assertTrue(privateAccess.getMaxArrivalTime().equals(theDate));
+		assertTrue(privateAccess.getMinArrivalTime().equals(theDate));
+		assertFalse(testSchedule.isArrivalTimeFlexible());
 	}
 
 	public void testSetHardArrivalTime_Invalid() {
@@ -335,7 +347,15 @@ public class ScheduleTest extends TestCase {
 	}
 
 	public void testSetHardDepartureTime() {
-		fail("Not yet implemented");
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Date theDate = new Date(100);
+		privateAccess.setHardDepartureTime(theDate);
+		assertTrue(privateAccess.getDepartureTime().equals(theDate));
+		assertTrue(privateAccess.getMaxDepartureTime().equals(theDate));
+		assertTrue(privateAccess.getMinDepartureTime().equals(theDate));
+		assertFalse(testSchedule.isDepartureTimeFlexible());
 	}
 
 	public void testSetMinDepartureTime() {
@@ -359,7 +379,15 @@ public class ScheduleTest extends TestCase {
 	}
 
 	public void testSetHardStayDuration() {
-		fail("Not yet implemented");
+		Schedule testSchedule = new Schedule();
+		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
+
+		Long theDate = Long.valueOf(100);
+		privateAccess.setHardStayDuration(theDate);
+		assertTrue(privateAccess.getStayDuration().equals(theDate));
+		assertTrue(privateAccess.getMaxStayDuration().equals(theDate));
+		assertTrue(privateAccess.getMinStayDuration().equals(theDate));
+		assertFalse(testSchedule.isStayDurationFlexible());
 	}
 
 	public void testSetMinStayDuration() {

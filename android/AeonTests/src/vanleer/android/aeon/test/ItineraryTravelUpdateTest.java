@@ -62,6 +62,7 @@ public class ItineraryTravelUpdateTest extends ActivityInstrumentationTestCase2<
 		solo.clickLongOnText("Burger Park", 1);
 
 		assertTrue(solo.waitForActivity(DestinationScheduleActivity.class));
+		solo.clickOnView(findView(R.id.checkBox_duration));
 		solo.clickOnView(findView(R.id.checkBox_departureTime));
 		solo.clickOnText("Done");
 
