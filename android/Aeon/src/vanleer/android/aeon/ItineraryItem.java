@@ -392,6 +392,13 @@ public final class ItineraryItem implements Parcelable {
 		googleDistanceMatrixResult = null;
 	}
 
+	public void setTravelDuration(long time) {
+		if (!atLocation()) {
+			throw new IllegalStateException();
+		}
+		travelDurationSec = time;
+	}
+
 	public Long getDistance() {
 		return distance;
 	}
@@ -441,7 +448,11 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String getTravelDurationLongFormat() {
-		return TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		String duration = "< 1 min";
+		if (getSchedule().getStayDuration() > 0) {
+			duration = TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		}
+		return duration;
 	}
 
 	public String getPhoneNumber() {

@@ -329,7 +329,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateArrivalTimeAndSchedules(ItineraryItem currentDestination) {
 		updateArrivalTime(currentDestination);
+		updateTravelDuration(currentDestination);
 		updateSchedules();
+	}
+
+	private void updateTravelDuration(ItineraryItem currentDestination) {
+		if (currentDestinationIndex == 0) {
+			throw new IllegalStateException();
+		}
+		ItineraryItem previousDestination = itineraryItems.getItem(currentDestinationIndex - 1);
+		currentDestination.setTravelDuration((currentDestination.getSchedule().getArrivalTime().getTime() - previousDestination.getSchedule().getDepartureTime().getTime()) / 1000);
+
 	}
 
 	private void updateArrivalTime(ItineraryItem currentDestination) {
@@ -780,10 +790,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 					origin = updatedDestination;
 				}
 
-				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
-					if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
-						cancelAlerts();
-						setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
+				if (!((currentDestinationIndex == 0) && (selectedItemPosition != 0))) {
+					if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
+						if (selectedItemPosition == currentDestinationIndex || selectedItemPosition == (currentDestinationIndex + 1)) {
+							cancelAlerts();
+							setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
+						}
 					}
 				}
 
