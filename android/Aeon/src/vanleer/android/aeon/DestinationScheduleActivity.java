@@ -75,7 +75,30 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		InitializeDurationControls();
 		InitalizeDepartureControls();
 
+		// TODO: Make this go away
+		hackInitialStates();
+
 		buttonDoneScheduling.setOnClickListener(this);
+	}
+
+	private void hackInitialStates() {
+		if (!destination.getSchedule().isDepartureTimeFlexible()) {
+			checkBoxDepartureTime.setChecked(true);
+			timePickerDepartureTime.setEnabled(true);
+			timePickerDepartureTime.setVisibility(TimePicker.VISIBLE);
+
+			checkBoxDuration.setChecked(false);
+			timePickerDuration.setEnabled(false);
+			timePickerDuration.setVisibility(TimePicker.GONE);
+		} else if (!destination.getSchedule().isStayDurationFlexible()) {
+			checkBoxDuration.setChecked(true);
+			timePickerDuration.setEnabled(true);
+			timePickerDuration.setVisibility(TimePicker.VISIBLE);
+
+			checkBoxDepartureTime.setChecked(false);
+			timePickerDepartureTime.setEnabled(false);
+			timePickerDepartureTime.setVisibility(TimePicker.GONE);
+		}
 	}
 
 	private void InitializeArrivalControls() {
