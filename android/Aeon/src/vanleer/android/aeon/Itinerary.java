@@ -320,10 +320,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateDepartureTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.setDepartureTime(nearestMinute());
+		thisSchedule.updateDepartureTime(nearestMinute());
 
 		if (thisSchedule.getArrivalTime() != null) {
-			thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+			thisSchedule.updateStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 		}
 	}
 
@@ -334,18 +334,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void updateArrivalTime(ItineraryItem currentDestination) {
 		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.setArrivalTime(nearestMinute());
+		thisSchedule.updateArrivalTime(nearestMinute());
 
 		if (thisSchedule.isDepartureTimeFlexible()) {
 			if (thisSchedule.getStayDuration() != null) {
 				Calendar newDeparture = Calendar.getInstance();
 				newDeparture.setTime(thisSchedule.getArrivalTime());
 				newDeparture.add(Calendar.SECOND, thisSchedule.getStayDuration().intValue());
-				thisSchedule.setDepartureTime(newDeparture.getTime());
+				thisSchedule.updateDepartureTime(newDeparture.getTime());
 			}
 		} else {
 			if (thisSchedule.getDepartureTime() != null) {
-				thisSchedule.setStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
+				thisSchedule.updateStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
 			}
 		}
 	}
@@ -608,7 +608,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.v("Aeon", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
 			Log.v("Aeon", "Updating origin departure time.");
-			origin.getSchedule().setDepartureTime(nearestMinute());
+			origin.getSchedule().updateDepartureTime(nearestMinute());
 		}
 		if (currentLocation() != null) {
 			try {
@@ -625,7 +625,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		origin = new ItineraryItem("My location (locating...)");
 		origin.setAtLocation();
 		Schedule departNow = new Schedule();
-		departNow.setDepartureTime(nearestMinute());
+		departNow.initializeFlexibleDepartureTime(nearestMinute());
 		origin.setSchedule(departNow);
 		if (currentLocation() != null) {
 			try {
@@ -806,7 +806,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		} else {
 			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
 		}
-		newDestination.getSchedule().setArrivalTime(arrivalTimeCalculator.getTime());
+		newDestination.getSchedule().initializeFlexibleArrivalTime(arrivalTimeCalculator.getTime());
 		startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
 		startActivityForResult(startDestinationSchedule, ADD_DESTINATION);
 	}

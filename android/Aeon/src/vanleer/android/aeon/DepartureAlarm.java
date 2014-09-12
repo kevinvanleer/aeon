@@ -71,10 +71,11 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 			setResult(Activity.RESULT_CANCELED);
 			break;
 		case R.id.button_departureAlarmSnooze:
+			// TODO: Send this information back to Itinerary activity
 			Calendar departureTime = Calendar.getInstance();
 			departureTime.setTime(origin.getSchedule().getDepartureTime());
 			departureTime.add(Calendar.MINUTE, 5);
-			origin.getSchedule().setDepartureTime(departureTime.getTime());
+			origin.getSchedule().updateDepartureTime(departureTime.getTime());
 			Intent delayedDeparture = new Intent();
 			delayedDeparture.putExtra("destination", origin);
 			setResult(Activity.RESULT_OK, delayedDeparture);

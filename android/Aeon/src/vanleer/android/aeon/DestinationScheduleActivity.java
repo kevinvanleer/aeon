@@ -7,6 +7,7 @@ import java.util.Locale;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -225,17 +226,19 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		if (checkBoxArrivalTime.isChecked()) {
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerArrivalTime.getCurrentHour());
 			timeConverter.set(Calendar.MINUTE, timePickerArrivalTime.getCurrentMinute());
-			destination.getSchedule().setArrivalTime(timeConverter.getTime());
+			destination.getSchedule().initializeHardArrivalTime(timeConverter.getTime());
+			Log.d("Aeon", "Setting hard arrival time for " + destination.getName());
 		} else {
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
 			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
 			timeConverter.add(Calendar.HOUR_OF_DAY, -timePickerDuration.getCurrentHour());
 			timeConverter.add(Calendar.MINUTE, -timePickerDuration.getCurrentMinute());
-			destination.getSchedule().setArrivalTime(timeConverter.getTime());
+			destination.getSchedule().initializeFlexibleArrivalTime(timeConverter.getTime());
 		}
 
 		if (checkBoxDuration.isChecked()) {
-			destination.getSchedule().setStayDuration((long) ((timePickerDuration.getCurrentHour() * 3600) + ((timePickerDuration.getCurrentMinute() * 60))));
+			destination.getSchedule().initializeHardStayDuration((long) ((timePickerDuration.getCurrentHour() * 3600) + ((timePickerDuration.getCurrentMinute() * 60))));
+			Log.d("Aeon", "Setting hard stay duration for " + destination.getName());
 		} else {
 			int durationHour = timePickerDepartureTime.getCurrentHour() - timePickerArrivalTime.getCurrentHour();
 			int durationMin = timePickerDepartureTime.getCurrentMinute() - timePickerArrivalTime.getCurrentMinute();
@@ -243,18 +246,19 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			if (durationHour < 0) durationHour += 24;
 
 			long duration = (durationHour * 3600) + (durationMin * 60);
-			destination.getSchedule().setStayDuration(duration);
+			destination.getSchedule().initializeFlexibleStayDuration(duration);
 		}
 
 		if (checkBoxDepartureTime.isChecked()) {
 			timeConverter.set(Calendar.HOUR_OF_DAY, timePickerDepartureTime.getCurrentHour());
 			timeConverter.set(Calendar.MINUTE, timePickerDepartureTime.getCurrentMinute());
-			destination.getSchedule().setDepartureTime(timeConverter.getTime());
+			destination.getSchedule().initializeHardDepartureTime(timeConverter.getTime());
+			Log.d("Aeon", "Setting hard departure time for " + destination.getName());
 		} else {
 			timeConverter.setTime(destination.getSchedule().getArrivalTime());
 			timeConverter.add(Calendar.HOUR_OF_DAY, timePickerDuration.getCurrentHour());
 			timeConverter.add(Calendar.MINUTE, timePickerDuration.getCurrentMinute());
-			destination.getSchedule().setDepartureTime(timeConverter.getTime());
+			destination.getSchedule().initializeFlexibleDepartureTime(timeConverter.getTime());
 		}
 
 		Calendar arrival = Calendar.getInstance();

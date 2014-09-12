@@ -25,6 +25,18 @@ public class Schedule implements Parcelable {
 	public Schedule() {
 	}
 
+	public Schedule(Schedule source) {
+		minArrivalTime = source.minArrivalTime;
+		maxArrivalTime = source.maxArrivalTime;
+		arrivalTime = source.arrivalTime;
+		minDepartureTime = source.minDepartureTime;
+		maxDepartureTime = source.maxDepartureTime;
+		departureTime = source.departureTime;
+		minStayDurationSec = source.minStayDurationSec;
+		maxStayDurationSec = source.maxStayDurationSec;
+		stayDurationSec = source.stayDurationSec;
+	}
+
 	private Schedule(Parcel in) {
 		readFromParcel(in);
 	}
@@ -94,35 +106,31 @@ public class Schedule implements Parcelable {
 	}
 
 	private boolean isDurationFlexible(Long duration, Long minDuration, Long maxDuration) {
-		boolean flexible = ((duration == INVALID_DURATION) || (minDuration == INVALID_DURATION) || (maxDuration == INVALID_DURATION));
+		boolean flexible = (duration.equals(INVALID_DURATION) || minDuration.equals(INVALID_DURATION) || maxDuration.equals(INVALID_DURATION));
 		if (!flexible) {
-			flexible = !((duration == minDuration) && (duration == maxDuration));
+			flexible = !(duration.equals(minDuration) && duration.equals(maxDuration));
 		}
 		return flexible;
 	}
 
-	public boolean isArrivalTimeValid(Date time) {
-		return isArrivalTimeFlexible() ? isDateInBounds(time, minArrivalTime, maxArrivalTime) : (time == arrivalTime);
+	public boolean isDateValid(Date time, Date minTime, Date maxTime) {
+		return !isDateFlexible(time, minTime, maxTime) || isDateInBounds(time, minTime, maxTime);
 	}
 
 	public boolean isArrivalTimeValid() {
-		return isArrivalTimeValid(arrivalTime);
-	}
-
-	public boolean isDepartureTimeValid(Date time) {
-		return isDepartureTimeFlexible() ? isDateInBounds(time, minDepartureTime, maxDepartureTime) : (time == departureTime);
+		return isDateValid(arrivalTime, minArrivalTime, maxArrivalTime);
 	}
 
 	public boolean isDepartureTimeValid() {
-		return isDepartureTimeValid(departureTime);
+		return isDateValid(departureTime, minDepartureTime, maxDepartureTime);
 	}
 
-	public boolean isStayDurationValid(Long duration) {
-		return isStayDurationFlexible() ? isDurationInBounds(duration, minStayDurationSec, maxStayDurationSec) : (duration == stayDurationSec);
+	public boolean isDurationValid(Long duration, Long minDuration, Long maxDuration) {
+		return isDurationFlexible(duration, minDuration, maxDuration) ? isDurationInBounds(duration, minStayDurationSec, maxStayDurationSec) : (duration != null);
 	}
 
 	public boolean isStayDurationValid() {
-		return isStayDurationValid(stayDurationSec);
+		return isDurationValid(stayDurationSec, minStayDurationSec, maxStayDurationSec);
 	}
 
 	public boolean validate() {
@@ -130,13 +138,16 @@ public class Schedule implements Parcelable {
 	}
 
 	public void update(Date newArrivalTime) {
-		setArrivalTime(newArrivalTime);
+		updateArrivalTime(newArrivalTime);
 
-		Calendar departure = Calendar.getInstance();
-		departure.setTime(arrivalTime);
-
-		departure.add(Calendar.SECOND, stayDurationSec.intValue());
-		departureTime.setTime(departure.getTimeInMillis());
+		if (isDepartureTimeFlexible()) {
+			Calendar departure = Calendar.getInstance();
+			departure.setTime(arrivalTime);
+			departure.add(Calendar.SECOND, stayDurationSec.intValue());
+			updateDepartureTime(departure.getTime());
+		} else {
+			updateStayDuration((getDepartureTime().getTime() - getArrivalTime().getTime()) / 1000);
+		}
 	}
 
 	private boolean isDateInBounds(Date time, Date minTime, Date maxTime) {
@@ -295,11 +306,27 @@ public class Schedule implements Parcelable {
 		return duration;
 	}
 
-	public void setArrivalTime(Date time) {
+	public void initializeHardArrivalTime(Date time) {
+		minArrivalTime = null;
+		maxArrivalTime = null;
+		setHardArrivalTime(time);
+	}
+
+	public void initializeFlexibleArrivalTime(Date time) {
+		minArrivalTime = null;
+		maxArrivalTime = null;
+		setFlexibleArrivalTime(time);
+	}
+
+	public void updateArrivalTime(Date time) {
+		setArrivalTime(time, !isArrivalTimeFlexible());
+	}
+
+	private void setFlexibleArrivalTime(Date time) {
 		setArrivalTime(time, false);
 	}
 
-	public void setHardArrivalTime(Date time) {
+	private void setHardArrivalTime(Date time) {
 		setArrivalTime(time, true);
 	}
 
@@ -319,11 +346,27 @@ public class Schedule implements Parcelable {
 		setMaxArrivalTime(time, true);
 	}
 
-	public void setDepartureTime(Date time) {
+	public void initializeHardDepartureTime(Date time) {
+		minDepartureTime = null;
+		maxDepartureTime = null;
+		setHardDepartureTime(time);
+	}
+
+	public void initializeFlexibleDepartureTime(Date time) {
+		minDepartureTime = null;
+		maxDepartureTime = null;
+		setFlexibleDepartureTime(time);
+	}
+
+	public void updateDepartureTime(Date time) {
+		setDepartureTime(time, !isDepartureTimeFlexible());
+	}
+
+	private void setFlexibleDepartureTime(Date time) {
 		setDepartureTime(time, false);
 	}
 
-	public void setHardDepartureTime(Date time) {
+	private void setHardDepartureTime(Date time) {
 		setDepartureTime(time, true);
 	}
 
@@ -343,11 +386,27 @@ public class Schedule implements Parcelable {
 		setMaxDepartureTime(time, true);
 	}
 
-	public void setStayDuration(Long seconds) {
+	public void initializeHardStayDuration(Long seconds) {
+		minStayDurationSec = INVALID_DURATION;
+		maxStayDurationSec = INVALID_DURATION;
+		setHardStayDuration(seconds);
+	}
+
+	public void initializeFlexibleStayDuration(Long seconds) {
+		minStayDurationSec = INVALID_DURATION;
+		maxStayDurationSec = INVALID_DURATION;
+		setFlexibleStayDuration(seconds);
+	}
+
+	public void updateStayDuration(Long seconds) {
+		setStayDuration(seconds, !isStayDurationFlexible());
+	}
+
+	private void setFlexibleStayDuration(Long seconds) {
 		setStayDuration(seconds, false);
 	}
 
-	public void setHardStayDuration(Long seconds) {
+	private void setHardStayDuration(Long seconds) {
 		setStayDuration(seconds, true);
 	}
 
@@ -373,11 +432,22 @@ public class Schedule implements Parcelable {
 			maxArrivalTime = time;
 		}
 
-		if (!isArrivalTimeValid(time)) {
+		arrivalTime = time;
+
+		if (!isArrivalTimeValid()) {
+
+			if (!isDateFlexible(arrivalTime, minArrivalTime, maxArrivalTime)) {
+				Log.d("Aeon", "Arrival time is not flexible.");
+			} else {
+				Log.d("Aeon", "Arrival time is flexible.");
+			}
+			if (isDateInBounds(arrivalTime, minArrivalTime, maxArrivalTime)) {
+				Log.d("Aeon", "Arrival time is in bounds.");
+			} else {
+				Log.d("Aeon", "Arrival time is not in bounds.");
+			}
 			throw new IllegalArgumentException();
 		}
-
-		arrivalTime = time;
 	}
 
 	private void setMinArrivalTime(Date time, boolean override) {
@@ -413,11 +483,11 @@ public class Schedule implements Parcelable {
 			minDepartureTime = time;
 		}
 
-		if (!isDepartureTimeValid(time)) {
+		departureTime = time;
+
+		if (!isDepartureTimeValid()) {
 			throw new NullPointerException();
 		}
-
-		departureTime = time;
 	}
 
 	private void setMinDepartureTime(Date time, boolean override) {
@@ -448,11 +518,11 @@ public class Schedule implements Parcelable {
 			minStayDurationSec = seconds;
 		}
 
-		if (!isStayDurationValid(seconds)) {
+		stayDurationSec = seconds;
+
+		if (!isStayDurationValid()) {
 			throw new RuntimeException();
 		}
-
-		stayDurationSec = seconds;
 	}
 
 	private void setMinStayDuration(Long seconds, boolean override) {
@@ -615,6 +685,18 @@ public class Schedule implements Parcelable {
 
 		public void setStayDuration(Long time) {
 			Schedule.this.stayDurationSec = time;
+		}
+
+		public void setHardArrivalTime(Date time) {
+			Schedule.this.setHardArrivalTime(time);
+		}
+
+		public void setHardDepartureTime(Date time) {
+			Schedule.this.setHardDepartureTime(time);
+		}
+
+		public void setHardStayDuration(Long time) {
+			Schedule.this.setHardStayDuration(time);
 		}
 	};
 }
