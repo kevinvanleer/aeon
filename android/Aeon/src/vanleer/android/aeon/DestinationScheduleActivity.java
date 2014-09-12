@@ -107,11 +107,11 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		checkBoxArrivalTime.setChecked(true);
 		textViewArrivalTime.setText("Getting to " + destination.getName() + " at");
 
-		if (destination.getSchedule().getArrivalTime() != null) {
-			checkBoxArrivalTime.setEnabled(false);
-			timePickerArrivalTime.setEnabled(false);
-			timePickerArrivalTime.setVisibility(TimePicker.GONE);
+		checkBoxArrivalTime.setEnabled(false);
+		timePickerArrivalTime.setEnabled(false);
+		timePickerArrivalTime.setVisibility(TimePicker.GONE);
 
+		if (destination.getSchedule().getArrivalTime() != null) {
 			Calendar arrivalTimeCalculator = Calendar.getInstance();
 			arrivalTimeCalculator.setTime(destination.getSchedule().getArrivalTime());
 			timePickerArrivalTime.setCurrentHour(arrivalTimeCalculator.get(Calendar.HOUR_OF_DAY));
@@ -120,6 +120,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 			SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
 			textViewArrivalTime.setText(textViewArrivalTime.getText() + " " + timeFormat.format(destination.getSchedule().getArrivalTime()));
 		} else {
+			checkBoxArrivalTime.setChecked(false);
 			timePickerArrivalTime.setEnabled(wantEnabled(checkBoxArrivalTime));
 			timePickerArrivalTime.setVisibility(wantVisible(checkBoxArrivalTime));
 		}
