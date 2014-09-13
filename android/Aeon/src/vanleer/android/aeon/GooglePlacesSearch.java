@@ -180,10 +180,10 @@ public final class GooglePlacesSearch {
 		}
 
 		url += "?input=" + Uri.encode(input);
-		url += "&types=establishment";
+		/*-url += "&types=establishment";
 		if (types != null) {
 			url += "|" + getTypesUrlPart(types);
-		}
+		}*/
 
 		if ((latitude != null) && (longitude != null)) {
 			url += "&location=" + latitude + "," + longitude;

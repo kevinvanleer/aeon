@@ -44,7 +44,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private AutoCompleteTextView searchText;
 	private boolean waitingForGps = false;
 	private boolean searching = false;
-	private final Long searchRadius = (long) 5000000;
+	private final Long searchRadius = (long) 50000; // the max
 	private UnfilteredArrayAdapter<String> suggestionList;
 	private Geocoder geocoder;
 
@@ -165,11 +165,19 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private void ConfigureTextWatcher() {
 		searchText.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(final CharSequence s, int start, int before, int count) {
-				/*
-				 * if (s.length() > 1) { new AsyncTask<CharSequence, Void, ArrayList<String>>() {
-				 * @Override protected ArrayList<String> doInBackground(CharSequence... arg0) { return performAutocompleteSearch(s); }
-				 * @Override protected void onPostExecute(ArrayList<String> suggestions) { updateAutocompleteChoices(suggestions); } }.execute(s); }
-				 */
+				if (s.length() > 1) {
+					new AsyncTask<CharSequence, Void, ArrayList<String>>() {
+						@Override
+						protected ArrayList<String> doInBackground(CharSequence... arg0) {
+							return performAutocompleteSearch(s);
+						}
+
+						@Override
+						protected void onPostExecute(ArrayList<String> suggestions) {
+							updateAutocompleteChoices(suggestions);
+						}
+					}.execute(s);
+				}
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -236,7 +244,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				PlacesSearchActivity.this.runOnUiThread(new LocationTextUpdater(googleSearch.getReverseGeocodeDescription(currentLocation)));
 
 				if (searchText.enoughToFilter()) {
-					// suggestions = performAutocompleteSearch(searchText.getText());
+					suggestions = performAutocompleteSearch(searchText.getText());
 				}
 				return suggestions;
 			}
