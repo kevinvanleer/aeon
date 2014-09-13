@@ -236,7 +236,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				PlacesSearchActivity.this.runOnUiThread(new LocationTextUpdater(googleSearch.getReverseGeocodeDescription(currentLocation, true)));
 
 				if (searchText.enoughToFilter()) {
-					suggestions = performAutocompleteSearch(searchText.getText());
+					// suggestions = performAutocompleteSearch(searchText.getText());
 				}
 				return suggestions;
 			}
