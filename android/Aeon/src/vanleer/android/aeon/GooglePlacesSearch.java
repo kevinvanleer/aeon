@@ -97,7 +97,7 @@ public final class GooglePlacesSearch {
 		if (places.size() > 0) {
 			JSONObject distanceMatrixResults = getDistances(latitude, longitude, sensor);
 			parseDistanceMatrixResults(distanceMatrixResults);
-			Collections.sort(places, distanceCompare);
+			// Collections.sort(places, distanceCompare);
 		}
 	}
 
