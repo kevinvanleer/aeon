@@ -357,10 +357,13 @@ public final class GooglePlacesSearch {
 			JSONArray results = (JSONArray) distanceMatrix.get("rows");
 			JSONArray resultArray = (JSONArray) ((JSONObject) results.get(0)).get("elements");
 			if (resultArray != null) {
-				for (int index = 0; index < places.size(); ++index) {
+				for (int index = places.size() - 1; index >= 0; --index) {
 					JSONObject distance = (JSONObject) resultArray.get(index);
 					if (distance != null) {
 						places.get(index).setDistance(distance);
+					}
+					if (places.get(index).getDistance() == null) {
+						places.remove(index);
 					}
 				}
 			}
