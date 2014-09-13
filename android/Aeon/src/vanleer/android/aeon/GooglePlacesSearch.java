@@ -49,17 +49,17 @@ public final class GooglePlacesSearch {
 	}
 
 	void performSearch(double latitude, double longitude, String keyword) {
-		performSearch(latitude, longitude, 0, null, keyword, true);
+		performSearch(latitude, longitude, 0, null, keyword);
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String name, boolean sensor) {
+	void performSearch(double latitude, double longitude, double radius, String name) {
 		String type = findType(name);
 		if (type != null) {
 			String[] types = new String[1];
 			types[0] = type;
-			performSearch(latitude, longitude, radius, types, "", sensor);
+			performSearch(latitude, longitude, radius, types, "");
 		} else {
-			performSearch(latitude, longitude, radius, null, name, sensor);
+			performSearch(latitude, longitude, radius, null, name);
 		}
 	}
 
@@ -86,20 +86,20 @@ public final class GooglePlacesSearch {
 		return inferredType;
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String[] types, boolean sensor) {
-		performSearch(latitude, longitude, radius, types, "", sensor);
+	void performSearch(double latitude, double longitude, double radius, String[] types) {
+		performSearch(latitude, longitude, radius, types, "");
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
+	void performSearch(double latitude, double longitude, double radius, String[] types, String name) {
 		clearSearchResults();
 
-		performPlacesSearch(latitude, longitude, radius, types, name, sensor);
+		performPlacesSearch(latitude, longitude, radius, types, name);
 		if (places.size() == 0) {
-			performGeocodingSearch(name, sensor);
+			performGeocodingSearch(name);
 		}
 
 		if (places.size() > 0) {
-			JSONObject distanceMatrixResults = getDistances(latitude, longitude, sensor);
+			JSONObject distanceMatrixResults = getDistances(latitude, longitude);
 			parseDistanceMatrixResults(distanceMatrixResults);
 			// Collections.sort(places, distanceCompare);
 		}
@@ -111,7 +111,7 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	public void performPlacesSearch(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
+	public void performPlacesSearch(double latitude, double longitude, double radius, String[] types, String name) {
 		try {
 			String url = buildGooglePlacesSearchUrl(latitude, longitude, name);
 			JSONObject placesSearchResults = performHttpGet(url);
@@ -121,8 +121,8 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	public ArrayList<String> performPlacesAutocomplete(String input, boolean sensor, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
-		String url = buildGooglePlacesAutocompleteUrl(input, sensor, latitude, longitude, radius, types, offset);
+	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
 
 		JSONObject autocompleteResults = performHttpGet(url);
 		return getResultsList(autocompleteResults);
@@ -164,7 +164,7 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
-	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String name, boolean sensor) {
+	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String name) {
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
@@ -188,7 +188,7 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
-	private String buildGooglePlacesAutocompleteUrl(String input, boolean sensor, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
 		String url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
 
 		if (input == null || input == "") {
@@ -213,7 +213,6 @@ public final class GooglePlacesSearch {
 			url += "&offset=" + offset;
 		}
 
-		url += "&sensor=" + sensor;
 		url += "&key=" + apiKey;
 
 		return url;
@@ -247,7 +246,7 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	private void performGeocodingSearch(String address, boolean sensor) {
+	private void performGeocodingSearch(String address) {
 		List<Address> geocodingSearchResults = null;
 		try {
 			geocodingSearchResults = externalGeocoder.getFromLocationName(address, 10);
@@ -269,15 +268,15 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	private JSONObject getDistances(double latitude, double longitude, boolean sensor) {
-		String url = buildDistanceMatrixUrl(latitude, longitude, sensor);
+	private JSONObject getDistances(double latitude, double longitude) {
+		String url = buildDistanceMatrixUrl(latitude, longitude);
 		return performHttpGet(url);
 	}
 
-	public String getReverseGeocodeDescription(final Location location, Boolean sensor) {
+	public String getReverseGeocodeDescription(final Location location) {
 		String bestDescription = "Address unknown";
 
-		Address placemark = getBestReverseGeocodeResult(location, sensor);
+		Address placemark = getBestReverseGeocodeResult(location);
 		if (placemark != null) {
 			// bestDescription = (String) placemark.get("formatted_address");
 			if (placemark.getMaxAddressLineIndex() >= 0) {
@@ -289,19 +288,19 @@ public final class GooglePlacesSearch {
 		return bestDescription;
 	}
 
-	public Address getBestReverseGeocodeResult(final Location location, Boolean sensor) {
+	public Address getBestReverseGeocodeResult(final Location location) {
 		Address placemark = null;
-		List<Address> addresses = getReverseGeocodeResults(location, sensor);
+		List<Address> addresses = getReverseGeocodeResults(location);
 		if (addresses != null) {
 			if (addresses.size() > 0) {
-				placemark = getReverseGeocodeResults(location, sensor).get(0);
+				placemark = getReverseGeocodeResults(location).get(0);
 			}
 		}
 
 		return placemark;
 	}
 
-	public List<Address> getReverseGeocodeResults(final Location location, Boolean sensor) {
+	public List<Address> getReverseGeocodeResults(final Location location) {
 		List<Address> addressList = null;
 		try {
 			addressList = externalGeocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
@@ -356,12 +355,11 @@ public final class GooglePlacesSearch {
 		return jsonResponse;
 	}
 
-	private String buildDistanceMatrixUrl(double latitude, double longitude, boolean sensor) {
+	private String buildDistanceMatrixUrl(double latitude, double longitude) {
 		String url = GOOGLE_DISTANCE_MATRIX_URL;
 		url += "?origins=" + latitude + "," + longitude;
 		String destinations = getDestinationsUrlPart();
 		url += "&destinations=" + Uri.encode(destinations);
-		url += "&sensor=" + sensor;
 		return url;
 	}
 

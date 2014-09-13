@@ -112,7 +112,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			if (currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
 				locationSensorImage.setVisibility(View.VISIBLE);
 			}
-			locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation, true));
+			locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation));
 		}
 	}
 
@@ -196,7 +196,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 			Long offset = (long) searchText.getSelectionStart();
 
-			results = googleSearch.performPlacesAutocomplete(input, true, latitude, longitude, radius, (String[]) null, offset);
+			results = googleSearch.performPlacesAutocomplete(input, latitude, longitude, radius, (String[]) null, offset);
 		}
 		return results;
 	}
@@ -233,7 +233,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					}
 				}
 
-				PlacesSearchActivity.this.runOnUiThread(new LocationTextUpdater(googleSearch.getReverseGeocodeDescription(currentLocation, true)));
+				PlacesSearchActivity.this.runOnUiThread(new LocationTextUpdater(googleSearch.getReverseGeocodeDescription(currentLocation)));
 
 				if (searchText.enoughToFilter()) {
 					// suggestions = performAutocompleteSearch(searchText.getText());
