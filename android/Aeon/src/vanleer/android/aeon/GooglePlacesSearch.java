@@ -169,7 +169,7 @@ public final class GooglePlacesSearch {
 		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
 
 		JSONObject autocompleteResults = performHttpGet(url);
-		return getResultsList(autocompleteResults);
+		return getAutocompleteResultsList(autocompleteResults);
 	}
 
 	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
@@ -202,7 +202,7 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
-	private ArrayList<String> getResultsList(JSONObject autocompleteResults) {
+	private ArrayList<String> getAutocompleteResultsList(JSONObject autocompleteResults) {
 		ArrayList<String> results = new ArrayList<String>();
 
 		if (autocompleteResults != null) {
