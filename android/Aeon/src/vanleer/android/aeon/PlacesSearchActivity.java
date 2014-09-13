@@ -316,7 +316,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void QuerySearchEngine() {
-		googleSearch.performSearch(currentLocation.getLatitude(), currentLocation.getLongitude(), searchRadius, searchText.getText().toString(), true);
+		googleSearch.performSearch(currentLocation.getLatitude(), currentLocation.getLongitude(), searchText.getText().toString());
 		searching = false;
 	}
 

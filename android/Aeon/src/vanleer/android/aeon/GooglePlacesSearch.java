@@ -31,7 +31,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 public final class GooglePlacesSearch {
-	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json";
+	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
@@ -46,6 +46,10 @@ public final class GooglePlacesSearch {
 		if (placeTypes.isEmpty()) {
 			initializePlaceTypes();
 		}
+	}
+
+	void performSearch(double latitude, double longitude, String keyword) {
+		performSearch(latitude, longitude, 0, null, keyword, true);
 	}
 
 	void performSearch(double latitude, double longitude, double radius, String name, boolean sensor) {
@@ -108,9 +112,13 @@ public final class GooglePlacesSearch {
 	}
 
 	public void performPlacesSearch(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
-		String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, types, name, sensor);
-		JSONObject placesSearchResults = performHttpGet(url);
-		addPlacesResults(placesSearchResults);
+		try {
+			String url = buildGooglePlacesSearchUrl(latitude, longitude, name);
+			JSONObject placesSearchResults = performHttpGet(url);
+			addPlacesResults(placesSearchResults);
+		} catch (IllegalArgumentException e) {
+			Log.d("Aeon", "Places search failed with keyword: " + name);
+		}
 	}
 
 	public ArrayList<String> performPlacesAutocomplete(String input, boolean sensor, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
@@ -138,12 +146,34 @@ public final class GooglePlacesSearch {
 		return results;
 	}
 
-	private String buildGooglePlacesSearchUrl(double latitude, double longitude, double radius, String[] types, String name, boolean sensor) {
+	private String buildGooglePlacesSearchUrl(double latitude, double longitude, String keyword) {
+		if (keyword == null || keyword.isEmpty()) {
+			throw new IllegalArgumentException("A keywork, name or type must be provided if a search radius is not.");
+		}
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
 		url += "?location=" + latitude + "," + longitude;
-		url += "&radius=" + radius;
+
+		url += "&rankby=distance";
+
+		url += "&keyword=" + Uri.encode(keyword);
+
+		url += "&key=" + apiKey;
+
+		return url;
+	}
+
+	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String name, boolean sensor) {
+
+		String url = GOOGLE_PLACES_SEARCH_URL;
+
+		url += "?location=" + latitude + "," + longitude;
+		if (radius != null) {
+			url += "&radius=" + radius;
+		} else {
+			url += "&rankby=distance";
+		}
 
 		if (types != null) {
 			url += "&types=" + getTypesUrlPart(types);
@@ -153,7 +183,6 @@ public final class GooglePlacesSearch {
 			url += "&name=" + Uri.encode(name);
 		}
 
-		url += "&sensor=" + sensor;
 		url += "&key=" + apiKey;
 
 		return url;
