@@ -49,15 +49,15 @@ public final class GooglePlacesSearch {
 	}
 
 	void performSearch(double latitude, double longitude, String keyword) {
-		performSearch(latitude, longitude, 0, null, keyword);
+		performSearch(latitude, longitude, null, null, keyword);
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String name) {
+	void performSearch(double latitude, double longitude, Double radius, String name) {
 		String type = findType(name);
 		if (type != null) {
 			String[] types = new String[1];
 			types[0] = type;
-			performSearch(latitude, longitude, radius, types, "");
+			performSearch(latitude, longitude, radius, types);
 		} else {
 			performSearch(latitude, longitude, radius, null, name);
 		}
@@ -86,11 +86,11 @@ public final class GooglePlacesSearch {
 		return inferredType;
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String[] types) {
+	void performSearch(double latitude, double longitude, Double radius, String[] types) {
 		performSearch(latitude, longitude, radius, types, "");
 	}
 
-	void performSearch(double latitude, double longitude, double radius, String[] types, String name) {
+	void performSearch(double latitude, double longitude, Double radius, String[] types, String name) {
 		clearSearchResults();
 
 		performPlacesSearch(latitude, longitude, radius, types, name);
@@ -101,7 +101,6 @@ public final class GooglePlacesSearch {
 		if (places.size() > 0) {
 			JSONObject distanceMatrixResults = getDistances(latitude, longitude);
 			parseDistanceMatrixResults(distanceMatrixResults);
-			// Collections.sort(places, distanceCompare);
 		}
 	}
 
@@ -111,13 +110,13 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	public void performPlacesSearch(double latitude, double longitude, double radius, String[] types, String name) {
+	public void performPlacesSearch(double latitude, double longitude, Double radius, String[] types, String name) {
 		try {
-			String url = buildGooglePlacesSearchUrl(latitude, longitude, name);
+			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, types, name);
 			JSONObject placesSearchResults = performHttpGet(url);
 			addPlacesResults(placesSearchResults);
 		} catch (IllegalArgumentException e) {
-			Log.d("Aeon", "Places search failed with keyword: " + name);
+			Log.d("Aeon", "Places search failed with keyword:  \"" + name + "\"");
 		}
 	}
 
@@ -146,25 +145,7 @@ public final class GooglePlacesSearch {
 		return results;
 	}
 
-	private String buildGooglePlacesSearchUrl(double latitude, double longitude, String keyword) {
-		if (keyword == null || keyword.isEmpty()) {
-			throw new IllegalArgumentException("A keywork, name or type must be provided if a search radius is not.");
-		}
-
-		String url = GOOGLE_PLACES_SEARCH_URL;
-
-		url += "?location=" + latitude + "," + longitude;
-
-		url += "&rankby=distance";
-
-		url += "&keyword=" + Uri.encode(keyword);
-
-		url += "&key=" + apiKey;
-
-		return url;
-	}
-
-	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String name) {
+	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String keyword) {
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
@@ -173,14 +154,17 @@ public final class GooglePlacesSearch {
 			url += "&radius=" + radius;
 		} else {
 			url += "&rankby=distance";
+			if ((keyword == null || keyword.isEmpty()) && (types == null || types.length == 0)) {
+				throw new IllegalArgumentException("A keywork, name or type must be provided if a search radius is not.");
+			}
 		}
 
 		if (types != null) {
 			url += "&types=" + getTypesUrlPart(types);
 		}
 
-		if (name != "") {
-			url += "&name=" + Uri.encode(name);
+		if (keyword != "") {
+			url += "&keyword=" + Uri.encode(keyword);
 		}
 
 		url += "&key=" + apiKey;
@@ -422,8 +406,6 @@ public final class GooglePlacesSearch {
 	}
 
 	private void initializePlaceTypes() {
-		// Levenshtein distance
-		// frej
 		placeTypes.add("accounting");
 		placeTypes.add("airport");
 		placeTypes.add("amusement_park");
