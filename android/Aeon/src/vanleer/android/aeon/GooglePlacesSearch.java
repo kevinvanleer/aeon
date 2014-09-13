@@ -110,6 +110,7 @@ public final class GooglePlacesSearch {
 		}
 	}
 
+	// PLACES
 	public void performPlacesSearch(double latitude, double longitude, Double radius, String[] types, String name) {
 		try {
 			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, types, name);
@@ -147,29 +148,28 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
+	private void addPlacesResults(JSONObject placesSearchResults) {
+		if (placesSearchResults != null) {
+			JSONArray placesResultArray = (JSONArray) placesSearchResults.get("results");
+			if (placesResultArray != null) {
+				for (int index = 0; index < placesResultArray.size(); ++index) {
+					JSONObject place = (JSONObject) placesResultArray.get(index);
+					if (place != null) {
+						places.add(new ItineraryItem(place));
+					}
+				}
+			}
+		}
+	}
+
+	// PLACES
+
+	// AUTOCOMPLETE
 	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
 		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
 
 		JSONObject autocompleteResults = performHttpGet(url);
 		return getResultsList(autocompleteResults);
-	}
-
-	private ArrayList<String> getResultsList(JSONObject autocompleteResults) {
-		ArrayList<String> results = new ArrayList<String>();
-
-		if (autocompleteResults != null) {
-			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
-			if (resultArray != null) {
-				for (int index = 0; index < resultArray.size(); ++index) {
-					JSONObject result = (JSONObject) resultArray.get(index);
-					if (result != null) {
-						results.add((String) result.get("description"));
-					}
-				}
-			}
-		}
-
-		return results;
 	}
 
 	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
@@ -202,34 +202,27 @@ public final class GooglePlacesSearch {
 		return url;
 	}
 
-	private String getTypesUrlPart(String[] types) {
-		String typesUrlPart = "";
+	private ArrayList<String> getResultsList(JSONObject autocompleteResults) {
+		ArrayList<String> results = new ArrayList<String>();
 
-		for (int i = 0; i < types.length; ++i) {
-			if (i > 0) {
-				typesUrlPart += "|";
-			}
-
-			typesUrlPart += types[i];
-		}
-
-		return Uri.encode(typesUrlPart);
-	}
-
-	private void addPlacesResults(JSONObject placesSearchResults) {
-		if (placesSearchResults != null) {
-			JSONArray placesResultArray = (JSONArray) placesSearchResults.get("results");
-			if (placesResultArray != null) {
-				for (int index = 0; index < placesResultArray.size(); ++index) {
-					JSONObject place = (JSONObject) placesResultArray.get(index);
-					if (place != null) {
-						places.add(new ItineraryItem(place));
+		if (autocompleteResults != null) {
+			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
+			if (resultArray != null) {
+				for (int index = 0; index < resultArray.size(); ++index) {
+					JSONObject result = (JSONObject) resultArray.get(index);
+					if (result != null) {
+						results.add((String) result.get("description"));
 					}
 				}
 			}
 		}
+
+		return results;
 	}
 
+	// AUTOCOMPLETE
+
+	// GEOCODING
 	private void performGeocodingSearch(String address) {
 		List<Address> geocodingSearchResults = null;
 		try {
@@ -309,6 +302,11 @@ public final class GooglePlacesSearch {
 	// GEOCODING
 
 	// DISTANCE MATRIX
+	private JSONObject getDistances(double latitude, double longitude) {
+		String url = buildDistanceMatrixUrl(latitude, longitude);
+		return performHttpGet(url);
+	}
+
 	private String buildDistanceMatrixUrl(double latitude, double longitude) {
 		String url = GOOGLE_DISTANCE_MATRIX_URL;
 		url += "?origins=" + latitude + "," + longitude;
@@ -359,6 +357,20 @@ public final class GooglePlacesSearch {
 
 	public int getResultCount() {
 		return places.size();
+	}
+
+	private String getTypesUrlPart(String[] types) {
+		String typesUrlPart = "";
+
+		for (int i = 0; i < types.length; ++i) {
+			if (i > 0) {
+				typesUrlPart += "|";
+			}
+
+			typesUrlPart += types[i];
+		}
+
+		return Uri.encode(typesUrlPart);
 	}
 
 	private void initializePlaceTypes() {
