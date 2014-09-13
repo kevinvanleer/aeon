@@ -90,7 +90,9 @@ public final class GooglePlacesSearch {
 		clearSearchResults();
 
 		performPlacesSearch(latitude, longitude, radius, types, name, sensor);
-		performGeocodingSearch(name, sensor);
+		if (places.size() == 0) {
+			performGeocodingSearch(name, sensor);
+		}
 
 		if (places.size() > 0) {
 			JSONObject distanceMatrixResults = getDistances(latitude, longitude, sensor);
