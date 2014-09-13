@@ -120,31 +120,6 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
-		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
-
-		JSONObject autocompleteResults = performHttpGet(url);
-		return getResultsList(autocompleteResults);
-	}
-
-	private ArrayList<String> getResultsList(JSONObject autocompleteResults) {
-		ArrayList<String> results = new ArrayList<String>();
-
-		if (autocompleteResults != null) {
-			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
-			if (resultArray != null) {
-				for (int index = 0; index < resultArray.size(); ++index) {
-					JSONObject result = (JSONObject) resultArray.get(index);
-					if (result != null) {
-						results.add((String) result.get("description"));
-					}
-				}
-			}
-		}
-
-		return results;
-	}
-
 	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String keyword) {
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
@@ -170,6 +145,31 @@ public final class GooglePlacesSearch {
 		url += "&key=" + apiKey;
 
 		return url;
+	}
+
+	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
+
+		JSONObject autocompleteResults = performHttpGet(url);
+		return getResultsList(autocompleteResults);
+	}
+
+	private ArrayList<String> getResultsList(JSONObject autocompleteResults) {
+		ArrayList<String> results = new ArrayList<String>();
+
+		if (autocompleteResults != null) {
+			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
+			if (resultArray != null) {
+				for (int index = 0; index < resultArray.size(); ++index) {
+					JSONObject result = (JSONObject) resultArray.get(index);
+					if (result != null) {
+						results.add((String) result.get("description"));
+					}
+				}
+			}
+		}
+
+		return results;
 	}
 
 	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
@@ -252,11 +252,6 @@ public final class GooglePlacesSearch {
 		}
 	}
 
-	private JSONObject getDistances(double latitude, double longitude) {
-		String url = buildDistanceMatrixUrl(latitude, longitude);
-		return performHttpGet(url);
-	}
-
 	public String getReverseGeocodeDescription(final Location location) {
 		String bestDescription = "Address unknown";
 
@@ -295,50 +290,25 @@ public final class GooglePlacesSearch {
 		return addressList;
 	}
 
-	private JSONObject performHttpGet(final String url) {
-		AsyncTask<String, Void, JSONObject> get = new AsyncTask<String, Void, JSONObject>() {
-			@Override
-			protected JSONObject doInBackground(String... arg0) {
-				JSONObject jsonResponse = null;
-				try {
-					AndroidHttpClient httpClient = AndroidHttpClient.newInstance("aeon");
-					HttpResponse response = httpClient.execute(new HttpGet(url));
-					StatusLine statusLine = response.getStatusLine();
-					if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-						InputStream inStream = response.getEntity().getContent();
-						BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
-						jsonResponse = (JSONObject) JSONValue.parse(reader);
-					}
-					response.getEntity().consumeContent();
-					httpClient.close();
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return jsonResponse;
-			}
-		};
-		get.execute(url);
-
-		JSONObject jsonResponse = null;
-		try {
-			jsonResponse = get.get(5, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TimeoutException e) {
-			Log.e("Aeon", e.getMessage(), e);
+	static String getGeodeticString(Location location) {
+		String latSuffix = "° N";
+		String lngSuffix = "° E";
+		if (location.getLatitude() < 0) {
+			latSuffix = "° S";
+		}
+		if (location.getLongitude() < 0) {
+			lngSuffix = "° W";
 		}
 
-		return jsonResponse;
+		String latString = String.format("%1$.4f", Math.abs(location.getLatitude()));
+		String lngString = String.format("%1$.4f", Math.abs(location.getLongitude()));
+
+		return (latString + latSuffix + ", " + lngString + lngSuffix);
 	}
 
+	// GEOCODING
+
+	// DISTANCE MATRIX
 	private String buildDistanceMatrixUrl(double latitude, double longitude) {
 		String url = GOOGLE_DISTANCE_MATRIX_URL;
 		url += "?origins=" + latitude + "," + longitude;
@@ -381,28 +351,14 @@ public final class GooglePlacesSearch {
 		}
 	}
 
+	// DISTANCE MATRIX
+
 	public ItineraryItem getPlace(final int index) {
 		return places.get(index);
 	}
 
 	public int getResultCount() {
 		return places.size();
-	}
-
-	static String getGeodeticString(Location location) {
-		String latSuffix = "° N";
-		String lngSuffix = "° E";
-		if (location.getLatitude() < 0) {
-			latSuffix = "° S";
-		}
-		if (location.getLongitude() < 0) {
-			lngSuffix = "° W";
-		}
-
-		String latString = String.format("%1$.4f", Math.abs(location.getLatitude()));
-		String lngString = String.format("%1$.4f", Math.abs(location.getLongitude()));
-
-		return (latString + latSuffix + ", " + lngString + lngSuffix);
 	}
 
 	private void initializePlaceTypes() {
@@ -503,5 +459,49 @@ public final class GooglePlacesSearch {
 		placeTypes.add("university");
 		placeTypes.add("veterinary_care");
 		placeTypes.add("zoo");
+	}
+
+	private JSONObject performHttpGet(final String url) {
+		AsyncTask<String, Void, JSONObject> get = new AsyncTask<String, Void, JSONObject>() {
+			@Override
+			protected JSONObject doInBackground(String... arg0) {
+				JSONObject jsonResponse = null;
+				try {
+					AndroidHttpClient httpClient = AndroidHttpClient.newInstance("aeon");
+					HttpResponse response = httpClient.execute(new HttpGet(url));
+					StatusLine statusLine = response.getStatusLine();
+					if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+						InputStream inStream = response.getEntity().getContent();
+						BufferedReader reader = new BufferedReader(new InputStreamReader(inStream), 8);
+						jsonResponse = (JSONObject) JSONValue.parse(reader);
+					}
+					response.getEntity().consumeContent();
+					httpClient.close();
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return jsonResponse;
+			}
+		};
+		get.execute(url);
+
+		JSONObject jsonResponse = null;
+		try {
+			jsonResponse = get.get(5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			Log.e("Aeon", e.getMessage(), e);
+		}
+
+		return jsonResponse;
 	}
 }
