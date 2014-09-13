@@ -165,7 +165,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private void ConfigureTextWatcher() {
 		searchText.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(final CharSequence s, int start, int before, int count) {
-				if (s.length() > 1) {
+				/*-if (s.length() > 1) {
 					new AsyncTask<CharSequence, Void, ArrayList<String>>() {
 						@Override
 						protected ArrayList<String> doInBackground(CharSequence... arg0) {
@@ -177,7 +177,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 							updateAutocompleteChoices(suggestions);
 						}
 					}.execute(s);
-				}
+				}*/
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -243,9 +243,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 				PlacesSearchActivity.this.runOnUiThread(new LocationTextUpdater(googleSearch.getReverseGeocodeDescription(currentLocation)));
 
-				if (searchText.enoughToFilter()) {
+				/*-if (searchText.enoughToFilter()) {
 					suggestions = performAutocompleteSearch(searchText.getText());
-				}
+				}*/
 				return suggestions;
 			}
 
