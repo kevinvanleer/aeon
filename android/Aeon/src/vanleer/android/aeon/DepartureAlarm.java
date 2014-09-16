@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -25,6 +26,9 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.departure_alarm);
+
+		getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		getWindow().addFlags(LayoutParams.FLAG_TURN_SCREEN_ON);
 
 		Button dismissAlarm = (Button) findViewById(R.id.button_departureAlarmDismiss);
 		dismissAlarm.setOnClickListener(this);
