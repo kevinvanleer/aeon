@@ -24,7 +24,16 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 	@Override
 	public void onBackPressed() {
-		// delay();
+		delay();
+		endAlarm();
+		super.onBackPressed();
+	}
+
+	@Override
+	public void onStop() {
+		delay();
+		endAlarm();
+		super.onStop();
 	}
 
 	@Override
@@ -88,9 +97,13 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 		setResult(Activity.RESULT_OK, delayedDeparture);
 	}
 
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		switch (v.getId()) {
+	private void endAlarm() {
+		alarmPlayer.stop();
+		finish();
+	}
+
+	private void handleUserInput(int buttonId) {
+		switch (buttonId) {
 		case R.id.button_departureAlarmDismiss:
 			dismiss();
 			break;
@@ -100,7 +113,11 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 			break;
 		}
 
-		alarmPlayer.stop();
-		finish();
+		endAlarm();
 	}
+
+	public void onClick(View v) {
+		handleUserInput(v.getId());
+	}
+
 }
