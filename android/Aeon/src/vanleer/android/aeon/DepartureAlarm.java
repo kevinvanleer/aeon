@@ -31,8 +31,8 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 	@Override
 	public void onStop() {
-		delay();
-		endAlarm();
+		// delay();
+		// endAlarm();
 		super.onStop();
 	}
 
@@ -84,7 +84,7 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 	}
 
 	public void dismiss() {
-		setResult(Activity.RESULT_CANCELED);
+		// setResult(Activity.RESULT_CANCELED);
 	}
 
 	public void delay() {
@@ -94,7 +94,9 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 		origin.getSchedule().updateDepartureTime(departureTime.getTime());
 		Intent delayedDeparture = new Intent();
 		delayedDeparture.putExtra("destination", origin);
-		setResult(Activity.RESULT_OK, delayedDeparture);
+		delayedDeparture.setAction("vanleer.android.aeon.delay_departure");
+		// setResult(Activity.RESULT_OK, delayedDeparture);
+		this.sendBroadcast(delayedDeparture);
 	}
 
 	private void endAlarm() {

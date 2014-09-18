@@ -59,6 +59,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private final ArrayList<Location> locations = new ArrayList<Location>();
 
 	@Override
+	public void onNewIntent(Intent theIntent) {
+		Log.d("Aeon", "onNewIntent called");
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
@@ -400,8 +405,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 		if (threshold < 100.f) threshold = 100.f;
 		float distance = currentLocation().distanceTo(currentDestination().getLocation());
-		Log.v("Aeon", "Vicinity threshold:" + threshold);
-		Log.v("Aeon", "Distance to destination:" + distance);
+		// Log.v("Aeon", "Vicinity threshold:" + threshold);
+		// Log.v("Aeon", "Distance to destination:" + distance);
 		return (distance < threshold);
 	}
 
@@ -517,10 +522,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 		boolean departed = !traveling;
 		departed &= !isInVicinity();
 		if (currentLocation().hasSpeed()) {
-			Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
+			// Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
 			departed &= isMoving();
 		} else {
-			Log.v("Aeon", "No speed parameter for this location.");
+			// Log.v("Aeon", "No speed parameter for this location.");
 		}
 
 		return departed;
