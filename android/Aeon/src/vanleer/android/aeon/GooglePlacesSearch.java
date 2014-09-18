@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.lang.Math;
@@ -475,10 +476,13 @@ public final class GooglePlacesSearch {
 
 	private JSONObject performHttpGet(final String url) {
 		AsyncTask<String, Void, JSONObject> get = new AsyncTask<String, Void, JSONObject>() {
+			private final Semaphore available = new Semaphore(1, true);
+
 			@Override
 			protected JSONObject doInBackground(String... arg0) {
 				JSONObject jsonResponse = null;
 				try {
+					available.acquire();
 					AndroidHttpClient httpClient = AndroidHttpClient.newInstance("aeon");
 					HttpResponse response = httpClient.execute(new HttpGet(url));
 					StatusLine statusLine = response.getStatusLine();
@@ -489,6 +493,10 @@ public final class GooglePlacesSearch {
 					}
 					response.getEntity().consumeContent();
 					httpClient.close();
+					available.release();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				} catch (ClientProtocolException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
