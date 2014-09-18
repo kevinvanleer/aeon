@@ -23,6 +23,11 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 	private ItineraryItem origin;
 
 	@Override
+	public void onBackPressed() {
+		// delay();
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.departure_alarm);
