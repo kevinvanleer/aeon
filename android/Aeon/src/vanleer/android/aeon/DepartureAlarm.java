@@ -34,6 +34,7 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 		getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(LayoutParams.FLAG_TURN_SCREEN_ON);
+		getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		Button dismissAlarm = (Button) findViewById(R.id.button_departureAlarmDismiss);
 		dismissAlarm.setOnClickListener(this);
