@@ -74,21 +74,29 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 		}
 	}
 
+	public void dismiss() {
+		setResult(Activity.RESULT_CANCELED);
+	}
+
+	public void delay() {
+		Calendar departureTime = Calendar.getInstance();
+		departureTime.setTime(origin.getSchedule().getDepartureTime());
+		departureTime.add(Calendar.MINUTE, 5);
+		origin.getSchedule().updateDepartureTime(departureTime.getTime());
+		Intent delayedDeparture = new Intent();
+		delayedDeparture.putExtra("destination", origin);
+		setResult(Activity.RESULT_OK, delayedDeparture);
+	}
+
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.button_departureAlarmDismiss:
-			setResult(Activity.RESULT_CANCELED);
+			dismiss();
 			break;
 		case R.id.button_departureAlarmSnooze:
 			// TODO: Send this information back to Itinerary activity
-			Calendar departureTime = Calendar.getInstance();
-			departureTime.setTime(origin.getSchedule().getDepartureTime());
-			departureTime.add(Calendar.MINUTE, 5);
-			origin.getSchedule().updateDepartureTime(departureTime.getTime());
-			Intent delayedDeparture = new Intent();
-			delayedDeparture.putExtra("destination", origin);
-			setResult(Activity.RESULT_OK, delayedDeparture);
+			delay();
 			break;
 		}
 
