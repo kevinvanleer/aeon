@@ -60,7 +60,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	@Override
 	public void onNewIntent(Intent theIntent) {
-		Log.d("Aeon", "onNewIntent called");
+		if (theIntent.getAction().equals("vanleer.android.aeon.delay_departure")) {
+			Object theExtra = theIntent.getExtras().get("destination");
+			if (theExtra != null) {
+				ItineraryItem update = (ItineraryItem) theExtra;
+
+				if (update.getSchedule().getArrivalTime().equals(currentDestination().getSchedule().getArrivalTime())) {
+					currentDestination().getSchedule().updateDepartureTime(update.getSchedule().getDepartureTime());
+					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
+					updateTimes();
+				}
+			}
+		}
 	}
 
 	@Override
