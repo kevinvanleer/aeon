@@ -449,7 +449,7 @@ public final class ItineraryItem implements Parcelable {
 
 	public String getTravelDurationLongFormat() {
 		String duration = "< 1 min";
-		if (getSchedule().getStayDuration() > 0) {
+		if (travelDurationSec >= 60) {
 			duration = TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
 		}
 		return duration;
