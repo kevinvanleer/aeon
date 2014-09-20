@@ -48,7 +48,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ProgressDialog waitSpinner;
 	private boolean waitingForGps = false;
 	private ItineraryItem origin = null;
-	private ItineraryItem addNewItemItem = null;
 	private int selectedItemPosition = -1;
 	private Geocoder theGeocoder = null;
 	private boolean traveling = false;
@@ -56,7 +55,34 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
-	private final ArrayList<Location> locations = new ArrayList<Location>();
+	private ArrayList<Location> locations = new ArrayList<Location>();
+
+	private void rebuildFromBundle(Bundle savedInstanceState) {
+
+		ArrayList<ItineraryItem> savedItinerary = savedInstanceState.getParcelableArrayList("itineraryItems");
+		origin = savedItinerary.get(0);
+		for (ItineraryItem item : savedItinerary) {
+			itineraryItems.add(item);
+		}
+		traveling = savedInstanceState.getBoolean("traveling");
+		currentDestinationIndex = savedInstanceState.getInt("currentDestinationIndex");
+		locations = savedInstanceState.getParcelableArrayList("locations");
+		itineraryItems.notifyDataSetChanged();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		ArrayList<ItineraryItem> savedItinerary = new ArrayList<ItineraryItem>();
+		for (int i = 0; i < itineraryItems.getCount() - 1; ++i) {
+			savedItinerary.add(itineraryItems.getItem(i));
+		}
+		savedInstanceState.putParcelableArrayList("itineraryItems", savedItinerary);
+		savedInstanceState.putParcelableArrayList("locations", locations);
+		savedInstanceState.putInt("currentDestinationIndex", currentDestinationIndex);
+		savedInstanceState.putBoolean("traveling", traveling);
+
+	}
 
 	@Override
 	public void onNewIntent(Intent theIntent) {
@@ -116,7 +142,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
 		configureItineraryListViewLongClickListener();
-		initializeOrigin();
+
+		if ((savedInstanceState == null) || savedInstanceState.isEmpty()) {
+			initializeOrigin();
+
+		} else {
+			rebuildFromBundle(savedInstanceState);
+		}
+
 		initializeAddNewItineraryItem();
 	}
 
@@ -129,7 +162,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void initializeAddNewItineraryItem() {
-		addNewItemItem = new ItineraryItem(getString(R.string.add_destination_itinerary_item));
+		ItineraryItem addNewItemItem = new ItineraryItem(getString(R.string.add_destination_itinerary_item));
 		LayoutInflater vi = (LayoutInflater) this.getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = vi.inflate(R.layout.itinerary_item, null);
 
@@ -631,14 +664,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateOrigin() {
-		Log.v("Aeon", "Updating origin.");
+		// Log.v("Aeon", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
-			Log.v("Aeon", "Updating origin departure time.");
+			// Log.v("Aeon", "Updating origin departure time.");
 			origin.getSchedule().updateDepartureTime(nearestMinute());
 		}
 		if (currentLocation() != null) {
 			try {
-				Log.v("Aeon", "Updating origin location.");
+				// Log.v("Aeon", "Updating origin location.");
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
