@@ -24,15 +24,13 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 	@Override
 	public void onBackPressed() {
-		delay();
-		endAlarm();
 		super.onBackPressed();
 	}
 
 	@Override
 	public void onStop() {
-		// delay();
-		// endAlarm();
+		endAlarm();
+		delay();
 		super.onStop();
 	}
 
