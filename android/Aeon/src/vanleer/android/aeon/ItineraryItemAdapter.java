@@ -54,7 +54,6 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				arrivalTime.setText(" at " + item.getSchedule().getArrivalTimeString());
 				destinationName.setText(item.getName());
 
-				// stayDuration.setText(" for " + item.getSchedule().getStayDurationLongFormat());
 				String duration = item.getSchedule().getStayDurationLongFormat();
 				if (!duration.equals("briefly")) {
 					duration = " for " + duration;
