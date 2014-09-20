@@ -99,7 +99,6 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 	private void endAlarm() {
 		alarmPlayer.stop();
-		finish();
 	}
 
 	private void handleUserInput(int buttonId) {
@@ -112,6 +111,7 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 			delay();
 			break;
 		}
+		finish();
 	}
 
 	public void onClick(View v) {
