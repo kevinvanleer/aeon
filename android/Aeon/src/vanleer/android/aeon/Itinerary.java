@@ -20,6 +20,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,6 +57,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
+	LocationListener locationListener = null;
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
@@ -122,7 +124,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
-		LocationListener locationListener = new LocationListener() {
+		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				// Called when a new location is found by the network location provider.
 				onNewLocation(location);
@@ -139,13 +141,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 		};
 
 		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (30 * 1000), 0, locationListener);
 
 		configureItineraryListViewLongClickListener();
 
 		if ((savedInstanceState == null) || savedInstanceState.isEmpty()) {
 			initializeOrigin();
-
 		} else {
 			rebuildFromBundle(savedInstanceState);
 		}
@@ -188,14 +189,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// destinationName.setBackgroundColor(Color.WHITE);
 
 		appendListItem(addNewItemItem);
-	}
-
-	class ItineraryUpdater implements Runnable {
-		public void run() {
-			// if (currentDestination().atLocation()) {
-			updateTimes();
-			// }
-		}
 	}
 
 	private void setDepartureReminder(ItineraryItem origin, ItineraryItem destination) {
@@ -298,6 +291,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateTravelStatus() {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			if (haveArrived()) {
+				locationManager.removeUpdates(locationListener);
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 500, Itinerary.this.locationListener);
 				traveling = false;
 				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
@@ -309,6 +304,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 		} else {
 			if (haveDeparted()) { // departing TODO: unreadable -> refactor
+				locationManager.removeUpdates(locationListener);
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 500, Itinerary.this.locationListener);
 				traveling = true;
 				cancelAlerts();
 				currentDestination().setLocationExpired();
@@ -700,7 +697,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			@Override
 			public void run() {
 				// TODO: Change nextMinute to current location departure time plus one minute
-
 				while (true) {
 					Calendar now = Calendar.getInstance();
 					now.setTime(new Date());
@@ -720,6 +716,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 					}
 
 					doStuff();
+					Itinerary.this.runOnUiThread(new LocationManagerUpdater());
 				}
 			}
 
@@ -738,6 +735,30 @@ public final class Itinerary extends Activity implements OnClickListener {
 				}
 			}
 		}.start();
+	}
+
+	class ItineraryUpdater implements Runnable {
+		public void run() {
+			// if (currentDestination().atLocation()) {
+			updateTimes();
+			// }
+		}
+	}
+
+	private void updateLocationRequestInterval() {
+		if (currentDestination().enRoute() && !currentDestination().getSchedule().isBeforeArrivalTime(-5)) {
+			locationManager.removeUpdates(locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (2 * 1000), 0, locationListener);
+		} else if (currentDestination().atLocation() && !currentDestination().getSchedule().isBeforeDepartureTime(-5)) {
+			locationManager.removeUpdates(locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (2 * 1000), 0, locationListener);
+		}
+	}
+
+	class LocationManagerUpdater implements Runnable {
+		public void run() {
+			updateLocationRequestInterval();
+		}
 	}
 
 	private Address getLocationAddress(Location location) {

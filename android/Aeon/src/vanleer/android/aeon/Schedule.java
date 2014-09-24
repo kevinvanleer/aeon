@@ -547,16 +547,30 @@ public class Schedule implements Parcelable {
 		maxStayDurationSec = seconds;
 	}
 
+	public boolean isBeforeArrivalTime(int offset) {
+		if (getArrivalTime() == null) return false;
+
+		Date offsetArrivalTime = nearestMinute(getArrivalTime(), offset);
+
+		// return areSameMinute(new Date(), offsetArrivalTime.getTime());
+		return (nearestMinute(new Date())).before(offsetArrivalTime);
+	}
+
+	public boolean isBeforeDepartureTime(int offset) {
+		if (getDepartureTime() == null) return false;
+
+		Date offsetDepartureTime = nearestMinute(getDepartureTime(), offset);
+
+		// return offsetDepartureTime.before(nearestMinute(new Date()));
+		return (nearestMinute(new Date())).before(offsetDepartureTime);
+	}
+
 	public boolean isArrivalTime(int offset) {
 		if (getArrivalTime() == null) return false;
 
-		Calendar offsetArrivalTime = Calendar.getInstance();
-		offsetArrivalTime.setTime(getArrivalTime());
-		offsetArrivalTime.set(Calendar.SECOND, 0);
-		offsetArrivalTime.set(Calendar.MILLISECOND, 0);
-		offsetArrivalTime.add(Calendar.MINUTE, offset);
+		Date offsetArrivalTime = nearestMinute(getArrivalTime(), offset);
 
-		return areSameMinute(new Date(), offsetArrivalTime.getTime());
+		return areSameMinute(new Date(), offsetArrivalTime);
 	}
 
 	public boolean isArrivalTime() {
@@ -564,6 +578,14 @@ public class Schedule implements Parcelable {
 
 		return areSameMinute(new Date(), getArrivalTime());
 	}
+
+	public boolean isDepartureTime(int offset) {
+		if (getDepartureTime() == null) return false;
+
+		Date offsetDepartureTime = nearestMinute(getDepartureTime(), offset);
+
+		return areSameMinute(new Date(), offsetDepartureTime);
+	};
 
 	public boolean isDepartureTime() {
 		if (getDepartureTime() == null) return false;
@@ -574,14 +596,24 @@ public class Schedule implements Parcelable {
 	static private boolean areSameMinute(Date time1, Date time2) {
 		if (time1 == null || time2 == null) return false;
 
-		Calendar minuteCalculator = Calendar.getInstance();
-		minuteCalculator.setTime(time1);
-		minuteCalculator.set(Calendar.SECOND, 0);
-		minuteCalculator.set(Calendar.MILLISECOND, 0);
+		Date time1Mod = nearestMinute(time1);
 
-		long delta = time2.getTime() - minuteCalculator.getTime().getTime();
+		long delta = time2.getTime() - time1Mod.getTime();
 
 		return ((delta <= 60000) && (delta >= 0));
+	}
+
+	static private Date nearestMinute(Date date) {
+		return nearestMinute(date, 0);
+	}
+
+	static private Date nearestMinute(Date date, int offset) {
+		Calendar nearestMinute = Calendar.getInstance();
+		nearestMinute.setTime(date);
+		nearestMinute.set(Calendar.SECOND, 0);
+		nearestMinute.set(Calendar.MILLISECOND, 0);
+		nearestMinute.add(Calendar.MINUTE, offset);
+		return nearestMinute.getTime();
 	}
 
 	public int describeContents() {
