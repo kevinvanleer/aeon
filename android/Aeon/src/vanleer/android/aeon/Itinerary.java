@@ -874,6 +874,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				selectedItemPosition = -1;
 				updateTimes();
+				updateLocationRequestInterval();
 			}
 			break;
 		default:
