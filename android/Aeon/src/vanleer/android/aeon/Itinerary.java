@@ -752,6 +752,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		} else if (currentDestination().atLocation() && !currentDestination().getSchedule().isBeforeDepartureTime(-5)) {
 			locationManager.removeUpdates(locationListener);
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (2 * 1000), 0, locationListener);
+		} else {
+			locationManager.removeUpdates(locationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 0, locationListener);
 		}
 	}
 
