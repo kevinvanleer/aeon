@@ -52,7 +52,9 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 				destinationName.setText(item.getName());
 
 				String duration = item.getSchedule().getStayDurationLongFormat();
-				if (!duration.equals("briefly")) {
+				if (duration == null) {
+					duration = "indefinitely";
+				} else if (!duration.equals("briefly")) {
 					duration = " for " + duration;
 				}
 				stayDuration.setText(duration);
