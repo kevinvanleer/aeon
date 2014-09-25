@@ -163,20 +163,23 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void scheduleNextLocationUpdate() {
-		long msDelta = 0;
-		if (currentDestination().enRoute()) {
-			msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
-		} else if (currentDestination().atLocation()) {
-			msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
-		}
-
-		long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
-		if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
-
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
-		Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
-		eventHandler.postDelayed(locationUpdater, msDelay);
+
+		if (!currentDestination().equals(getFinalDestination())) {
+			long msDelta = 0;
+			if (currentDestination().enRoute()) {
+				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
+			} else if (currentDestination().atLocation()) {
+				msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
+			}
+
+			long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
+			if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
+
+			Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
+			eventHandler.postDelayed(locationUpdater, msDelay);
+		}
 	}
 
 	private Location currentLocation() {
@@ -868,12 +871,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				selectedItemPosition = -1;
 				updateTimes();
-				eventHandler.removeCallbacks(locationUpdater);
-				scheduleNextLocationUpdate();
 			}
 			break;
 		default:
 		}
+		eventHandler.removeCallbacks(locationUpdater);
+		scheduleNextLocationUpdate();
 	}
 
 	private void initializeSchedule(ItineraryItem newDestination) {
