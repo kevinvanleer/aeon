@@ -21,7 +21,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,8 +60,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
 	private LocationListener locationListener = null;
-	private Handler locationUpdateHandler;
+	private Handler eventHandler;
 	private LocationManagerUpdater locationUpdater;
+	private ScheduleUpdater scheduleUpdater;
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
@@ -130,7 +130,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
 		locationUpdater = new LocationManagerUpdater();
-		locationUpdateHandler = new Handler();
+		scheduleUpdater = new ScheduleUpdater();
+		eventHandler = new Handler();
 
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
@@ -175,7 +176,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
 		Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
-		locationUpdateHandler.postDelayed(locationUpdater, msDelay);
+		eventHandler.postDelayed(locationUpdater, msDelay);
 	}
 
 	private Location currentLocation() {
@@ -712,55 +713,41 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 
 		insertListItem(origin, 0);
-
-		new Thread() {
-			@Override
-			public void run() {
-				// TODO: Change nextMinute to current location departure time plus one minute
-				while (true) {
-					Calendar now = Calendar.getInstance();
-					now.setTime(new Date());
-
-					Calendar nextMinute = Calendar.getInstance();
-					nextMinute.setTime(now.getTime());
-					nextMinute.set(Calendar.SECOND, 0);
-					nextMinute.add(Calendar.MINUTE, 1);
-
-					if (now.getTime().before(nextMinute.getTime())) {
-						try {
-							sleep(nextMinute.getTimeInMillis() - now.getTimeInMillis());
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-
-					doStuff();
-				}
-			}
-
-			private void doStuff() {
-				if (currentDestinationIndex >= 0) {
-					if (currentDestination().getSchedule().isArrivalTime(1)) {
-						Itinerary.this.runOnUiThread(new ItineraryUpdater());
-						Log.v("Aeon", "Updating itinerary to highlight stay duration.");
-					} else if (currentDestination().getSchedule().isDepartureTime()) {
-						Itinerary.this.runOnUiThread(new ItineraryUpdater());
-						Log.v("Aeon", "Updating itinerary prior to departure.");
-					} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
-						Itinerary.this.runOnUiThread(new ItineraryUpdater());
-						Log.v("Aeon", "Updating itinerary after departure time expiration.");
-					}
-				}
-			}
-		}.start();
+		scheduleUpdater.run();
 	}
 
-	class ItineraryUpdater implements Runnable {
+	class ScheduleUpdater implements Runnable {
 		public void run() {
-			// if (currentDestination().atLocation()) {
-			updateTimes();
-			// }
+			Log.v("Aeon", "Schedule updater is running.");
+			Calendar now = Calendar.getInstance();
+			now.setTime(new Date());
+
+			Calendar nextMinute = Calendar.getInstance();
+			nextMinute.setTime(now.getTime());
+			nextMinute.set(Calendar.MILLISECOND, 0);
+			nextMinute.set(Calendar.SECOND, 0);
+			nextMinute.add(Calendar.MINUTE, 1);
+
+			long delayMs = nextMinute.getTimeInMillis() - now.getTimeInMillis();
+
+			Itinerary.this.eventHandler.postDelayed(Itinerary.this.scheduleUpdater, delayMs);
+
+			doStuff();
+		}
+	}
+
+	private void doStuff() {
+		if (currentDestinationIndex >= 0) {
+			if (currentDestination().getSchedule().isArrivalTime(1)) {
+				updateTimes();
+				Log.v("Aeon", "Updating itinerary to highlight stay duration.");
+			} else if (currentDestination().getSchedule().isDepartureTime()) {
+				updateTimes();
+				Log.v("Aeon", "Updating itinerary prior to departure.");
+			} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
+				updateTimes();
+				Log.v("Aeon", "Updating itinerary after departure time expiration.");
+			}
 		}
 	}
 
@@ -881,7 +868,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				selectedItemPosition = -1;
 				updateTimes();
-				locationUpdateHandler.removeCallbacks(locationUpdater);
+				eventHandler.removeCallbacks(locationUpdater);
 				scheduleNextLocationUpdate();
 			}
 			break;
