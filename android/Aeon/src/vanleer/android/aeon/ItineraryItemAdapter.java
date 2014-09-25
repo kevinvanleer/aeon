@@ -143,12 +143,12 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		}
 
 		if (item.atLocation()) {
-			if (item.getSchedule().isArrivalTime()) {
+			if (item.getSchedule().isArrivalTime() && arrivalInfoRow.getVisibility() == View.VISIBLE) {
 				arrivalInfoRow.setBackgroundDrawable(gd);
 				// arrivalInfoRow.setBackgroundColor(0xff0b4496);
 				destinationInfoRow.setBackgroundColor(Color.BLACK);
 				departureInfoRow.setBackgroundColor(Color.BLACK);
-			} else if (item.getSchedule().isDepartureTime()) {
+			} else if (item.getSchedule().isDepartureTime() && (departureInfoRow.getVisibility() == View.VISIBLE)) {
 				departureInfoRow.setBackgroundDrawable(gd);
 				// departureInfoRow.setBackgroundColor(0xff0b4496);
 				arrivalInfoRow.setBackgroundColor(Color.BLACK);
