@@ -163,14 +163,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void scheduleNextLocationUpdate() {
-		long msDelay = 0;
+		long msDelta = 0;
 		if (currentDestination().enRoute()) {
-			msDelay = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
+			msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
 		} else if (currentDestination().atLocation()) {
-			msDelay = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
+			msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
 		}
 
-		msDelay /= 2;
+		long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
 		if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
 
 		Log.d("Aeon", "Cancelling current location updates");
