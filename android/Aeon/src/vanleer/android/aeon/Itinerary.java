@@ -20,6 +20,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +39,8 @@ import android.widget.AdapterView.OnItemLongClickListener;
 
 public final class Itinerary extends Activity implements OnClickListener {
 
+	private static final int GPS_UPDATE_DISTANCE_M = 20;
+	private static final int GPS_UPDATE_INTERVAL_MS = 2000;
 	private final int listViewId = R.id.listView_itinerary;
 	private ListView itineraryListView;
 	private ItineraryItemAdapter itineraryItems;
@@ -57,7 +60,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
-	LocationListener locationListener = null;
+	private LocationListener locationListener = null;
+	private Handler locationUpdateHandler;
+	private LocationManagerUpdater locationUpdater;
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
@@ -124,10 +129,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
+		locationUpdater = new LocationManagerUpdater();
+		locationUpdateHandler = new Handler();
+
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location provider.
 				onNewLocation(location);
+				Itinerary.this.scheduleNextLocationUpdate();
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -140,8 +148,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 		};
 
-		// Register the listener with the Location Manager to receive location updates
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (30 * 1000), 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 
 		configureItineraryListViewLongClickListener();
 
@@ -152,6 +159,23 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 
 		initializeAddNewItineraryItem();
+	}
+
+	protected void scheduleNextLocationUpdate() {
+		long msDelay = 0;
+		if (currentDestination().enRoute()) {
+			msDelay = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
+		} else if (currentDestination().atLocation()) {
+			msDelay = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
+		}
+
+		msDelay /= 2;
+		if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
+
+		Log.d("Aeon", "Cancelling current location updates");
+		locationManager.removeUpdates(locationListener);
+		Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
+		locationUpdateHandler.postDelayed(locationUpdater, msDelay);
 	}
 
 	private Location currentLocation() {
@@ -273,7 +297,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	protected void onNewLocation(Location location) {
-		// Log.v("Aeon", "New location received.");
+		Log.v("Aeon", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
@@ -291,8 +315,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateTravelStatus() {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			if (haveArrived()) {
-				locationManager.removeUpdates(locationListener);
-				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 500, Itinerary.this.locationListener);
 				traveling = false;
 				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
@@ -304,8 +326,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 		} else {
 			if (haveDeparted()) { // departing TODO: unreadable -> refactor
-				locationManager.removeUpdates(locationListener);
-				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 500, Itinerary.this.locationListener);
 				traveling = true;
 				cancelAlerts();
 				currentDestination().setLocationExpired();
@@ -523,7 +543,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// assume user is loitering at intended destination
 			}
 		} else {
-			Log.v("Aeon", "User has not loitered for " + totalTime_s + " seconds.");
+			Log.v("Aeon", "User has only loitered for " + totalTime_s + " seconds.");
 		}
 
 		return loitering;
@@ -716,7 +736,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 					}
 
 					doStuff();
-					Itinerary.this.runOnUiThread(new LocationManagerUpdater());
 				}
 			}
 
@@ -745,22 +764,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
-	private void updateLocationRequestInterval() {
-		if (currentDestination().enRoute() && !currentDestination().getSchedule().isBeforeArrivalTime(-5)) {
-			locationManager.removeUpdates(locationListener);
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (2 * 1000), 0, locationListener);
-		} else if (currentDestination().atLocation() && !currentDestination().getSchedule().isBeforeDepartureTime(-5)) {
-			locationManager.removeUpdates(locationListener);
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (2 * 1000), 0, locationListener);
-		} else {
-			locationManager.removeUpdates(locationListener);
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (5 * 60 * 1000), 0, locationListener);
-		}
-	}
-
 	class LocationManagerUpdater implements Runnable {
 		public void run() {
-			updateLocationRequestInterval();
+			Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 		}
 	}
 
@@ -874,7 +881,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 				selectedItemPosition = -1;
 				updateTimes();
-				updateLocationRequestInterval();
+				locationUpdateHandler.removeCallbacks(locationUpdater);
+				scheduleNextLocationUpdate();
 			}
 			break;
 		default:
