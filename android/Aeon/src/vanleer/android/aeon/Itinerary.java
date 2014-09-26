@@ -632,8 +632,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			itineraryItems.clear();
 			currentDestinationIndex = 0;
 			eventHandler.removeCallbacks(scheduleUpdater);
+			eventHandler.removeCallbacks(locationUpdater);
 			initializeOrigin();
 			initializeAddNewItineraryItem();
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 			break;
 		case R.id.menu_item_clear_itinerary:
 		case R.id.submenu_item_clear_itinerary_no:
