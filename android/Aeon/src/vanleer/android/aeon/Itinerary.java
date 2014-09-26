@@ -12,6 +12,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -19,6 +20,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -344,6 +346,31 @@ public final class Itinerary extends Activity implements OnClickListener {
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
 				// TODO: Display map
+				startExternalNavigation();
+			}
+		}
+	}
+
+	private void startExternalNavigation() {
+		try {
+			Log.v("Aeon", "Starting external navigation.");
+			String navUri = "google.navigation:ll=";
+			navUri += currentDestination().getLocation().getLatitude() + ",";
+			navUri += currentDestination().getLocation().getLongitude();
+			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
+			startActivity(navIntent);
+		} catch (ActivityNotFoundException e) {
+			try {
+				Log.v("Aeon", "Navigation intent failed starting Google Maps.");
+				String navUri = "http://maps.google.com/maps?&daddr=";
+				navUri += currentDestination().getLocation().getLatitude() + ",";
+				navUri += currentDestination().getLocation().getLongitude();
+				// TODO: add the following to give a custom name to the location
+				// navUri += "(Custom name here)";
+				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
+				startActivity(navIntent);
+			} catch (ActivityNotFoundException er) {
+				Log.d("Aeon", "No external navigation apps found.");
 			}
 		}
 	}
