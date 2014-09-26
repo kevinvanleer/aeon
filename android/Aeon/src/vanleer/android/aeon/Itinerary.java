@@ -166,7 +166,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
 
-		if (!getFinalDestination().atLocation()) {
+		if ((getFinalDestinationIndex() == 0) || !getFinalDestination().atLocation()) {
 			long msDelta = 0;
 			if (currentDestination().enRoute()) {
 				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
@@ -179,6 +179,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
 			eventHandler.postDelayed(locationUpdater, msDelay);
+		} else {
+			Log.d("Aeon", "No GPS update scheduled.  User at final destination.");
 		}
 	}
 
