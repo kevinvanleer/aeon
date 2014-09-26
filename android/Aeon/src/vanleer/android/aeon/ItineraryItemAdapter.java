@@ -124,6 +124,8 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		TableRow arrivalInfoRow = (TableRow) v.findViewById(R.id.arrivalInfo);
 		TableRow destinationInfoRow = (TableRow) v.findViewById(R.id.destinationInfo);
 		TableRow departureInfoRow = (TableRow) v.findViewById(R.id.departureInfo);
+		TextView arrivalTime = (TextView) v.findViewById(R.id.textView_arrivalTime);
+		TextView departureTime = (TextView) v.findViewById(R.id.textView_departureTime);
 
 		GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[] { 0xff0b4496, 0xff000000 });
 		// gd.setGradientType(GradientDrawable.LINEAR_GRADIENT);
@@ -143,12 +145,12 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 		}
 
 		if (item.atLocation()) {
-			if (item.getSchedule().isArrivalTime() && arrivalInfoRow.getVisibility() == View.VISIBLE) {
+			if (item.getSchedule().isArrivalTime() && arrivalTime.getVisibility() == View.VISIBLE) {
 				arrivalInfoRow.setBackgroundDrawable(gd);
 				// arrivalInfoRow.setBackgroundColor(0xff0b4496);
 				destinationInfoRow.setBackgroundColor(Color.BLACK);
 				departureInfoRow.setBackgroundColor(Color.BLACK);
-			} else if (item.getSchedule().isDepartureTime() && (departureInfoRow.getVisibility() == View.VISIBLE)) {
+			} else if (item.getSchedule().isDepartureTime() && (departureTime.getVisibility() == View.VISIBLE)) {
 				departureInfoRow.setBackgroundDrawable(gd);
 				// departureInfoRow.setBackgroundColor(0xff0b4496);
 				arrivalInfoRow.setBackgroundColor(Color.BLACK);
