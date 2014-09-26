@@ -553,35 +553,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return loitering;
 	}
 
-	private boolean isLoitering_old() {
-		if (locations.size() == 0) {
-			throw new IllegalStateException("No locations have been received.");
-		}
-
-		boolean loitering = false;
-
-		final int SIZE = 5;
-		int sampleSize = locations.size() < SIZE ? locations.size() : SIZE;
-		int locationsIndex = locations.size() - sampleSize;
-		locationsIndex = (locationsIndex < 0) ? 0 : locationsIndex;
-
-		float distance = 0;
-		for (int i = 0; i < (sampleSize - 1); ++i) {
-			distance += locations.get(locationsIndex + i).distanceTo(locations.get(locationsIndex + i + 1));
-		}
-
-		if (distance < 100) {
-			loitering = true;
-		} else {
-			float elapsedTime = ((locations.get(locations.size() - 1).getTime() - locations.get(locationsIndex).getTime()) / 1000.f);
-			if ((distance / elapsedTime) < 5) {
-				loitering = true;
-			}
-		}
-
-		return loitering;
-	}
-
 	private boolean haveDeparted() {
 		// boolean departed = currentDestination().atLocation();
 		boolean departed = !traveling;
@@ -591,6 +562,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			departed &= isMoving();
 		} else {
 			// Log.v("Aeon", "No speed parameter for this location.");
+		}
+
+		if (departed) {
+			departed &= !isLoitering();
 		}
 
 		return departed;
