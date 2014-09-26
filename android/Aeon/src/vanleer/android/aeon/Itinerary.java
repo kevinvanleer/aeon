@@ -168,7 +168,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
 
-		if ((getFinalDestinationIndex() == 0) || !getFinalDestination().atLocation()) {
+		if ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation()) {
 			long msDelta = 0;
 			if (currentDestination().enRoute()) {
 				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
@@ -685,7 +685,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (itineraryItems.isEmpty()) {
 			startItineraryOpen.putExtra("location", currentLocation());
 		} else {
-			ItineraryItem lastDestination = getFinalDestination();
+			ItineraryItem lastDestination = finalDestination();
 			startItineraryOpen.putExtra("location", lastDestination.getLocation());
 		}
 
@@ -789,7 +789,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			// TODO: Wait for location service if current location is null
 
 			try {
-				ItineraryItem lastDestination = getFinalDestination();
+				ItineraryItem lastDestination = finalDestination();
 				myLocation = new ItineraryItem(currentLocation(), lastDestination.getLocation(), getLocationAddress(currentLocation()));
 			} catch (IllegalStateException e) {
 				myLocation = new ItineraryItem(currentLocation(), getLocationAddress(currentLocation()));
@@ -807,7 +807,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return (itineraryItems.getCount() - 2);
 	}
 
-	private ItineraryItem getFinalDestination() {
+	private ItineraryItem finalDestination() {
 		return itineraryItems.getItem(getFinalDestinationIndex());
 	}
 
@@ -892,7 +892,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Calendar arrivalTimeCalculator = Calendar.getInstance();
 
 		if (!itineraryItems.isEmpty()) {
-			ItineraryItem lastDestination = getFinalDestination();
+			ItineraryItem lastDestination = finalDestination();
 			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
 			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
 		} else {
