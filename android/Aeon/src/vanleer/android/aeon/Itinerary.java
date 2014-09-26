@@ -628,6 +628,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 			break;
 		case R.id.submenu_item_clear_itinerary_yes:
 			itineraryItems.clear();
+			currentDestinationIndex = 0;
+			eventHandler.removeCallbacks(scheduleUpdater);
 			initializeOrigin();
 			initializeAddNewItineraryItem();
 			break;
