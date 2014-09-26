@@ -166,7 +166,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
 
-		if (!currentDestination().equals(getFinalDestination())) {
+		if (!getFinalDestination().atLocation()) {
 			long msDelta = 0;
 			if (currentDestination().enRoute()) {
 				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
