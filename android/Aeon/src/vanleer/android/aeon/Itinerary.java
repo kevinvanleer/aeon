@@ -168,6 +168,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onDestroy() {
 		cancelAlerts();
 		locationManager.removeUpdates(locationListener);
+		super.onDestroy();
 	}
 
 	protected void scheduleNextLocationUpdate() {
