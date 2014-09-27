@@ -17,9 +17,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AutoCompleteTextView;
@@ -27,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public final class PlacesSearchActivity extends Activity implements OnClickListener {
 	private ArrayList<ItineraryItem> searchResultsList;
@@ -88,6 +91,16 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		suggestionList = new UnfilteredArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
 		searchText = (AutoCompleteTextView) findViewById(R.id.editText_searchQuery);
 		searchText.setAdapter(suggestionList);
+		searchText.setOnEditorActionListener(new OnEditorActionListener() {
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				// if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+				GetSearchResults();
+				return true;
+				// } else {
+				// return false;
+				// }
+			}
+		});
 		searchResultsList = new ArrayList<ItineraryItem>();
 		searchResults = new SearchResultItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
@@ -309,6 +322,8 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void GetSearchResults() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 		if (currentLocation == null) {
 			WaitForGps();
 		} else {

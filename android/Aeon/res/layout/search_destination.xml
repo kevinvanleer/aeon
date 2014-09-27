@@ -68,7 +68,9 @@
             android:dropDownHeight="match_parent"
             android:dropDownWidth="match_parent"
             android:hint="@string/destination_search_hint"
+            android:imeOptions="actionSearch"
             android:inputType="textPostalAddress" >
+
         </AutoCompleteTextView>
 
         <ImageButton
