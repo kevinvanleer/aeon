@@ -62,6 +62,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
 	private LocationListener locationListener = null;
+	private LocationListener appendMyLocationListener = null;
 	private Handler eventHandler;
 	private LocationManagerUpdater locationUpdater;
 	private ScheduleUpdater scheduleUpdater;
@@ -159,6 +160,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			initializeOrigin();
 		} else {
 			rebuildFromBundle(savedInstanceState);
+			scheduleUpdater.run();
 		}
 
 		initializeAddNewItineraryItem();
@@ -376,6 +378,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// navUri += "(Custom name here)";
 				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
 				startActivity(navIntent);
+
 			} catch (ActivityNotFoundException er) {
 				Log.d("Aeon", "No external navigation apps found.");
 			}
@@ -665,6 +668,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		case R.id.submenu_item_clear_itinerary_yes:
 			itineraryItems.clear();
 			currentDestinationIndex = 0;
+			traveling = false;
 			eventHandler.removeCallbacks(scheduleUpdater);
 			eventHandler.removeCallbacks(locationUpdater);
 			initializeOrigin();
@@ -788,22 +792,60 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void GetMyLocationInfo() {
+		if (appendMyLocationListener == null) {
+			appendMyLocationListener = new LocationListener() {
+
+				public void onLocationChanged(Location arg0) {
+					onNewLocation(arg0);
+					appendMyLocationToItinerary();
+					locationManager.removeUpdates(this);
+				}
+
+				public void onProviderDisabled(String arg0) {
+					// TODO Auto-generated method stub
+
+				}
+
+				public void onProviderEnabled(String arg0) {
+					// TODO Auto-generated method stub
+
+				}
+
+				public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+					// TODO Auto-generated method stub
+
+				}
+
+			};
+		}
+
 		if (currentLocation() == null) {
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, appendMyLocationListener);
 			waitForGps();
 		} else {
-			ItineraryItem myLocation = null;
-
-			// TODO: Wait for location service if current location is null
-
-			try {
-				ItineraryItem lastDestination = finalDestination();
-				myLocation = new ItineraryItem(currentLocation(), lastDestination.getLocation(), getLocationAddress(currentLocation()));
-			} catch (IllegalStateException e) {
-				myLocation = new ItineraryItem(currentLocation(), getLocationAddress(currentLocation()));
+			long threshold = new Date().getTime() - 1000 * 60 * 5;
+			if (currentLocation().getTime() < threshold) {
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, appendMyLocationListener);
+				waitForGps();
+			} else {
+				appendMyLocationToItinerary();
 			}
-
-			initializeSchedule(myLocation);
 		}
+	}
+
+	private void appendMyLocationToItinerary() {
+		ItineraryItem myLocation = null;
+
+		// TODO: Wait for location service if current location is null
+
+		try {
+			ItineraryItem lastDestination = finalDestination();
+			myLocation = new ItineraryItem(currentLocation(), lastDestination.getLocation(), getLocationAddress(currentLocation()));
+		} catch (IllegalStateException e) {
+			myLocation = new ItineraryItem(currentLocation(), getLocationAddress(currentLocation()));
+		}
+
+		initializeSchedule(myLocation);
 	}
 
 	private int getFinalDestinationIndex() {
