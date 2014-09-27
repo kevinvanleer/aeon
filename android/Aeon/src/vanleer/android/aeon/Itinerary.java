@@ -164,6 +164,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 		initializeAddNewItineraryItem();
 	}
 
+	@Override
+	public void onDestroy() {
+		cancelAlerts();
+		locationManager.removeUpdates(locationListener);
+	}
+
 	protected void scheduleNextLocationUpdate() {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
