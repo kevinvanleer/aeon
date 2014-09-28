@@ -12,7 +12,7 @@ public class AeonBroadcastReceiver extends BroadcastReceiver {
 			Object theExtra = theIntent.getExtras().get("destination");
 			if (theExtra != null) {
 				theIntent.setClass(theContext, Itinerary.class);
-				theIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK /* | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP */);
+				theIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				theContext.startActivity(theIntent);
 			}
 		}

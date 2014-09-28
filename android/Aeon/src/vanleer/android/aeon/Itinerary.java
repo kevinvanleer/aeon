@@ -76,6 +76,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 		traveling = savedInstanceState.getBoolean("traveling");
 		currentDestinationIndex = savedInstanceState.getInt("currentDestinationIndex");
+		selectedItemPosition = savedInstanceState.getInt("selectedItemPosition");
 		locations = savedInstanceState.getParcelableArrayList("locations");
 		itineraryItems.notifyDataSetChanged();
 	}
@@ -90,6 +91,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		savedInstanceState.putParcelableArrayList("itineraryItems", savedItinerary);
 		savedInstanceState.putParcelableArrayList("locations", locations);
 		savedInstanceState.putInt("currentDestinationIndex", currentDestinationIndex);
+		savedInstanceState.putInt("selectedItemPosition", selectedItemPosition);
 		savedInstanceState.putBoolean("traveling", traveling);
 
 	}
