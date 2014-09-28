@@ -847,7 +847,15 @@ public final class Itinerary extends Activity implements OnClickListener {
 			myLocation = new ItineraryItem(currentLocation(), getLocationAddress(currentLocation()));
 		}
 
+		// TODO: Refactor after testing behavior of search in this situation (following clause)
+		if (currentDestination().equals(finalDestination())) {
+			currentDestination().setLocationExpired();
+			myLocation.setAtLocation();
+		}
 		initializeSchedule(myLocation);
+		if (currentDestination().equals(finalDestination())) {
+			++currentDestinationIndex;
+		}
 	}
 
 	private int getFinalDestinationIndex() {
