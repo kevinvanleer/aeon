@@ -56,7 +56,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private int selectedItemPosition = -1;
 	private Geocoder theGeocoder = null;
 	private boolean traveling = false;
-	private int currentDestinationIndex = -1;
+	private int currentDestinationIndex = 0;
 	private PendingIntent pendingReminder;
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
