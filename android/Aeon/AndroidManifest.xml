@@ -8,15 +8,16 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />    
     <application android:icon="@drawable/arrive_launcher" android:label="@string/app_name" android:vmSafeMode="true" android:allowBackup="false">
         <uses-library android:name="com.google.android.maps" />
-        <activity android:name=".AeonActivity"
+        <activity android:name=".Itinerary"
             	  android:icon="@drawable/arrive_launcher"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name"
+                  android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Itinerary" android:label="@string/itinerary_title"  android:launchMode="singleTop" android:configChanges="orientation" />
+        <!-- activity android:name=".Itinerary" android:label="@string/itinerary_title"  android:configChanges="orientation" /-->
         <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" android:configChanges="orientation" />
         <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" android:configChanges="orientation" />
         <activity android:name=".DepartureAlarm" android:configChanges="orientation" />
