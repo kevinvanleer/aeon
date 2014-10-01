@@ -9,11 +9,13 @@ import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -36,6 +38,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.Toast;
 
 // Something for sending destinations to Navigator
 // I/ActivityManager( 118): Starting activity: Intent { act=android.intent.action.VIEW dat=google.navigation:///?q=Some%20place cmp=brut.googlemaps/com.google.android.maps.driveabout.app.NavigationActivity }
@@ -139,6 +142,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			buildAlertMessageNoGps();
+		}
+
 		locationUpdater = new LocationManagerUpdater();
 		scheduleUpdater = new ScheduleUpdater();
 		eventHandler = new Handler();
@@ -171,6 +178,23 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 
 		initializeAddNewItineraryItem();
+	}
+
+	private void buildAlertMessageNoGps() {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Arrive requires precise location tracking, would you like to enable GPS?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+				startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+				dialog.cancel();
+				Toast.makeText(getApplicationContext(), "You must enable GPS to use Arrive", Toast.LENGTH_LONG).show();
+				// TODO: Disable add destination/next destination
+			}
+		});
+		final AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 	@Override
@@ -291,10 +315,18 @@ public final class Itinerary extends Activity implements OnClickListener {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == (itineraryItems.getCount() - 1)) {
-					startSearchActivity();
+					if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+						startSearchActivity();
+					} else {
+						Toast.makeText(getApplicationContext(), "You must enable GPS to use Arrive", Toast.LENGTH_LONG).show();
+					}
 				} else if (position >= currentDestinationIndex) {
-					selectedItemPosition = position;
-					updateSchedule(itineraryItems.getItem(position));
+					if (locations.isEmpty()) {
+						Toast.makeText(getApplicationContext(), "You must enable GPS to use Arrive", Toast.LENGTH_LONG).show();
+					} else {
+						selectedItemPosition = position;
+						updateSchedule(itineraryItems.getItem(position));
+					}
 				}
 				return true;
 			}
@@ -657,8 +689,20 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			Toast.makeText(getApplicationContext(), "You must enable GPS to use Arrive", Toast.LENGTH_LONG).show();
+		}
+		menu.findItem(R.id.menu_item_add_destination).setEnabled(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_item_add_destination:
+
+			break;
 		case R.id.submenu_item_add_destination_google_search:
 			startSearchActivity();
 			break;
