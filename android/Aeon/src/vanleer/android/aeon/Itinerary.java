@@ -22,6 +22,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -351,13 +352,15 @@ public final class Itinerary extends Activity implements OnClickListener {
 				updateDepartureTimeAndSchedules(currentDestination());
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					getDirections();
+					PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+					if (pm.isScreenOn() && currentDestination().getLocation().distanceTo(currentLocation()) < 500) {
+						startExternalNavigation();
+					}
 					++currentDestinationIndex;
 				}
 				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
-				// TODO: Display map
-				startExternalNavigation();
 			}
 		}
 	}
