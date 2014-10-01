@@ -31,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -130,6 +131,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		// TODO: Use this to verify location service is available
 		// GooglePlayServicesUtil.isGooglePlayServicesAvailable();
+
+		// THIS IS TEMPORARY -- HAR HAR HAR
+		getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		theGeocoder = new Geocoder(this);
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
