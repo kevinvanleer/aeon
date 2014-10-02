@@ -388,11 +388,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 				updateDepartureTimeAndSchedules(currentDestination());
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					getDirections();
+					++currentDestinationIndex;
 					PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 					if (pm.isScreenOn() && currentDestination().getLocation().distanceTo(currentLocation()) < 500) {
 						startExternalNavigation();
 					}
-					++currentDestinationIndex;
+
 				}
 				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
