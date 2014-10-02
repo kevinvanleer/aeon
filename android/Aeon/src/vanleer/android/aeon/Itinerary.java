@@ -22,9 +22,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -389,11 +391,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
 					getDirections();
 					++currentDestinationIndex;
-					PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-					if (pm.isScreenOn() && currentDestination().getLocation().distanceTo(currentLocation()) < 500) {
-						startExternalNavigation();
-					}
-
+					sendExternalNavigationNotification();
 				}
 				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
@@ -402,14 +400,36 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
+	private void sendExternalNavigationNotification() {
+		NotificationCompat.Builder navNotiBuilder = new NotificationCompat.Builder(this);
+		navNotiBuilder.setContentTitle("Navigation");
+		String message = "Select for directions to " + currentDestination().getName();
+		navNotiBuilder.setContentText(message);
+		navNotiBuilder.setWhen(new Date().getTime());
+		navNotiBuilder.setContentInfo(currentDestination().getFormattedDistance());
+		navNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
+		navNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		navNotiBuilder.setAutoCancel(true);
+
+		PendingIntent pendingResult = PendingIntent.getActivity(getBaseContext(), 0, getExternalNavigationIntent(), 0);
+
+		navNotiBuilder.setContentIntent(pendingResult);
+		NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notiMgr.notify(R.id.departure_reminder_notification, navNotiBuilder.build());
+	}
+
 	private void startExternalNavigation() {
+		startActivity(getExternalNavigationIntent());
+	}
+
+	private Intent getExternalNavigationIntent() {
 		try {
 			Log.v("Aeon", "Starting external navigation.");
 			String navUri = "google.navigation:ll=";
 			navUri += currentDestination().getLocation().getLatitude() + ",";
 			navUri += currentDestination().getLocation().getLongitude();
 			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-			startActivity(navIntent);
+			return navIntent;
 		} catch (ActivityNotFoundException e) {
 			try {
 				Log.v("Aeon", "Navigation intent failed starting Google Maps.");
@@ -419,12 +439,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 				// TODO: add the following to give a custom name to the location
 				// navUri += "(Custom name here)";
 				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-				startActivity(navIntent);
-
+				return navIntent;
 			} catch (ActivityNotFoundException er) {
 				Log.d("Aeon", "No external navigation apps found.");
 			}
 		}
+		return null;
 	}
 
 	void updateTimes() {
