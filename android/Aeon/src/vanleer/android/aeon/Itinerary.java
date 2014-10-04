@@ -723,11 +723,28 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return true;
 	}
 
+	private void quit() {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Your itinerary will be cleared. Would you still like to quit?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+				finish();
+			}
+		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
+			public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+
+			}
+		});
+		final AlertDialog alert = builder.create();
+		alert.show();
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_item_exit:
+			quit();
+			break;
 		case R.id.menu_item_add_destination:
-
 			break;
 		case R.id.submenu_item_add_destination_google_search:
 			startSearchActivity();
