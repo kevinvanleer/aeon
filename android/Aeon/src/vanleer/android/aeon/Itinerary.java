@@ -87,6 +87,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		locations = savedInstanceState.getParcelableArrayList("locations");
 		itineraryItems.notifyDataSetChanged();
 	}
+	
+	@Override
+	public void onBackPressed() {		
+		moveTaskToBack(true);
+	}
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
