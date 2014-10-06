@@ -95,11 +95,11 @@ public final class GooglePlacesSearch {
 		clearSearchResults();
 
 		performPlacesSearch(latitude, longitude, radius, types, name);
-		if (places.size() == 0) {
+		if (places.isEmpty()) {
 			performGeocodingSearch(name);
 		}
 
-		if (places.size() > 0) {
+		if (!places.isEmpty()) {
 			JSONObject distanceMatrixResults = getDistances(latitude, longitude);
 			parseDistanceMatrixResults(distanceMatrixResults);
 		}
