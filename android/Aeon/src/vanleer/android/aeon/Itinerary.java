@@ -460,7 +460,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			}
 		} else if (currentDestination().enRoute()) {
 			if (currentDestination().getSchedule().getArrivalTime().before(new Date())) {
-				Log.v("Aeon", "Updating current destination departure time while en route.");
+				Log.v("Aeon", "Updating current destination arrival time while en route.");
 				updateArrivalTime(currentDestination());
 			}
 		}
