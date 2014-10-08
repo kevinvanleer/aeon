@@ -19,6 +19,19 @@ class ItineraryItemAdapter extends ArrayAdapter<ItineraryItem> {
 	}
 
 	@Override
+	public boolean isEnabled(int position) {
+		if (!this.isEmpty()) {
+			ItineraryItem item = this.getItem(position);
+			if (item != null) {
+				if (!item.locationExpired()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 		if (v == null) {
