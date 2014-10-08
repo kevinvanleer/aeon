@@ -344,6 +344,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void BuildResultsList() {
+		if (googleSearch.getResultCount() == 0) {
+			ItineraryItem notFound = new ItineraryItem("Your search did not match any locations.");
+			searchResultsList.add(notFound);
+			searchResults.add(searchResultsList.get(0));
+		}
 		for (int i = 0; i < googleSearch.getResultCount(); ++i) {
 			ItineraryItem newItem = googleSearch.getPlace(i);
 			if (newItem != null) {

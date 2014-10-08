@@ -335,7 +335,15 @@ public final class GooglePlacesSearch {
 	private void parseDistanceMatrixResults(JSONObject distanceMatrix) {
 		if (distanceMatrix != null) {
 			JSONArray results = (JSONArray) distanceMatrix.get("rows");
+
+			if (results.isEmpty()) {
+				String statusCode = (String) distanceMatrix.get("status");
+				Log.d("Aeon", "Distance matrix search returned 0 results: STATUS_CODE=" + statusCode);
+				// TODO: Now what
+			}
+
 			JSONArray resultArray = (JSONArray) ((JSONObject) results.get(0)).get("elements");
+
 			if (resultArray != null) {
 				for (int index = places.size() - 1; index >= 0; --index) {
 					JSONObject distance = (JSONObject) resultArray.get(index);
