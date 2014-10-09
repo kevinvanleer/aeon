@@ -208,9 +208,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	@Override
 	public void onDestroy() {
-		cancelAlerts();
-		locationManager.removeUpdates(locationListener);
 		super.onDestroy();
+		locationManager.removeUpdates(locationListener);
 	}
 
 	protected void scheduleNextLocationUpdate() {
@@ -729,6 +728,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Your itinerary will be cleared. Would you still like to quit?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+				Intent intent = new Intent(Intent.ACTION_MAIN);
+				intent.addCategory(Intent.CATEGORY_HOME);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				cancelAlerts();
 				finish();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
