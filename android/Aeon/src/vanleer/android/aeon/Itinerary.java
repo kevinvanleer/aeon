@@ -84,6 +84,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		currentDestinationIndex = savedInstanceState.getInt("currentDestinationIndex");
 		selectedItemPosition = savedInstanceState.getInt("selectedItemPosition");
 		locations = savedInstanceState.getParcelableArrayList("locations");
+		pendingAlarm = savedInstanceState.getParcelable("pendingAlarm");
+		pendingReminder = savedInstanceState.getParcelable("pendingReminder");
 		itineraryItems.notifyDataSetChanged();
 	}
 
@@ -104,7 +106,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		savedInstanceState.putInt("currentDestinationIndex", currentDestinationIndex);
 		savedInstanceState.putInt("selectedItemPosition", selectedItemPosition);
 		savedInstanceState.putBoolean("traveling", traveling);
-
+		savedInstanceState.putParcelable("pendingAlarm", pendingAlarm);
+		savedInstanceState.putParcelable("pendingReminder", pendingReminder);
 	}
 
 	@Override
