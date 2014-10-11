@@ -24,11 +24,7 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 
 		if (item == null) return false;
 
-		if (item.getName().contains("Your search did not match any locations")) {
-			return false;
-		} else {
-			return true;
-		}
+		return ((item.getDistance() != null) && (item.getTravelDuration() != null));
 	}
 
 	@Override
