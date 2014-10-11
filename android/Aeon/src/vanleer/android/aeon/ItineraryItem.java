@@ -455,9 +455,12 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public String getTravelDurationLongFormat() {
-		String duration = "< 1 min";
-		if (travelDurationSec >= 60) {
-			duration = TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+		String duration = "...";
+		if (travelDurationSec != null) {
+			duration = "< 1 min";
+			if (travelDurationSec >= 60) {
+				duration = TimeFormat.format(travelDurationSec * 1000, TimeFormat.LONG_FORMAT, TimeFormat.MINUTES);
+			}
 		}
 		return duration;
 	}
