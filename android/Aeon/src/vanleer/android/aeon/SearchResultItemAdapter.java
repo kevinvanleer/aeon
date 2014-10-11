@@ -45,10 +45,7 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 					name.setText(item.getName());
 				}
 
-				if (item.getName().contains("Your search did not match any locations")) {
-					vicinity.setVisibility(View.GONE);
-					distance.setVisibility(View.GONE);
-				} else {
+				if ((item.getDistance() != null) && (item.getTravelDuration() != null)) {
 					vicinity.setVisibility(View.VISIBLE);
 					distance.setVisibility(View.VISIBLE);
 					if (vicinity != null) {
@@ -57,6 +54,9 @@ class SearchResultItemAdapter extends ArrayAdapter<ItineraryItem> {
 					if (distance != null) {
 						distance.setText(item.getFormattedDistance());
 					}
+				} else {
+					vicinity.setVisibility(View.GONE);
+					distance.setVisibility(View.GONE);
 				}
 			}
 		}
