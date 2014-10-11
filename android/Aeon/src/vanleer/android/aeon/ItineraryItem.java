@@ -63,8 +63,8 @@ public final class ItineraryItem implements Parcelable {
 	public ItineraryItem(String fakeName) {
 		location = null;
 		name = fakeName;
-		travelDurationSec = (long) 0;
-		distance = (long) 0;
+		travelDurationSec = null;
+		distance = null;
 		times = null;
 		iconUrl = null;
 		phoneNumber = "NONE";
@@ -153,8 +153,8 @@ public final class ItineraryItem implements Parcelable {
 		dest.writeSerializable(googleGeocodingResult);
 		dest.writeSerializable(googleDistanceMatrixResult);
 		dest.writeParcelable(location, flags);
-		dest.writeLong(travelDurationSec);
-		dest.writeLong(distance);
+		if (travelDurationSec != null) dest.writeLong(travelDurationSec);
+		if (distance != null) dest.writeLong(distance);
 		dest.writeString(iconUrl);
 		dest.writeParcelable(getSchedule(), flags);
 		dest.writeString(phoneNumber);
