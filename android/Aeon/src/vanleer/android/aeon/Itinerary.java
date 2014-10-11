@@ -77,6 +77,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		ArrayList<ItineraryItem> savedItinerary = savedInstanceState.getParcelableArrayList("itineraryItems");
 		origin = savedItinerary.get(0);
+		Log.v("Aeon", "Restoring " + savedItinerary.size() + " itinerary items.");
 		for (ItineraryItem item : savedItinerary) {
 			itineraryItems.add(item);
 		}
@@ -830,6 +831,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		origin.setSchedule(departNow);
 		if (currentLocation() != null) {
 			try {
+				Log.v("Aeon", "Valid location found while initializing origin.");
+				currentDestinationIndex = 0;
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
