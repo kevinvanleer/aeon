@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry exported="true" kind="lib" path="C:/pkgs/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/kvanleer/devel/android/Aeon/libs/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="C:/pkgs/google-api-client"/>
 	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-1.4.1-beta.jar"/>
 	<classpathentry kind="lib" path="C:/pkgs/google-api-client/google-api-client-1.4.1-beta-sources.jar"/>
