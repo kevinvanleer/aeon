@@ -1,5 +1,6 @@
 package vanleer.android.aeon;
 
+import vanleer.util.InvalidDistanceMatrixResponseException;
 import vanleer.util.UnfilteredArrayAdapter;
 
 import java.util.ArrayList;
@@ -332,9 +333,22 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			searchResultsList.clear();
 			searchResults.clear();
 			searchResultsListView.clearChoices();
-			QuerySearchEngine();
+			try {
+				QuerySearchEngine();
+				if (googleSearch.getResultCount() == 0) {
+					ItineraryItem notFound = new ItineraryItem("Your search did not match any locations.");
+					searchResultsList.add(notFound);
+					searchResults.add(searchResultsList.get(0));
+				} else {
+					BuildResultsList();
+				}
+			} catch (InvalidDistanceMatrixResponseException e) {
+				searching = false;
+				ItineraryItem notFound = new ItineraryItem("Failed to get distance and duration information.");
+				searchResultsList.add(notFound);
+				searchResults.add(searchResultsList.get(0));
+			}
 
-			BuildResultsList();
 		}
 	}
 
@@ -344,11 +358,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void BuildResultsList() {
-		if (googleSearch.getResultCount() == 0) {
-			ItineraryItem notFound = new ItineraryItem("Your search did not match any locations.");
-			searchResultsList.add(notFound);
-			searchResults.add(searchResultsList.get(0));
-		}
+
 		for (int i = 0; i < googleSearch.getResultCount(); ++i) {
 			ItineraryItem newItem = googleSearch.getPlace(i);
 			if (newItem != null) {

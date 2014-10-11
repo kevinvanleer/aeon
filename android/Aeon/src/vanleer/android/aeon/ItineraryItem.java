@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import vanleer.util.DistanceUnit;
+import vanleer.util.InvalidDistanceMatrixResponseException;
 import vanleer.util.TimeFormat;
 
 import android.location.Location;
@@ -371,18 +372,24 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	void setDistance(JSONObject distanceMatrixData) {
-		if (distanceMatrixData != null) {
-			googleDistanceMatrixResult = distanceMatrixData;
+		if (distanceMatrixData == null) {
+			throw new InvalidDistanceMatrixResponseException("Uninitialized distance matrix element");
+		}
+		String statusCode = (String) distanceMatrixData.get("status");
+		if (!statusCode.equals("OK")) {
+			throw new InvalidDistanceMatrixResponseException(statusCode);
+		}
 
-			JSONObject distanceObject = (JSONObject) googleDistanceMatrixResult.get("distance");
-			if (distanceObject != null) {
-				distance = (Long) distanceObject.get("value");
-			}
+		googleDistanceMatrixResult = distanceMatrixData;
 
-			JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
-			if (durationObject != null) {
-				travelDurationSec = (Long) durationObject.get("value");
-			}
+		JSONObject distanceObject = (JSONObject) googleDistanceMatrixResult.get("distance");
+		if (distanceObject != null) {
+			distance = (Long) distanceObject.get("value");
+		}
+
+		JSONObject durationObject = (JSONObject) googleDistanceMatrixResult.get("duration");
+		if (durationObject != null) {
+			travelDurationSec = (Long) durationObject.get("value");
 		}
 	}
 

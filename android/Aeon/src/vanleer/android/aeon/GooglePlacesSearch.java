@@ -23,6 +23,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import vanleer.util.InvalidDistanceMatrixResponseException;
+
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -333,26 +335,40 @@ public final class GooglePlacesSearch {
 	}
 
 	private void parseDistanceMatrixResults(JSONObject distanceMatrix) {
-		if (distanceMatrix != null) {
-			JSONArray results = (JSONArray) distanceMatrix.get("rows");
+		if (distanceMatrix == null) {
+			String message = "Uninitialized distance matrix result.";
+			Log.w("Aeon", message);
+			throw new InvalidDistanceMatrixResponseException(message);
+		}
 
-			if (results.isEmpty()) {
-				String statusCode = (String) distanceMatrix.get("status");
-				Log.d("Aeon", "Distance matrix search returned 0 results: STATUS_CODE=" + statusCode);
-				// TODO: Now what
-			}
+		String statusCode = (String) distanceMatrix.get("status");
+		if (!statusCode.equals("OK")) {
+			String message = "Distance matrix search returned bad status.  STATUS_CODE=" + statusCode;
+			Log.w("Aeon", message);
+			throw new InvalidDistanceMatrixResponseException(message);
+		}
 
-			JSONArray resultArray = (JSONArray) ((JSONObject) results.get(0)).get("elements");
+		JSONArray results = (JSONArray) distanceMatrix.get("rows");
+		if ((results == null) || results.isEmpty()) {
+			String message = "Distance matrix search returned no results.";
+			Log.w("Aeon", message);
+			throw new InvalidDistanceMatrixResponseException(message);
+		}
 
-			if (resultArray != null) {
-				for (int index = places.size() - 1; index >= 0; --index) {
-					JSONObject distance = (JSONObject) resultArray.get(index);
-					if (distance != null) {
-						places.get(index).setDistance(distance);
-					}
-					if (places.get(index).getDistance() == null) {
-						places.remove(index);
-					}
+		JSONArray resultArray = (JSONArray) ((JSONObject) results.get(0)).get("elements");
+		if ((resultArray == null) || (resultArray.size() != places.size())) {
+			String message = "Distance matrix search result count does not match places result count.";
+			Log.w("Aeon", message);
+			throw new InvalidDistanceMatrixResponseException(message);
+		}
+
+		if (resultArray != null) {
+			for (int index = places.size() - 1; index >= 0; --index) {
+				JSONObject distance = (JSONObject) resultArray.get(index);
+				try {
+					places.get(index).setDistance(distance);
+				} catch (InvalidDistanceMatrixResponseException e) {
+					places.remove(index);
 				}
 			}
 		}
