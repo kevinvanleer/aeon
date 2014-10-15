@@ -184,10 +184,37 @@ public final class Itinerary extends Activity implements OnClickListener {
 			initializeOrigin();
 		} else {
 			rebuildFromBundle(savedInstanceState);
-			scheduleUpdater.run();
 		}
 
 		initializeAddNewItineraryItem();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		scheduleUpdater.run();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		eventHandler.removeCallbacks(scheduleUpdater);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		locationManager.removeUpdates(locationListener);
 	}
 
 	private void buildAlertMessageNoGps() {
@@ -205,12 +232,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		});
 		final AlertDialog alert = builder.create();
 		alert.show();
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		locationManager.removeUpdates(locationListener);
 	}
 
 	protected void scheduleNextLocationUpdate() {
