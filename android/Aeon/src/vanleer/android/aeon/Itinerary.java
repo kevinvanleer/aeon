@@ -972,14 +972,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 
 		// TODO: Refactor after testing behavior of search in this situation (following clause)
-		if (currentDestination().equals(finalDestination())) {
+		if ((getFinalDestinationIndex() != 0) && finalDestination().atLocation()) {
 			currentDestination().setLocationExpired();
 			myLocation.setAtLocation();
 		}
+
 		initializeSchedule(myLocation);
-		if (currentDestination().equals(finalDestination())) {
+
+		if ((getFinalDestinationIndex() != 0) && finalDestination().atLocation()) {
 			++currentDestinationIndex;
 		}
+
 	}
 
 	private int getFinalDestinationIndex() {
