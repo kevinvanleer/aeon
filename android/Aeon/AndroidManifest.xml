@@ -22,6 +22,7 @@
         <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" android:configChanges="orientation" />
         <activity android:name=".DepartureAlarm" android:configChanges="orientation" />
         <service android:name=".DepartureReminder" />
+        <service android:name=".ItineraryManager" />
         <receiver android:name="AeonBroadcastReceiver">
             <intent-filter>
                 <action android:name="vanleer.android.aeon.delay_departure" />
