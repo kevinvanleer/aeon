@@ -47,7 +47,7 @@ import android.widget.Toast;
 public final class Itinerary extends Activity implements OnClickListener {
 
 	private static final int GPS_UPDATE_DISTANCE_M = 0;
-	private static final int GPS_UPDATE_INTERVAL_MS = 2000;
+	private static final int GPS_UPDATE_INTERVAL_MS = 10000;
 	private final int listViewId = R.id.listView_itinerary;
 	private ListView itineraryListView;
 	private ItineraryItemAdapter itineraryItems;
