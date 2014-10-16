@@ -149,6 +149,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		theGeocoder = new Geocoder(this);
+
+		startService(new Intent(this, ItineraryManager.class));
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
