@@ -26,7 +26,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-public class LocationService extends Service {
+public class ItineraryManager extends Service {
 	private static final int GPS_UPDATE_DISTANCE_M = 20;
 	private static final int GPS_UPDATE_INTERVAL_MS = 2000;
 
@@ -51,8 +51,8 @@ public class LocationService extends Service {
 	private final IBinder binder = new LocationServiceBinder();
 
 	class LocationServiceBinder extends Binder {
-		LocationService getService() {
-			return LocationService.this;
+		ItineraryManager getService() {
+			return ItineraryManager.this;
 		}
 
 	}
@@ -78,7 +78,7 @@ public class LocationService extends Service {
 
 			long delayMs = nextMinute.getTimeInMillis() - now.getTimeInMillis();
 
-			LocationService.this.eventHandler.postDelayed(LocationService.this.scheduleUpdater, delayMs);
+			ItineraryManager.this.eventHandler.postDelayed(ItineraryManager.this.scheduleUpdater, delayMs);
 
 			doStuff();
 		}
@@ -559,7 +559,7 @@ public class LocationService extends Service {
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				onNewLocation(location);
-				LocationService.this.scheduleNextLocationUpdate();
+				ItineraryManager.this.scheduleNextLocationUpdate();
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {
