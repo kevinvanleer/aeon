@@ -243,7 +243,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 			if (currentDestination().enRoute()) {
 				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
 			} else if (currentDestination().atLocation()) {
-				msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
+				// msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
+				msDelta = 0;
 			}
 
 			long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
