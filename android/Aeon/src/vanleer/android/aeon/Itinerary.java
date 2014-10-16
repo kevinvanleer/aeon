@@ -755,6 +755,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				cancelAlerts();
+				locationManager.removeUpdates(locationListener);
 				finish();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
