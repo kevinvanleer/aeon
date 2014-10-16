@@ -27,8 +27,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class ItineraryManager extends Service {
-	private static final int GPS_UPDATE_DISTANCE_M = 20;
-	private static final int GPS_UPDATE_INTERVAL_MS = 2000;
+	private static final int GPS_UPDATE_DISTANCE_M = 0;
+	private static final int GPS_UPDATE_INTERVAL_MS = 10000;
 
 	private LocationManager locationManager;
 	private LocationListener locationListener;
