@@ -67,7 +67,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
-	private LocationListener locationListener = null;
+	// private LocationListener locationListener = null;
 	private LocationListener appendMyLocationListener = null;
 	private Handler eventHandler;
 	private LocationManagerUpdater locationUpdater;
@@ -160,7 +160,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		scheduleUpdater = new ScheduleUpdater();
 		eventHandler = new Handler();
 
-		locationListener = new LocationListener() {
+		/*-locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				onNewLocation(location);
 				Itinerary.this.scheduleNextLocationUpdate();
@@ -174,9 +174,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			public void onProviderDisabled(String provider) {
 			}
-		};
+		};*/
 
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
+		// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 
 		configureItineraryListViewLongClickListener();
 
@@ -214,7 +214,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		locationManager.removeUpdates(locationListener);
+		// locationManager.removeUpdates(locationListener);
 	}
 
 	private void buildAlertMessageNoGps() {
@@ -236,7 +236,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	protected void scheduleNextLocationUpdate() {
 		Log.d("Aeon", "Cancelling current location updates");
-		locationManager.removeUpdates(locationListener);
+		// locationManager.removeUpdates(locationListener);
 
 		if ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation()) {
 			long msDelta = 0;
@@ -756,7 +756,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				cancelAlerts();
-				locationManager.removeUpdates(locationListener);
+				// locationManager.removeUpdates(locationListener);
 				finish();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -799,7 +799,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			eventHandler.removeCallbacks(locationUpdater);
 			initializeOrigin();
 			initializeAddNewItineraryItem();
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
+			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 			break;
 		case R.id.menu_item_clear_itinerary:
 		case R.id.submenu_item_clear_itinerary_no:
@@ -904,7 +904,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	class LocationManagerUpdater implements Runnable {
 		public void run() {
 			Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
+			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 		}
 	}
 
