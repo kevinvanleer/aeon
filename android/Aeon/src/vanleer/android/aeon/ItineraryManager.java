@@ -57,9 +57,17 @@ public class ItineraryManager extends Service {
 
 	class ItineraryManagerBinder extends Binder {
 		ItineraryManager getService() {
+			// HACK: ONLY TEMPORARY WHILE MIGRATING
 			return ItineraryManager.this;
 		}
 
+		public Location currentLocation() {
+			Location currentLocation = null;
+			if (!locations.isEmpty()) {
+				currentLocation = locations.get(locations.size() - 1);
+			}
+			return currentLocation;
+		}
 	}
 
 	class LocationManagerUpdater implements Runnable {

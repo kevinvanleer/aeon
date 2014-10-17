@@ -297,7 +297,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private Location currentLocation() {
-		return itineraryManagerBinder.getService().currentLocation();
+		return itineraryManagerBinder.currentLocation();
 	}
 
 	private void initializeAddNewItineraryItem() {
