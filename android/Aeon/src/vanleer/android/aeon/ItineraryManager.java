@@ -24,11 +24,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 
 public class ItineraryManager extends Service {
 	private static final int GPS_UPDATE_DISTANCE_M = 0;
 	private static final int GPS_UPDATE_INTERVAL_MS = 10000;
+	static final int MSG_NEW_LOCATION = 0;
 
 	private LocationManager locationManager;
 	private LocationListener locationListener;
@@ -47,8 +51,9 @@ public class ItineraryManager extends Service {
 	private ItineraryItem origin = null;
 	private int currentDestinationIndex = 0;
 	private boolean traveling = false;
-	private boolean waitingForGps = false;
+	private final boolean waitingForGps = false;
 	private final IBinder binder = new LocationServiceBinder();
+	private Messenger itineraryMessenger;
 
 	class LocationServiceBinder extends Binder {
 		ItineraryManager getService() {
@@ -59,7 +64,7 @@ public class ItineraryManager extends Service {
 
 	class LocationManagerUpdater implements Runnable {
 		public void run() {
-			Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
+			Log.d("Aeon", "LocationManagerUpdater requesting updates from GPS provider");
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 		}
 	}
@@ -209,8 +214,21 @@ public class ItineraryManager extends Service {
 
 	protected void onNewLocation(Location location) {
 		Log.v("Aeon", "New location received.");
+
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
+
+		Message newLocationMessage = Message.obtain(null, MSG_NEW_LOCATION, 0, 0);
+		Bundle locationData = new Bundle();
+		locationData.putParcelable("location", location);
+		newLocationMessage.setData(locationData);
+		try {
+			itineraryMessenger.send(newLocationMessage);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*-
 		if (origin.getLocation() == null || itineraryItems.size() <= 2) {
 			currentDestinationIndex = 0;
 			updateOrigin();
@@ -221,6 +239,7 @@ public class ItineraryManager extends Service {
 		if (waitingForGps) {
 			waitingForGps = false;
 		}
+		 */
 	}
 
 	private void initializeOrigin() {
@@ -256,7 +275,7 @@ public class ItineraryManager extends Service {
 	}
 
 	private int getFinalDestinationIndex() {
-		return itineraryItems.size() - 1;
+		return itineraryItems.size();
 	}
 
 	private ItineraryItem finalDestination() {
@@ -269,12 +288,13 @@ public class ItineraryManager extends Service {
 
 		if ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation()) {
 			long msDelta = 0;
+			/*- TODO: DISABLED UNTIL ITINERARY IS TRACKED BAY MANAGER
 			if (currentDestination().enRoute()) {
 				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
 			} else if (currentDestination().atLocation()) {
 				msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
 			}
-
+			 */
 			long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
 			if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
 
@@ -293,7 +313,7 @@ public class ItineraryManager extends Service {
 				currentDestination().setAtLocation();
 				// FIX itineraryItems.notifyDataSetChanged();
 				updateArrivalTimeAndSchedules(currentDestination());
-				if (currentDestinationIndex < (itineraryItems.size() - 2)) {
+				if (currentDestinationIndex < getFinalDestinationIndex()) {
 					setAlerts(currentDestination(), itineraryItems.get(currentDestinationIndex + 1));
 				}
 			}
@@ -303,7 +323,7 @@ public class ItineraryManager extends Service {
 				cancelAlerts();
 				currentDestination().setLocationExpired();
 				updateDepartureTimeAndSchedules(currentDestination());
-				if (currentDestinationIndex < (itineraryItems.size() - 2)) {
+				if (currentDestinationIndex < getFinalDestinationIndex()) {
 					getDirections();
 					++currentDestinationIndex;
 				}
@@ -550,11 +570,12 @@ public class ItineraryManager extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.v("Aeon", "Location service started");
+		Log.v("Aeon", "Itinerary manager started");
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 		theGeocoder = new Geocoder(this);
 		eventHandler = new Handler();
+		itineraryItems = new ArrayList<ItineraryItem>();
 
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
@@ -577,14 +598,14 @@ public class ItineraryManager extends Service {
 		scheduleUpdater = new ScheduleUpdater();
 		locationUpdater = new LocationManagerUpdater();
 
-		initializeOrigin();
-		scheduleUpdater.run();
+		// initializeOrigin();
+		// scheduleUpdater.run();
 	}
 
-	/*-
 	@Override
 	public int onStartCommand(Intent theIntent, int flags, int startId) {
-
+		// FYI THIS IS CALLED EVERY TIME startService IS CALLED
+		/*- THIS STUFF CAN PROBABLY GO AWAY
 		if (theIntent.getAction().equals("vanleer.android.aeon.append_destination")) {
 		} else if (theIntent.getAction().equals("vanleer.android.aeon.update_destination")) {
 		} else if (theIntent.getAction().equals("vanleer.android.aeon.remove_destination")) {
@@ -601,18 +622,36 @@ public class ItineraryManager extends Service {
 				}
 			}
 		}
+		 */
 
 		return START_STICKY;
-	}*/
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
+		Log.d("Aeon", "Activity binding to itinerary manager");
+		itineraryMessenger = (Messenger) intent.getParcelableExtra("itineraryMessenger");
 		return binder;
 	}
 
 	@Override
+	public void onRebind(Intent intent) {
+		// TODO Auto-generated method stub
+		Log.d("Aeon", "Activity re-binding to itinerary manager");
+		itineraryMessenger = (Messenger) intent.getParcelableExtra("itineraryMessenger");
+		// return binder;
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent) {
+		Log.d("Aeon", "Activity unbinding from itinerary manager");
+		return true;
+	}
+
+	@Override
 	public void onDestroy() {
+		Log.d("Aeon", "Destroying itinerary manager");
 		cancelAlerts();
 		locationManager.removeUpdates(locationListener);
 		super.onDestroy();

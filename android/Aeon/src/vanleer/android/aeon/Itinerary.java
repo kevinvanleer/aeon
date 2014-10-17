@@ -1,11 +1,14 @@
 package vanleer.android.aeon;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
+
+import vanleer.android.aeon.ItineraryManager.LocationServiceBinder;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -14,9 +17,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -25,6 +30,9 @@ import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.NotificationCompat;
 import android.os.Handler;
 import android.util.Log;
@@ -67,11 +75,55 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
-	// private LocationListener locationListener = null;
 	private LocationListener appendMyLocationListener = null;
-	private Handler eventHandler;
-	private LocationManagerUpdater locationUpdater;
 	private ScheduleUpdater scheduleUpdater;
+	private LocationServiceBinder locationServiceBinder;
+	private boolean boundToInteraryManager;
+
+	private static ItineraryManagerHandler eventHandler;
+
+	private static class ItineraryManagerHandler extends Handler {
+		private WeakReference<Itinerary> theItinerary;
+
+		public ItineraryManagerHandler(WeakReference<Itinerary> itineraryRef) {
+			theItinerary = itineraryRef;
+		}
+
+		public void setItinerary(WeakReference<Itinerary> itineraryRef) {
+			theItinerary = itineraryRef;
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case ItineraryManager.MSG_NEW_LOCATION:
+				// onNewLocation(locationServiceBinder.getService().currentLocation());
+				if (theItinerary.get() == null) {
+					throw new NullPointerException("Itinerary reference is null");
+				}
+				theItinerary.get().onNewLocation((Location) msg.getData().getParcelable("location"));
+				break;
+			default:
+				super.handleMessage(msg);
+			}
+		}
+	};
+
+	private final ServiceConnection itineraryManagerConnection = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
+			locationServiceBinder = (LocationServiceBinder) service;
+			boundToInteraryManager = true;
+		}
+
+		public void onServiceDisconnected(ComponentName name) {
+			Log.d("Aeon", "Itinerary has been disconnected from itinerary manager");
+			// TODO Auto-generated method stub
+
+			boundToInteraryManager = false;
+		}
+	};
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
@@ -132,11 +184,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.itinerary);
 
-		// FOR TESTING
-		// currentLocation() = new Location("test");
-		// currentLocation().setLatitude(38.477548);
-		// currentLocation().setLongitude(-91.051562);
-		// FOR TESTING
+		if (eventHandler == null) {
+			eventHandler = new ItineraryManagerHandler(new WeakReference<Itinerary>(this));
+		} else {
+			eventHandler.setItinerary(new WeakReference<Itinerary>(this));
+		}
 
 		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item);
 		itineraryListView = (ListView) findViewById(listViewId);
@@ -151,6 +203,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		theGeocoder = new Geocoder(this);
 
 		startService(new Intent(this, ItineraryManager.class));
+
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
@@ -158,9 +211,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			buildAlertMessageNoGps();
 		}
 
-		locationUpdater = new LocationManagerUpdater();
 		scheduleUpdater = new ScheduleUpdater();
-		eventHandler = new Handler();
 
 		/*-locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
@@ -194,28 +245,37 @@ public final class Itinerary extends Activity implements OnClickListener {
 	@Override
 	public void onStart() {
 		super.onStart();
+		Log.d("Aeon", "Starting itinerary activity");
+		Intent bindIntent = new Intent(this, ItineraryManager.class);
+		bindIntent.putExtra("itineraryMessenger", new Messenger(eventHandler));
+		bindService(bindIntent, itineraryManagerConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		Log.d("Aeon", "Resuming itinerary activity");
 		scheduleUpdater.run();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
+		Log.d("Aeon", "Pausing itinerary activity");
 		eventHandler.removeCallbacks(scheduleUpdater);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
+		Log.d("Aeon", "Stopping itinerary activity");
+		unbindService(itineraryManagerConnection);
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		Log.d("Aeon", "Destroying itinerary activity");
 		// locationManager.removeUpdates(locationListener);
 	}
 
@@ -234,29 +294,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		});
 		final AlertDialog alert = builder.create();
 		alert.show();
-	}
-
-	protected void scheduleNextLocationUpdate() {
-		Log.d("Aeon", "Cancelling current location updates");
-		// locationManager.removeUpdates(locationListener);
-
-		if ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation()) {
-			long msDelta = 0;
-			if (currentDestination().enRoute()) {
-				msDelta = currentDestination().getSchedule().getArrivalTime().getTime() - (new Date()).getTime();
-			} else if (currentDestination().atLocation()) {
-				// msDelta = currentDestination().getSchedule().getDepartureTime().getTime() - (new Date()).getTime();
-				msDelta = 0;
-			}
-
-			long msDelay = (msDelta - (1000 * 60 * 5)) / 2;
-			if (msDelay < GPS_UPDATE_INTERVAL_MS) msDelay = GPS_UPDATE_INTERVAL_MS;
-
-			Log.d("Aeon", "Scheduled GPS update for " + msDelay + "ms from now");
-			eventHandler.postDelayed(locationUpdater, msDelay);
-		} else {
-			Log.d("Aeon", "No GPS update scheduled.  User at final destination.");
-		}
 	}
 
 	private Location currentLocation() {
@@ -389,6 +426,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.v("Aeon", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
+		Log.d("Aeon", origin.getLocation() == null ? "Origin location is null" : "Origin has valid location");
+		Log.d("Aeon", itineraryItems.getCount() <= 2 ? "Itinerary has 2 or fewer items" : "Itinerary has more than two items");
 		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
 			currentDestinationIndex = 0;
 			updateOrigin();
@@ -602,8 +641,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 		if (threshold < 100.f) threshold = 100.f;
 		float distance = currentLocation().distanceTo(currentDestination().getLocation());
-		// Log.v("Aeon", "Vicinity threshold:" + threshold);
-		// Log.v("Aeon", "Distance to destination:" + distance);
+		Log.d("Aeon", "Vicinity threshold:" + threshold);
+		Log.d("Aeon", "Distance to destination:" + distance);
 		return (distance < threshold);
 	}
 
@@ -759,6 +798,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 				startActivity(intent);
 				cancelAlerts();
 				// locationManager.removeUpdates(locationListener);
+				// stopService(new Intent(this, ItineraryManager.class));
+				stopService(new Intent(Itinerary.this, ItineraryManager.class));
 				finish();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -798,7 +839,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			currentDestinationIndex = 0;
 			traveling = false;
 			eventHandler.removeCallbacks(scheduleUpdater);
-			eventHandler.removeCallbacks(locationUpdater);
 			initializeOrigin();
 			initializeAddNewItineraryItem();
 			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
@@ -832,14 +872,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateOrigin() {
-		// Log.v("Aeon", "Updating origin.");
+		Log.v("Aeon", "Updating origin.");
 		if (origin.getSchedule().getDepartureTime().before(new Date())) {
-			// Log.v("Aeon", "Updating origin departure time.");
+			Log.d("Aeon", "Updating origin departure time.");
 			origin.getSchedule().updateDepartureTime(nearestMinute());
 		}
 		if (currentLocation() != null) {
 			try {
-				// Log.v("Aeon", "Updating origin location.");
+				Log.d("Aeon", "Updating origin location.");
 				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
 			} catch (NullPointerException e) {
 				// TODO Location was null
@@ -905,7 +945,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	class LocationManagerUpdater implements Runnable {
 		public void run() {
-			Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
+			// Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
 			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 		}
 	}
@@ -1073,8 +1113,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			break;
 		default:
 		}
-		eventHandler.removeCallbacks(locationUpdater);
-		scheduleNextLocationUpdate();
 	}
 
 	private void initializeSchedule(ItineraryItem newDestination) {
