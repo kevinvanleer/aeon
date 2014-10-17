@@ -68,6 +68,11 @@ public class ItineraryManager extends Service {
 			}
 			return currentLocation;
 		}
+
+		public void requestLocationUpdate() {
+			eventHandler.removeCallbacks(locationUpdater);
+			locationUpdater.run();
+		}
 	}
 
 	class LocationManagerUpdater implements Runnable {
