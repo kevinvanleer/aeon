@@ -463,6 +463,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 					++currentDestinationIndex;
 					sendExternalNavigationNotification();
 				}
+				// TODO: Don't set enRoute to final destination after arrival at final destination
+
 				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
 				itineraryItems.notifyDataSetChanged();
@@ -823,7 +825,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			startSearchActivity();
 			break;
 		case R.id.submenu_item_add_destination_my_location:
-			GetMyLocationInfo();
+			getMyLocationInfo();
 			break;
 		case R.id.submenu_item_add_destination_starred_locations:
 			if (loggedIntoGoogle) {
@@ -961,7 +963,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		return theAddress;
 	}
 
-	private void GetMyLocationInfo() {
+	private void getMyLocationInfo() {
 		if (appendMyLocationListener == null) {
 			appendMyLocationListener = new LocationListener() {
 
