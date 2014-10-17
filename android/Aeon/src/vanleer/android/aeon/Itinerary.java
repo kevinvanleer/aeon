@@ -297,11 +297,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private Location currentLocation() {
-		Location currentLocation = null;
-		if (!locations.isEmpty()) {
-			currentLocation = locations.get(locations.size() - 1);
-		}
-		return currentLocation;
+		return itineraryManagerBinder.getService().currentLocation();
 	}
 
 	private void initializeAddNewItineraryItem() {
