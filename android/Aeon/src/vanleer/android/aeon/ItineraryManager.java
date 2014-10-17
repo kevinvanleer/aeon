@@ -52,10 +52,10 @@ public class ItineraryManager extends Service {
 	private int currentDestinationIndex = 0;
 	private boolean traveling = false;
 	private final boolean waitingForGps = false;
-	private final IBinder binder = new LocationServiceBinder();
+	private final IBinder binder = new ItineraryManagerBinder();
 	private Messenger itineraryMessenger;
 
-	class LocationServiceBinder extends Binder {
+	class ItineraryManagerBinder extends Binder {
 		ItineraryManager getService() {
 			return ItineraryManager.this;
 		}

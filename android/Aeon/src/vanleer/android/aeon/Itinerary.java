@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
-import vanleer.android.aeon.ItineraryManager.LocationServiceBinder;
+import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -77,7 +77,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ArrayList<Location> locations = new ArrayList<Location>();
 	private LocationListener appendMyLocationListener = null;
 	private ScheduleUpdater scheduleUpdater;
-	private LocationServiceBinder locationServiceBinder;
+	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
 
 	private static ItineraryManagerHandler eventHandler;
@@ -113,7 +113,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
-			locationServiceBinder = (LocationServiceBinder) service;
+			itineraryManagerBinder = (ItineraryManagerBinder) service;
 			boundToInteraryManager = true;
 		}
 
