@@ -115,6 +115,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
 			boundToInteraryManager = true;
+
+			if (itineraryItems.getCount() <= 1) {
+				initializeOrigin();
+			}
 		}
 
 		public void onServiceDisconnected(ComponentName name) {
@@ -234,7 +238,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		configureItineraryListViewLongClickListener();
 
 		if ((savedInstanceState == null) || savedInstanceState.isEmpty()) {
-			initializeOrigin();
+			// initializeOrigin();
 		} else {
 			rebuildFromBundle(savedInstanceState);
 		}
@@ -928,6 +932,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private void doStuff() {
 		if (currentDestinationIndex >= 0) {
+			/*-THIS LOGIC MAY BE UNNECESSARY
 			if (currentDestination().getSchedule().isArrivalTime(1)) {
 				updateTimes();
 				Log.v("Aeon", "Updating itinerary to highlight stay duration.");
@@ -938,6 +943,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 				updateTimes();
 				Log.v("Aeon", "Updating itinerary after departure time expiration.");
 			}
+			 */
+			updateTimes();
 		}
 	}
 
