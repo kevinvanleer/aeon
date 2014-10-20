@@ -216,24 +216,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		scheduleUpdater = new ScheduleUpdater();
 
-		/*-locationListener = new LocationListener() {
-			public void onLocationChanged(Location location) {
-				onNewLocation(location);
-				Itinerary.this.scheduleNextLocationUpdate();
-			}
-
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-			}
-
-			public void onProviderEnabled(String provider) {
-			}
-
-			public void onProviderDisabled(String provider) {
-			}
-		};*/
-
-		// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
-
 		configureItineraryListViewLongClickListener();
 
 		if ((savedInstanceState == null) || savedInstanceState.isEmpty()) {
