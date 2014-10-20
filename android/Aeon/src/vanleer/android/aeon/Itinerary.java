@@ -75,7 +75,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
-	private LocationListener appendMyLocationListener = null;
 	private ScheduleUpdater scheduleUpdater;
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
@@ -967,40 +966,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void getMyLocationInfo() {
-		if (appendMyLocationListener == null) {
-			appendMyLocationListener = new LocationListener() {
-
-				public void onLocationChanged(Location arg0) {
-					onNewLocation(arg0);
-					appendMyLocationToItinerary();
-					locationManager.removeUpdates(this);
-				}
-
-				public void onProviderDisabled(String arg0) {
-					// TODO Auto-generated method stub
-
-				}
-
-				public void onProviderEnabled(String arg0) {
-					// TODO Auto-generated method stub
-
-				}
-
-				public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-					// TODO Auto-generated method stub
-
-				}
-
-			};
-		}
-
 		if (currentLocation() == null) {
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, appendMyLocationListener);
+			itineraryManagerBinder.requestLocationUpdate();
 			waitForGps();
 		} else {
 			long threshold = new Date().getTime() - 1000 * 60 * 5;
 			if (currentLocation().getTime() < threshold) {
-				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, appendMyLocationListener);
+				itineraryManagerBinder.requestLocationUpdate();
 				waitForGps();
 			} else {
 				appendMyLocationToItinerary();
