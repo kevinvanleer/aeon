@@ -236,7 +236,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		super.onStart();
 		Log.d("Aeon", "Starting itinerary activity");
 		Intent bindIntent = new Intent(this, ItineraryManager.class);
-		bindIntent.putExtra("itineraryMessenger", new Messenger(eventHandler));
+		String messengerName = new String("itineraryMessenger");
+		bindIntent.putExtra("messengerName", messengerName);
+		bindIntent.putExtra(messengerName, new Messenger(eventHandler));
 		bindService(bindIntent, itineraryManagerConnection, Context.BIND_AUTO_CREATE);
 	}
 

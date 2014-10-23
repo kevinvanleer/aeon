@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -53,7 +55,7 @@ public class ItineraryManager extends Service {
 	private boolean traveling = false;
 	private final boolean waitingForGps = false;
 	private final IBinder binder = new ItineraryManagerBinder();
-	private Messenger itineraryMessenger;
+	private final Map<String, Messenger> messengerMap = new Hashtable<String, Messenger>();
 
 	class ItineraryManagerBinder extends Binder {
 		ItineraryManager getService() {
@@ -236,7 +238,9 @@ public class ItineraryManager extends Service {
 		locationData.putParcelable("location", location);
 		newLocationMessage.setData(locationData);
 		try {
-			itineraryMessenger.send(newLocationMessage);
+			for (Map.Entry<String, Messenger> entry : messengerMap.entrySet()) {
+				entry.getValue().send(newLocationMessage);
+			}
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -644,7 +648,10 @@ public class ItineraryManager extends Service {
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
 		Log.d("Aeon", "Activity binding to itinerary manager");
-		itineraryMessenger = (Messenger) intent.getParcelableExtra("itineraryMessenger");
+
+		String messengerName = intent.getStringExtra("messengerName");
+		messengerMap.put(messengerName, (Messenger) intent.getParcelableExtra(messengerName));
+
 		return binder;
 	}
 
@@ -652,13 +659,16 @@ public class ItineraryManager extends Service {
 	public void onRebind(Intent intent) {
 		// TODO Auto-generated method stub
 		Log.d("Aeon", "Activity re-binding to itinerary manager");
-		itineraryMessenger = (Messenger) intent.getParcelableExtra("itineraryMessenger");
-		// return binder;
+
+		String messengerName = intent.getStringExtra("messengerName");
+		messengerMap.put(messengerName, (Messenger) intent.getParcelableExtra(messengerName));
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
 		Log.d("Aeon", "Activity unbinding from itinerary manager");
+		String messengerName = intent.getStringExtra("messengerName");
+		messengerMap.remove(messengerName);
 		return true;
 	}
 
