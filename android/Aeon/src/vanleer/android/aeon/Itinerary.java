@@ -101,6 +101,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 					throw new NullPointerException("Itinerary reference is null");
 				}
 				theItinerary.get().onNewLocation((Location) msg.getData().getParcelable("location"));
+				if (theItinerary.get().callAppendMyLocationToItinerary) {
+					theItinerary.get().appendMyLocationToItinerary();
+				}
 				break;
 			default:
 				super.handleMessage(msg);
@@ -127,6 +130,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			boundToInteraryManager = false;
 		}
 	};
+	private boolean callAppendMyLocationToItinerary;
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
@@ -944,11 +948,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (currentLocation() == null) {
 			itineraryManagerBinder.requestLocationUpdate();
 			waitForGps();
+			callAppendMyLocationToItinerary = true;
 		} else {
 			long threshold = new Date().getTime() - 1000 * 60 * 5;
 			if (currentLocation().getTime() < threshold) {
 				itineraryManagerBinder.requestLocationUpdate();
 				waitForGps();
+				callAppendMyLocationToItinerary = true;
 			} else {
 				appendMyLocationToItinerary();
 			}
@@ -956,6 +962,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void appendMyLocationToItinerary() {
+		callAppendMyLocationToItinerary = false;
 		ItineraryItem myLocation = null;
 
 		// TODO: Wait for location service if current location is null
