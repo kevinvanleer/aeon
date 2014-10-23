@@ -929,13 +929,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		}
 	}
 
-	class LocationManagerUpdater implements Runnable {
-		public void run() {
-			// Log.d("Aeon", "LocationManagerUpdater requesting single update from GPS provider");
-			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
-		}
-	}
-
 	private Address getLocationAddress(Location location) {
 		Address theAddress = null;
 		try {
