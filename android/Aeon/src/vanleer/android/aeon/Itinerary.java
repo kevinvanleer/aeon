@@ -905,7 +905,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 			long delayMs = nextMinute.getTimeInMillis() - now.getTimeInMillis();
 
-			Itinerary.this.eventHandler.postDelayed(Itinerary.this.scheduleUpdater, delayMs);
+			Itinerary.eventHandler.postDelayed(Itinerary.this.scheduleUpdater, delayMs);
 
 			doStuff();
 		}
