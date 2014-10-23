@@ -784,8 +784,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				cancelAlerts();
-				// locationManager.removeUpdates(locationListener);
-				// stopService(new Intent(this, ItineraryManager.class));
 				stopService(new Intent(Itinerary.this, ItineraryManager.class));
 				finish();
 			}

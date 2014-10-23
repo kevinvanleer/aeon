@@ -664,9 +664,10 @@ public class ItineraryManager extends Service {
 
 	@Override
 	public void onDestroy() {
+		super.onDestroy();
 		Log.d("Aeon", "Destroying itinerary manager");
 		cancelAlerts();
 		locationManager.removeUpdates(locationListener);
-		super.onDestroy();
+		eventHandler.removeCallbacks(locationUpdater);
 	}
 }
