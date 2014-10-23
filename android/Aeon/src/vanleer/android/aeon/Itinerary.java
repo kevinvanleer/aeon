@@ -78,6 +78,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ScheduleUpdater scheduleUpdater;
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
+	private boolean callAppendMyLocationToItinerary;
 
 	private static ItineraryManagerHandler eventHandler;
 
@@ -130,7 +131,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			boundToInteraryManager = false;
 		}
 	};
-	private boolean callAppendMyLocationToItinerary;
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
