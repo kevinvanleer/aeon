@@ -75,6 +75,21 @@ public class ItineraryManager extends Service {
 			eventHandler.removeCallbacks(locationUpdater);
 			locationUpdater.run();
 		}
+
+		public void registerMessenger(String messengerName, Messenger messenger) {
+			if (!messengerMap.containsKey(messengerName)) {
+				messengerMap.put(messengerName, messenger);
+				Log.d("Aeon", "Registered " + messengerName + " with itinerary manager");
+			}
+
+		}
+
+		public void unregisterMessenger(String messengerName) {
+			if (messengerMap.containsKey(messengerName)) {
+				messengerMap.remove(messengerName);
+				Log.d("Aeon", "Un-registered " + messengerName + " with itinerary manager");
+			}
+		}
 	}
 
 	class LocationManagerUpdater implements Runnable {
@@ -239,6 +254,7 @@ public class ItineraryManager extends Service {
 		newLocationMessage.setData(locationData);
 		try {
 			for (Map.Entry<String, Messenger> entry : messengerMap.entrySet()) {
+				Log.d("Aeon", "Sending new location message with " + entry.getKey());
 				entry.getValue().send(newLocationMessage);
 			}
 		} catch (RemoteException e) {
@@ -646,29 +662,18 @@ public class ItineraryManager extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
 		Log.d("Aeon", "Activity binding to itinerary manager");
-
-		String messengerName = intent.getStringExtra("messengerName");
-		messengerMap.put(messengerName, (Messenger) intent.getParcelableExtra(messengerName));
-
 		return binder;
 	}
 
 	@Override
 	public void onRebind(Intent intent) {
-		// TODO Auto-generated method stub
 		Log.d("Aeon", "Activity re-binding to itinerary manager");
-
-		String messengerName = intent.getStringExtra("messengerName");
-		messengerMap.put(messengerName, (Messenger) intent.getParcelableExtra(messengerName));
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
 		Log.d("Aeon", "Activity unbinding from itinerary manager");
-		String messengerName = intent.getStringExtra("messengerName");
-		messengerMap.remove(messengerName);
 		return true;
 	}
 

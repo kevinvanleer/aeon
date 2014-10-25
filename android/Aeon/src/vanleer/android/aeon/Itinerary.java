@@ -79,6 +79,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
 	private boolean callAppendMyLocationToItinerary;
+	public final String messengerName = new String("itineraryMessenger");
 
 	private static ItineraryManagerHandler eventHandler;
 
@@ -97,7 +98,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ItineraryManager.MSG_NEW_LOCATION:
-				// onNewLocation(locationServiceBinder.getService().currentLocation());
+				Log.d("Aeon", "Itinerary got location update");
 				if (theItinerary.get() == null) {
 					throw new NullPointerException("Itinerary reference is null");
 				}
@@ -118,6 +119,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
 			boundToInteraryManager = true;
+			itineraryManagerBinder.registerMessenger(messengerName, new Messenger(eventHandler));
 
 			if (itineraryItems.getCount() <= 1) {
 				initializeOrigin();
@@ -126,9 +128,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "Itinerary has been disconnected from itinerary manager");
-			// TODO Auto-generated method stub
-
 			boundToInteraryManager = false;
+			itineraryManagerBinder.unregisterMessenger(messengerName);
 		}
 	};
 
@@ -236,9 +237,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		super.onStart();
 		Log.d("Aeon", "Starting itinerary activity");
 		Intent bindIntent = new Intent(this, ItineraryManager.class);
-		String messengerName = new String("itineraryMessenger");
-		bindIntent.putExtra("messengerName", messengerName);
-		bindIntent.putExtra(messengerName, new Messenger(eventHandler));
 		bindService(bindIntent, itineraryManagerConnection, Context.BIND_AUTO_CREATE);
 	}
 
@@ -260,6 +258,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onStop() {
 		super.onStop();
 		Log.d("Aeon", "Stopping itinerary activity");
+		itineraryManagerBinder.unregisterMessenger(messengerName);
 		unbindService(itineraryManagerConnection);
 	}
 

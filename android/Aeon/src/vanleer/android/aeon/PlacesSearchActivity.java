@@ -1,23 +1,32 @@
 package vanleer.android.aeon;
 
+import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
 import vanleer.util.InvalidDistanceMatrixResponseException;
 import vanleer.util.UnfilteredArrayAdapter;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,23 +60,90 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private final Long searchRadius = (long) 50000; // the max
 	private UnfilteredArrayAdapter<String> suggestionList;
 	private Geocoder geocoder;
+	private ItineraryManagerBinder itineraryManagerBinder;
+	private boolean boundToInteraryManager;
+	public final String messengerName = new String("searchMessenger");
 
-	// 4812 Danielle CT Granite City IL 62040 38.74419380,-90.09839319999999
-	// lat=38.74419380
-	// lng=-90.09839319999999
+	private static ItineraryManagerHandler eventHandler;
 
-	// 283 STONEHENGE DR WASHINGTON, MO 63090-4312
-	// 38.477548,-91.051562
+	private static class ItineraryManagerHandler extends Handler {
+		private WeakReference<PlacesSearchActivity> theActivity;
+
+		public ItineraryManagerHandler(WeakReference<PlacesSearchActivity> itineraryRef) {
+			theActivity = itineraryRef;
+		}
+
+		public void setItinerary(WeakReference<PlacesSearchActivity> itineraryRef) {
+			theActivity = itineraryRef;
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case ItineraryManager.MSG_NEW_LOCATION:
+				Log.d("Aeon", "PlacesSearchActivity got location update");
+				if (theActivity.get() == null) {
+					throw new NullPointerException("Itinerary reference is null");
+				}
+
+				// theActivity.get().makeUseOfNewLocation((Location) msg.getData().getParcelable("location"));
+				// theActivity.get().setLocationText();
+
+				break;
+			default:
+				super.handleMessage(msg);
+			}
+		}
+	};
+
+	private final ServiceConnection itineraryManagerConnection = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			Log.d("Aeon", "PlacesSearchActivity has been connected to itinerary manager");
+			itineraryManagerBinder = (ItineraryManagerBinder) service;
+			boundToInteraryManager = true;
+			itineraryManagerBinder.registerMessenger(messengerName, new Messenger(eventHandler));
+			ConfigureLocationManager();
+		}
+
+		public void onServiceDisconnected(ComponentName name) {
+			Log.d("Aeon", "PlacesSearchActivity has been disconnected from itinerary manager");
+			boundToInteraryManager = false;
+			itineraryManagerBinder.unregisterMessenger(messengerName);
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search_destination);
 
+		if (eventHandler == null) {
+			eventHandler = new ItineraryManagerHandler(new WeakReference<PlacesSearchActivity>(this));
+		} else {
+			eventHandler.setItinerary(new WeakReference<PlacesSearchActivity>(this));
+		}
+
 		InitializeMembers();
 		ConfigureSearchResultsListViewLongClickListener();
-		ConfigureLocationManager();
+
 		ConfigureTextWatcher();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		Log.d("Aeon", "Starting search activity");
+		Intent bindIntent = new Intent(this, ItineraryManager.class);
+		bindService(bindIntent, itineraryManagerConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		Log.d("Aeon", "Stopping places search activity");
+		itineraryManagerBinder.unregisterMessenger(messengerName);
+		unbindService(itineraryManagerConnection);
 	}
 
 	@Override
@@ -110,44 +186,25 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	private void ConfigureLocationManager() {
-		LocationListener locationListener = CreateLocationListener();
-
 		if (getIntent() != null && getIntent().getExtras() != null) {
 			currentLocation = getIntent().getExtras().getParcelable("location");
 		}
-
 		if (currentLocation == null) {
-			// Register the listener with the Location Manager to receive location updates
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-			// TODO: locationManager.requestSingleUpdate(
-			// LocationManager.GPS_PROVIDER, locationListener, some looper thing);
+			currentLocation = itineraryManagerBinder.currentLocation();
+		}
+		if (currentLocation == null) {
+			itineraryManagerBinder.requestLocationUpdate();
 		} else {
-			locationText.setText(GooglePlacesSearch.getGeodeticString(currentLocation));
-			if (currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
-				locationSensorImage.setVisibility(View.VISIBLE);
-			}
-			locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation));
+			setLocationText();
 		}
 	}
 
-	private LocationListener CreateLocationListener() {
-		return new LocationListener() {
-			public void onLocationChanged(Location location) {
-				makeUseOfNewLocation(location);
-				if (!getString(R.string.address_unknown).equals(locationText.getText())) {
-					locationManager.removeUpdates(this);
-				}
-			}
-
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-			}
-
-			public void onProviderEnabled(String provider) {
-			}
-
-			public void onProviderDisabled(String provider) {
-			}
-		};
+	private void setLocationText() {
+		locationText.setText(GooglePlacesSearch.getGeodeticString(currentLocation));
+		if (currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
+			locationSensorImage.setVisibility(View.VISIBLE);
+		}
+		locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation));
 	}
 
 	private void ConfigureSearchResultsListViewLongClickListener() {
