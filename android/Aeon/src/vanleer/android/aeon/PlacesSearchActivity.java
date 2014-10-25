@@ -51,7 +51,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private TextView locationText;
 	private ImageView locationSensorImage;
 	private GooglePlacesSearch googleSearch;
-	private LocationManager locationManager;
 	private ProgressDialog waitSpinner = null;
 	private AutoCompleteTextView searchText;
 	private boolean waitingForGps = false;
@@ -61,7 +60,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private Geocoder geocoder;
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
-	public final String messengerName = new String("searchMessenger");
 
 	private static Handler eventHandler;
 
@@ -173,7 +171,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		searchResults = new SearchResultItemAdapter(this, R.layout.search_result_item, searchResultsList);
 		searchResultsListView = (ListView) findViewById(listViewId);
 		searchResultsListView.setAdapter(searchResults);
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	private void ConfigureLocationManager() {
