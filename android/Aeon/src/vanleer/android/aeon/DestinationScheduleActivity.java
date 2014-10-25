@@ -4,9 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
+
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +39,22 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 	private ItineraryItem destination;
 	private CheckBox checkBoxLastChecked;
 	private Button buttonDoneScheduling;
+	private ItineraryManagerBinder itineraryManagerBinder;
+	private boolean boundToInteraryManager;
+
+	private final ServiceConnection itineraryManagerConnection = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			Log.d("Aeon", "PlacesSearchActivity has been connected to itinerary manager");
+			itineraryManagerBinder = (ItineraryManagerBinder) service;
+			boundToInteraryManager = true;
+		}
+
+		public void onServiceDisconnected(ComponentName name) {
+			Log.d("Aeon", "PlacesSearchActivity has been disconnected from itinerary manager");
+			boundToInteraryManager = false;
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +78,21 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		destination = getIntent().getExtras().getParcelable("vanleer.android.aeon.destination");
 
 		InitializeControls();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		Log.d("Aeon", "Starting schedule activity");
+		Intent bindIntent = new Intent(this, ItineraryManager.class);
+		bindService(bindIntent, itineraryManagerConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		Log.d("Aeon", "Stopping schedule activity");
+		unbindService(itineraryManagerConnection);
 	}
 
 	private int wantVisible(CheckBox theBox) {
@@ -230,6 +267,7 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		calculateScheduling();
 		Intent finishedScheduling = new Intent();
 		finishedScheduling.putExtra("destination", destination);
+		itineraryManagerBinder.appendDestination(destination);
 		setResult(Activity.RESULT_OK, finishedScheduling);
 		finish();
 	}
