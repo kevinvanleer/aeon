@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -26,9 +24,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class ItineraryManager extends Service {
@@ -55,7 +51,6 @@ public class ItineraryManager extends Service {
 	private boolean traveling = false;
 	private final boolean waitingForGps = false;
 	private final IBinder binder = new ItineraryManagerBinder();
-	private final Map<String, Messenger> messengerMap = new Hashtable<String, Messenger>();
 
 	class ItineraryManagerBinder extends Binder {
 		ItineraryManager getService() {
@@ -74,21 +69,6 @@ public class ItineraryManager extends Service {
 		public void requestLocationUpdate() {
 			eventHandler.removeCallbacks(locationUpdater);
 			locationUpdater.run();
-		}
-
-		public void registerMessenger(String messengerName, Messenger messenger) {
-			if (!messengerMap.containsKey(messengerName)) {
-				messengerMap.put(messengerName, messenger);
-				Log.d("Aeon", "Registered " + messengerName + " with itinerary manager");
-			}
-
-		}
-
-		public void unregisterMessenger(String messengerName) {
-			if (messengerMap.containsKey(messengerName)) {
-				messengerMap.remove(messengerName);
-				Log.d("Aeon", "Un-registered " + messengerName + " with itinerary manager");
-			}
 		}
 	}
 
@@ -248,19 +228,10 @@ public class ItineraryManager extends Service {
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 
-		Message newLocationMessage = Message.obtain(null, MSG_NEW_LOCATION, 0, 0);
-		Bundle locationData = new Bundle();
-		locationData.putParcelable("location", location);
-		newLocationMessage.setData(locationData);
-		try {
-			for (Map.Entry<String, Messenger> entry : messengerMap.entrySet()) {
-				Log.d("Aeon", "Sending new location message with " + entry.getKey());
-				entry.getValue().send(newLocationMessage);
-			}
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Intent newLocationMessage = new Intent("new-location");
+		newLocationMessage.putExtra("location", location);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(newLocationMessage);
+
 		/*-
 		if (origin.getLocation() == null || itineraryItems.size() <= 2) {
 			currentDestinationIndex = 0;

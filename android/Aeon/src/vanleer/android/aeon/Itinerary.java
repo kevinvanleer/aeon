@@ -17,23 +17,23 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,9 +53,6 @@ import android.widget.Toast;
 // I/ActivityManager( 118): Starting activity: Intent { act=android.intent.action.VIEW dat=google.navigation:///?q=Some%20place cmp=brut.googlemaps/com.google.android.maps.driveabout.app.NavigationActivity }
 
 public final class Itinerary extends Activity implements OnClickListener {
-
-	private static final int GPS_UPDATE_DISTANCE_M = 0;
-	private static final int GPS_UPDATE_INTERVAL_MS = 10000;
 	private final int listViewId = R.id.listView_itinerary;
 	private ListView itineraryListView;
 	private ItineraryItemAdapter itineraryItems;
@@ -79,36 +76,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToInteraryManager;
 	private boolean callAppendMyLocationToItinerary;
-	public final String messengerName = new String("itineraryMessenger");
 
-	private static ItineraryManagerHandler eventHandler;
+	private static Handler eventHandler;
 
-	private static class ItineraryManagerHandler extends Handler {
-		private WeakReference<Itinerary> theItinerary;
-
-		public ItineraryManagerHandler(WeakReference<Itinerary> itineraryRef) {
-			theItinerary = itineraryRef;
-		}
-
-		public void setItinerary(WeakReference<Itinerary> itineraryRef) {
-			theItinerary = itineraryRef;
-		}
-
+	private final BroadcastReceiver itineraryManagerReceiver = new BroadcastReceiver() {
 		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case ItineraryManager.MSG_NEW_LOCATION:
-				Log.d("Aeon", "Itinerary got location update");
-				if (theItinerary.get() == null) {
-					throw new NullPointerException("Itinerary reference is null");
-				}
-				theItinerary.get().onNewLocation((Location) msg.getData().getParcelable("location"));
-				if (theItinerary.get().callAppendMyLocationToItinerary) {
-					theItinerary.get().appendMyLocationToItinerary();
-				}
-				break;
-			default:
-				super.handleMessage(msg);
+		public void onReceive(Context context, Intent intent) {
+			Log.d("Aeon", "Itinerary got location update");
+			onNewLocation((Location) intent.getExtras().getParcelable("location"));
+			if (callAppendMyLocationToItinerary) {
+				appendMyLocationToItinerary();
 			}
 		}
 	};
@@ -119,7 +96,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
 			boundToInteraryManager = true;
-			itineraryManagerBinder.registerMessenger(messengerName, new Messenger(eventHandler));
 
 			if (itineraryItems.getCount() <= 1) {
 				initializeOrigin();
@@ -129,7 +105,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "Itinerary has been disconnected from itinerary manager");
 			boundToInteraryManager = false;
-			itineraryManagerBinder.unregisterMessenger(messengerName);
 		}
 	};
 
@@ -193,9 +168,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 		setContentView(R.layout.itinerary);
 
 		if (eventHandler == null) {
-			eventHandler = new ItineraryManagerHandler(new WeakReference<Itinerary>(this));
+			eventHandler = new Handler();
 		} else {
-			eventHandler.setItinerary(new WeakReference<Itinerary>(this));
+			// eventHandler.setItinerary(new WeakReference<Itinerary>(this));
 		}
 
 		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item);
@@ -244,6 +219,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 		Log.d("Aeon", "Resuming itinerary activity");
+		LocalBroadcastManager.getInstance(this).registerReceiver(itineraryManagerReceiver, new IntentFilter("new-location"));
 		scheduleUpdater.run();
 	}
 
@@ -251,6 +227,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onPause() {
 		super.onPause();
 		Log.d("Aeon", "Pausing itinerary activity");
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(itineraryManagerReceiver);
 		eventHandler.removeCallbacks(scheduleUpdater);
 	}
 
@@ -258,7 +235,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onStop() {
 		super.onStop();
 		Log.d("Aeon", "Stopping itinerary activity");
-		itineraryManagerBinder.unregisterMessenger(messengerName);
 		unbindService(itineraryManagerConnection);
 	}
 
@@ -266,7 +242,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d("Aeon", "Destroying itinerary activity");
-		// locationManager.removeUpdates(locationListener);
 	}
 
 	private void buildAlertMessageNoGps() {

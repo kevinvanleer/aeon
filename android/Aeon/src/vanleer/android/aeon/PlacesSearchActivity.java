@@ -4,26 +4,25 @@ import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
 import vanleer.util.InvalidDistanceMatrixResponseException;
 import vanleer.util.UnfilteredArrayAdapter;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -64,35 +63,16 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private boolean boundToInteraryManager;
 	public final String messengerName = new String("searchMessenger");
 
-	private static ItineraryManagerHandler eventHandler;
+	private static Handler eventHandler;
 
-	private static class ItineraryManagerHandler extends Handler {
-		private WeakReference<PlacesSearchActivity> theActivity;
-
-		public ItineraryManagerHandler(WeakReference<PlacesSearchActivity> itineraryRef) {
-			theActivity = itineraryRef;
-		}
-
-		public void setItinerary(WeakReference<PlacesSearchActivity> itineraryRef) {
-			theActivity = itineraryRef;
-		}
-
+	private final BroadcastReceiver itineraryManagerReceiver = new BroadcastReceiver() {
 		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case ItineraryManager.MSG_NEW_LOCATION:
-				Log.d("Aeon", "PlacesSearchActivity got location update");
-				if (theActivity.get() == null) {
-					throw new NullPointerException("Itinerary reference is null");
-				}
+		public void onReceive(Context context, Intent intent) {
+			Log.d("Aeon", "Itinerary got location update");
 
-				// theActivity.get().makeUseOfNewLocation((Location) msg.getData().getParcelable("location"));
-				// theActivity.get().setLocationText();
+			makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
+			// setLocationText();
 
-				break;
-			default:
-				super.handleMessage(msg);
-			}
 		}
 	};
 
@@ -102,14 +82,12 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 			Log.d("Aeon", "PlacesSearchActivity has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
 			boundToInteraryManager = true;
-			itineraryManagerBinder.registerMessenger(messengerName, new Messenger(eventHandler));
 			ConfigureLocationManager();
 		}
 
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "PlacesSearchActivity has been disconnected from itinerary manager");
 			boundToInteraryManager = false;
-			itineraryManagerBinder.unregisterMessenger(messengerName);
 		}
 	};
 
@@ -119,9 +97,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		setContentView(R.layout.search_destination);
 
 		if (eventHandler == null) {
-			eventHandler = new ItineraryManagerHandler(new WeakReference<PlacesSearchActivity>(this));
+			eventHandler = new Handler();
 		} else {
-			eventHandler.setItinerary(new WeakReference<PlacesSearchActivity>(this));
+			// eventHandler.setItinerary(new WeakReference<PlacesSearchActivity>(this));
 		}
 
 		InitializeMembers();
@@ -139,10 +117,23 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	}
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		Log.d("Aeon", "Resuming places search activity");
+		LocalBroadcastManager.getInstance(this).registerReceiver(itineraryManagerReceiver, new IntentFilter("new-location"));
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		Log.d("Aeon", "Pausing places search activity");
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(itineraryManagerReceiver);
+	}
+
+	@Override
 	public void onStop() {
 		super.onStop();
 		Log.d("Aeon", "Stopping places search activity");
-		itineraryManagerBinder.unregisterMessenger(messengerName);
 		unbindService(itineraryManagerConnection);
 	}
 
