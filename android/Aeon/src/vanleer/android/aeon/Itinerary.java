@@ -1050,6 +1050,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateListView() {
 		itineraryItems.clear();
 		itineraryItems.addAll(itineraryManagerBinder.getDestinations());
+		initializeAddNewItineraryItem();
 	}
 
 	private void initializeSchedule(ItineraryItem newDestination) {
