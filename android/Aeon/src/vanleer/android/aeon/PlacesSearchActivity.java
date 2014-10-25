@@ -216,7 +216,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					dialog.show();
 					return false;
 				} else {
-					itineraryManagerBinder.appendDestination(searchResultsList.get(position));
+					itineraryManagerBinder.initializeSchedule(searchResultsList.get(position));
 					Intent startDestinationSchedule = new Intent(PlacesSearchActivity.this, DestinationScheduleActivity.class);
 					startDestinationSchedule.putExtra("vanleer.android.aeon.destination", searchResultsList.get(position));
 					startActivityForResult(startDestinationSchedule, 0);
