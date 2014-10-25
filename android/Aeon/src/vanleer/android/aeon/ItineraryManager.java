@@ -608,26 +608,6 @@ public class ItineraryManager extends Service {
 
 	@Override
 	public int onStartCommand(Intent theIntent, int flags, int startId) {
-		// FYI THIS IS CALLED EVERY TIME startService IS CALLED
-		/*- THIS STUFF CAN PROBABLY GO AWAY
-		if (theIntent.getAction().equals("vanleer.android.aeon.append_destination")) {
-		} else if (theIntent.getAction().equals("vanleer.android.aeon.update_destination")) {
-		} else if (theIntent.getAction().equals("vanleer.android.aeon.remove_destination")) {
-			// TODO: placeholder for future implementation
-		} else if (theIntent.getAction().equals("vanleer.android.aeon.delay_departure")) {
-			Object theExtra = theIntent.getExtras().get("destination");
-			if (theExtra != null) {
-				ItineraryItem update = (ItineraryItem) theExtra;
-
-				if (update.getSchedule().getArrivalTime().equals(currentDestination().getSchedule().getArrivalTime())) {
-					currentDestination().getSchedule().updateDepartureTime(update.getSchedule().getDepartureTime());
-					setAlerts(currentDestination(), itineraryItems.get(currentDestinationIndex + 1));
-					updateTimes();
-				}
-			}
-		}
-		 */
-
 		return START_STICKY;
 	}
 
