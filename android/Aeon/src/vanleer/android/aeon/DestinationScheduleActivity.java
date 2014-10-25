@@ -267,7 +267,21 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 		calculateScheduling();
 		Intent finishedScheduling = new Intent();
 		finishedScheduling.putExtra("destination", destination);
-		itineraryManagerBinder.appendDestination(destination);
+		;
+		switch (getIntent().getIntExtra("requestCode", -1)) {
+		case Itinerary.GET_NEW_DESTINATION:
+			// INVALID
+			break;
+		case Itinerary.ADD_DESTINATION:
+			itineraryManagerBinder.appendDestination(destination);
+			break;
+		case Itinerary.UPDATE_DESTINATION:
+			itineraryManagerBinder.updateDestination(destination);
+			break;
+		default:
+			break;
+		}
+
 		setResult(Activity.RESULT_OK, finishedScheduling);
 		finish();
 	}
