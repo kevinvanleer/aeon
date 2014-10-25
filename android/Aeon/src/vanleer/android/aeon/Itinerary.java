@@ -1053,22 +1053,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		initializeAddNewItineraryItem();
 	}
 
-	private void initializeSchedule(ItineraryItem newDestination) {
-		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
-		Calendar arrivalTimeCalculator = Calendar.getInstance();
-
-		if (!itineraryItems.isEmpty()) {
-			ItineraryItem lastDestination = finalDestination();
-			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
-		} else {
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
-		}
-		newDestination.getSchedule().initializeFlexibleArrivalTime(arrivalTimeCalculator.getTime());
-		startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
-		startActivityForResult(startDestinationSchedule, ADD_DESTINATION);
-	}
-
 	private void updateSchedule(ItineraryItem newDestination) {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 
