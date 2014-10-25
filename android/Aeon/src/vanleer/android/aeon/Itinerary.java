@@ -169,8 +169,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		if (eventHandler == null) {
 			eventHandler = new Handler();
-		} else {
-			// eventHandler.setItinerary(new WeakReference<Itinerary>(this));
 		}
 
 		itineraryItems = new ItineraryItemAdapter(this, R.layout.itinerary_item);

@@ -96,8 +96,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 		if (eventHandler == null) {
 			eventHandler = new Handler();
-		} else {
-			// eventHandler.setItinerary(new WeakReference<PlacesSearchActivity>(this));
 		}
 
 		InitializeMembers();
