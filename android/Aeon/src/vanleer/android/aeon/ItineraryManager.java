@@ -49,7 +49,7 @@ public class ItineraryManager extends Service {
 	private ItineraryItem origin = null;
 	private int currentDestinationIndex = 0;
 	private boolean traveling = false;
-	private final boolean waitingForGps = false;
+	private boolean waitingForGps = false;
 	private final IBinder binder = new ItineraryManagerBinder();
 
 	class ItineraryManagerBinder extends Binder {
@@ -69,6 +69,10 @@ public class ItineraryManager extends Service {
 		public void requestLocationUpdate() {
 			eventHandler.removeCallbacks(locationUpdater);
 			locationUpdater.run();
+		}
+
+		public void appendDestination(ItineraryItem destination) {
+			itineraryItems.add(destination);
 		}
 	}
 
@@ -232,8 +236,7 @@ public class ItineraryManager extends Service {
 		newLocationMessage.putExtra("location", location);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(newLocationMessage);
 
-		/*-
-		if (origin.getLocation() == null || itineraryItems.size() <= 2) {
+		if (origin.getLocation() == null || itineraryItems.size() <= 1) {
 			currentDestinationIndex = 0;
 			updateOrigin();
 		}
@@ -243,7 +246,6 @@ public class ItineraryManager extends Service {
 		if (waitingForGps) {
 			waitingForGps = false;
 		}
-		 */
 	}
 
 	private void initializeOrigin() {
@@ -259,6 +261,8 @@ public class ItineraryManager extends Service {
 				// TODO Location was null
 			}
 		}
+
+		itineraryItems.add(origin);
 	}
 
 	private void updateOrigin() {
@@ -279,7 +283,7 @@ public class ItineraryManager extends Service {
 	}
 
 	private int getFinalDestinationIndex() {
-		return itineraryItems.size();
+		return itineraryItems.size() - 1;
 	}
 
 	private ItineraryItem finalDestination() {
@@ -602,7 +606,7 @@ public class ItineraryManager extends Service {
 		scheduleUpdater = new ScheduleUpdater();
 		locationUpdater = new LocationManagerUpdater();
 
-		// initializeOrigin();
+		initializeOrigin();
 		// scheduleUpdater.run();
 	}
 

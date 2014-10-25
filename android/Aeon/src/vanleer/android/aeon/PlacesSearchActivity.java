@@ -209,6 +209,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					dialog.show();
 					return false;
 				} else {
+					itineraryManagerBinder.appendDestination(searchResultsList.get(position));
 					Intent resultIntent = new Intent();
 					resultIntent.putExtra("itineraryItem", searchResultsList.get(position));
 					setResult(Activity.RESULT_OK, resultIntent);
