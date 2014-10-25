@@ -72,13 +72,30 @@ public class ItineraryManager extends Service {
 			locationUpdater.run();
 		}
 
+		public Collection<ItineraryItem> getDestinations() {
+			return itineraryItems;
+		}
+
 		public void appendDestination(ItineraryItem destination) {
-			initializeSchedule(destination);
 			itineraryItems.add(destination);
 		}
 
-		public Collection<ItineraryItem> getDestinations() {
-			return itineraryItems;
+		public void initializeSchedule(ItineraryItem newDestination) {
+			Calendar arrivalTimeCalculator = Calendar.getInstance();
+			if (!itineraryItems.isEmpty()) {
+				ItineraryItem lastDestination = finalDestination();
+				arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
+				arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+			} else {
+				arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+			}
+			newDestination.getSchedule().initializeFlexibleArrivalTime(arrivalTimeCalculator.getTime());
+		}
+
+		public void updateDestination(ItineraryItem destination) {
+			// TODO: Find correct item and update it
+			itineraryItems.remove(getFinalDestinationIndex());
+			itineraryItems.add(destination);
 		}
 	}
 
@@ -122,18 +139,6 @@ public class ItineraryManager extends Service {
 				Log.v("Aeon", "Updating itinerary after departure time expiration.");
 			}
 		}
-	}
-
-	private void initializeSchedule(ItineraryItem newDestination) {
-		Calendar arrivalTimeCalculator = Calendar.getInstance();
-		if (!itineraryItems.isEmpty()) {
-			ItineraryItem lastDestination = finalDestination();
-			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
-		} else {
-			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
-		}
-		newDestination.getSchedule().initializeFlexibleArrivalTime(arrivalTimeCalculator.getTime());
 	}
 
 	void updateTimes() {
