@@ -93,9 +93,11 @@ public class ItineraryManager extends Service {
 		}
 
 		public void updateDestination(ItineraryItem destination) {
-			// TODO: Find correct item and update it
-			itineraryItems.remove(getFinalDestinationIndex());
-			itineraryItems.add(destination);
+			for (ItineraryItem item : itineraryItems) {
+				if (destination.matches(item)) {
+					itineraryItems.set(itineraryItems.indexOf(item), destination);
+				}
+			}
 		}
 	}
 
