@@ -68,9 +68,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		public void onReceive(Context context, Intent intent) {
 			Log.d("Aeon", "Itinerary got location update");
 
-			makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
-			// setLocationText();
-
+			if (currentLocation == null) {
+				makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
+			}
 		}
 	};
 
