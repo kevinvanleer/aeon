@@ -2,6 +2,7 @@ package vanleer.android.aeon;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ import android.util.Log;
 
 public final class ItineraryItem implements Parcelable {
 	public DistanceUnit distanceUnit = DistanceUnit.MILES;
+	private UUID id = UUID.randomUUID();
 	private JSONObject googlePlaceResult = null;
 	private JSONObject googleGeocodingResult = null;
 	private Address geocodingAddress = null;
@@ -108,6 +110,10 @@ public final class ItineraryItem implements Parcelable {
 		}
 	}
 
+	public boolean matches(ItineraryItem other) {
+		return id.equals(other.id);
+	}
+
 	void updateLocation(Location newLocation, Address locationAddress) {
 		if (newLocation == null) {
 			throw new NullPointerException();
@@ -131,6 +137,7 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	private void readFromParcel(Parcel in) {
+		id = (UUID) in.readSerializable();
 		googlePlaceResult = (JSONObject) in.readSerializable();
 		geocodingAddress = in.readParcelable(null);
 		googleGeocodingResult = (JSONObject) in.readSerializable();
@@ -155,6 +162,7 @@ public final class ItineraryItem implements Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeSerializable(id);
 		dest.writeSerializable(googlePlaceResult);
 		dest.writeParcelable(geocodingAddress, flags);
 		dest.writeSerializable(googleGeocodingResult);
