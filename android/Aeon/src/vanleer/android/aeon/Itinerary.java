@@ -53,14 +53,15 @@ import android.widget.Toast;
 // I/ActivityManager( 118): Starting activity: Intent { act=android.intent.action.VIEW dat=google.navigation:///?q=Some%20place cmp=brut.googlemaps/com.google.android.maps.driveabout.app.NavigationActivity }
 
 public final class Itinerary extends Activity implements OnClickListener {
+	public static final int GET_NEW_DESTINATION = 0;
+	public static final int ADD_DESTINATION = 1;
+	public static final int UPDATE_DESTINATION = 2;
+
 	private final int listViewId = R.id.listView_itinerary;
 	private ListView itineraryListView;
 	private ItineraryItemAdapter itineraryItems;
 	private final boolean loggedIntoGoogle = /* false */true; // for debugging
 	private LocationManager locationManager;
-	private static final int GET_NEW_DESTINATION = 0;
-	private static final int ADD_DESTINATION = 1;
-	private static final int UPDATE_DESTINATION = 2;
 	private ProgressDialog waitSpinner;
 	private boolean waitingForGps = false;
 	private ItineraryItem origin = null;
@@ -827,7 +828,9 @@ public final class Itinerary extends Activity implements OnClickListener {
 			startItineraryOpen.putExtra("location", lastDestination.getLocation());
 		}
 
+		startItineraryOpen.putExtra("requestCode", GET_NEW_DESTINATION);
 		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
+
 	}
 
 	private void updateOrigin() {
@@ -952,7 +955,12 @@ public final class Itinerary extends Activity implements OnClickListener {
 			myLocation.setAtLocation();
 		}
 
-		initializeSchedule(myLocation);
+		itineraryManagerBinder.initializeSchedule(myLocation);
+
+		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
+		startDestinationSchedule.putExtra("vanleer.android.aeon.destination", myLocation);
+		startDestinationSchedule.putExtra("requestCode", ADD_DESTINATION);
+		startActivityForResult(startDestinationSchedule, ADD_DESTINATION);
 
 		if ((getFinalDestinationIndex() != 0) && finalDestination().atLocation()) {
 			++currentDestinationIndex;
@@ -1057,6 +1065,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Intent startDestinationSchedule = new Intent(Itinerary.this, DestinationScheduleActivity.class);
 
 		startDestinationSchedule.putExtra("vanleer.android.aeon.destination", newDestination);
+		startDestinationSchedule.putExtra("requestCode", UPDATE_DESTINATION);
 		startActivityForResult(startDestinationSchedule, UPDATE_DESTINATION);
 	}
 
