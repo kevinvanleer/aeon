@@ -1007,19 +1007,19 @@ public final class Itinerary extends Activity implements OnClickListener {
 		switch (requestCode) {
 		case GET_NEW_DESTINATION:
 			if (resultCode == Activity.RESULT_OK) {
-				ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
-				initializeSchedule(newDestination);
+				// ItineraryItem newDestination = (ItineraryItem) data.getParcelableExtra("itineraryItem");
+				// initializeSchedule(newDestination);
 			}
 			break;
 		case ADD_DESTINATION:
 			if (resultCode == Activity.RESULT_OK) {
-				ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
-				appendDestination(scheduledDestination);
+				// ItineraryItem scheduledDestination = (ItineraryItem) data.getParcelableExtra("destination");
+				// appendDestination(scheduledDestination);
 			}
 			break;
 		case UPDATE_DESTINATION:
 			if (resultCode == Activity.RESULT_OK) {
-				ItineraryItem updatedDestination = (ItineraryItem) data.getParcelableExtra("destination");
+				/*-ItineraryItem updatedDestination = (ItineraryItem) data.getParcelableExtra("destination");
 
 				if (selectedItemPosition != -1) {
 					replaceListItem(updatedDestination, selectedItemPosition);
@@ -1039,11 +1039,17 @@ public final class Itinerary extends Activity implements OnClickListener {
 				}
 
 				selectedItemPosition = -1;
-				updateTimes();
+				updateTimes();*/
 			}
 			break;
 		default:
 		}
+		updateListView();
+	}
+
+	private void updateListView() {
+		itineraryItems.clear();
+		itineraryItems.addAll(itineraryManagerBinder.getDestinations());
 	}
 
 	private void initializeSchedule(ItineraryItem newDestination) {

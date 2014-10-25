@@ -3,6 +3,7 @@ package vanleer.android.aeon;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -72,7 +73,12 @@ public class ItineraryManager extends Service {
 		}
 
 		public void appendDestination(ItineraryItem destination) {
+			initializeSchedule(destination);
 			itineraryItems.add(destination);
+		}
+
+		public Collection<ItineraryItem> getDestinations() {
+			return itineraryItems;
 		}
 	}
 
@@ -116,6 +122,18 @@ public class ItineraryManager extends Service {
 				Log.v("Aeon", "Updating itinerary after departure time expiration.");
 			}
 		}
+	}
+
+	private void initializeSchedule(ItineraryItem newDestination) {
+		Calendar arrivalTimeCalculator = Calendar.getInstance();
+		if (!itineraryItems.isEmpty()) {
+			ItineraryItem lastDestination = finalDestination();
+			arrivalTimeCalculator.setTime(lastDestination.getSchedule().getDepartureTime());
+			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+		} else {
+			arrivalTimeCalculator.add(Calendar.SECOND, newDestination.getTravelDuration().intValue());
+		}
+		newDestination.getSchedule().initializeFlexibleArrivalTime(arrivalTimeCalculator.getTime());
 	}
 
 	void updateTimes() {

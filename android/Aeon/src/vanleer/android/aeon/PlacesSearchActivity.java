@@ -193,6 +193,13 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		locationText.setText(googleSearch.getReverseGeocodeDescription(currentLocation));
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		setResult(Activity.RESULT_OK, null);
+		finish();
+	}
+
 	private void ConfigureSearchResultsListViewLongClickListener() {
 		searchResultsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -210,10 +217,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 					return false;
 				} else {
 					itineraryManagerBinder.appendDestination(searchResultsList.get(position));
-					Intent resultIntent = new Intent();
-					resultIntent.putExtra("itineraryItem", searchResultsList.get(position));
-					setResult(Activity.RESULT_OK, resultIntent);
-					finish();
+					Intent startDestinationSchedule = new Intent(PlacesSearchActivity.this, DestinationScheduleActivity.class);
+					startDestinationSchedule.putExtra("vanleer.android.aeon.destination", searchResultsList.get(position));
+					startActivityForResult(startDestinationSchedule, 0);
 					return true;
 				}
 			}
