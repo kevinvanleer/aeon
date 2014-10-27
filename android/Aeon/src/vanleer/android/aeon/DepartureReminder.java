@@ -36,8 +36,6 @@ public class DepartureReminder extends Service {
 		timeToGoNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		timeToGoNotiBuilder.setAutoCancel(true);
 
-		// TODO: Return to itinerary activity when notification touched
-
 		Intent result = new Intent(getBaseContext(), Itinerary.class);
 		result.setAction(Intent.ACTION_MAIN);
 		result.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -58,11 +56,6 @@ public class DepartureReminder extends Service {
 
 	@Override
 	public void onDestroy() {
-		// Cancel the persistent notification.
-		// mNM.cancel(R.id.departure_reminder_notification);
-
-		// Tell the user we stopped.
-		// Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
