@@ -1,12 +1,11 @@
 package vanleer.android.aeon;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 
 import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
 
@@ -16,7 +15,6 @@ import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,11 +26,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.os.Handler;
 import android.util.Log;
@@ -42,7 +37,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -64,7 +58,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private LocationManager locationManager;
 	private ProgressDialog waitSpinner;
 	private boolean waitingForGps = false;
-	private ItineraryItem origin = null;
 	private int selectedItemPosition = -1;
 	private Geocoder theGeocoder = null;
 	private boolean traveling = false;
@@ -73,9 +66,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private AlarmManager alarmManager;
 	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
-	private ScheduleUpdater scheduleUpdater;
 	private ItineraryManagerBinder itineraryManagerBinder;
-	private boolean boundToInteraryManager;
+	private boolean boundToItineraryManager;
 	private boolean callAppendMyLocationToItinerary;
 
 	private static Handler eventHandler;
@@ -83,10 +75,16 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private final BroadcastReceiver itineraryManagerReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d("Aeon", "Itinerary got location update");
-			onNewLocation((Location) intent.getExtras().getParcelable("location"));
-			if (callAppendMyLocationToItinerary) {
-				appendMyLocationToItinerary();
+			Log.d("Aeon", "Itinerary received a broadcast");
+			if (intent.getAction().equals(ItineraryManager.NEW_LOCATION)) {
+				Log.d("Aeon", "Itinerary got location update");
+				onNewLocation((Location) intent.getExtras().getParcelable("location"));
+				if (callAppendMyLocationToItinerary) {
+					appendMyLocationToItinerary();
+				}
+			} else if (intent.getAction().equals(ItineraryManager.DATA_SET_CHANGED)) {
+				Log.d("Aeon", "Itinerary notified that itinerary data changed");
+				updateListView();
 			}
 		}
 	};
@@ -96,23 +94,21 @@ public final class Itinerary extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.d("Aeon", "Itinerary has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
-			boundToInteraryManager = true;
+			boundToItineraryManager = true;
 
-			if (itineraryItems.getCount() <= 1) {
-				initializeOrigin();
-			}
+			updateListView();
 		}
 
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "Itinerary has been disconnected from itinerary manager");
-			boundToInteraryManager = false;
+			boundToItineraryManager = false;
 		}
 	};
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 
 		ArrayList<ItineraryItem> savedItinerary = savedInstanceState.getParcelableArrayList("itineraryItems");
-		origin = savedItinerary.get(0);
+
 		Log.v("Aeon", "Restoring " + savedItinerary.size() + " itinerary items.");
 		for (ItineraryItem item : savedItinerary) {
 			itineraryItems.add(item);
@@ -157,7 +153,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				if (update.getSchedule().getArrivalTime().equals(currentDestination().getSchedule().getArrivalTime())) {
 					currentDestination().getSchedule().updateDepartureTime(update.getSchedule().getDepartureTime());
 					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
-					updateTimes();
+					// updateTimes();
 				}
 			}
 		}
@@ -179,8 +175,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// TODO: Use this to verify location service is available
 		// GooglePlayServicesUtil.isGooglePlayServicesAvailable();
 
-		// THIS IS TEMPORARY -- HAR HAR HAR
-		getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+		// getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		theGeocoder = new Geocoder(this);
 
@@ -192,8 +187,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			buildAlertMessageNoGps();
 		}
-
-		scheduleUpdater = new ScheduleUpdater();
 
 		configureItineraryListViewLongClickListener();
 
@@ -218,8 +211,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 		Log.d("Aeon", "Resuming itinerary activity");
-		LocalBroadcastManager.getInstance(this).registerReceiver(itineraryManagerReceiver, new IntentFilter("new-location"));
-		scheduleUpdater.run();
+		IntentFilter myFilter = new IntentFilter();
+		myFilter.addAction(ItineraryManager.NEW_LOCATION);
+		myFilter.addAction(ItineraryManager.DATA_SET_CHANGED);
+		LocalBroadcastManager.getInstance(this).registerReceiver(itineraryManagerReceiver, myFilter);
 	}
 
 	@Override
@@ -227,7 +222,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		super.onPause();
 		Log.d("Aeon", "Pausing itinerary activity");
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(itineraryManagerReceiver);
-		eventHandler.removeCallbacks(scheduleUpdater);
 	}
 
 	@Override
@@ -386,352 +380,14 @@ public final class Itinerary extends Activity implements OnClickListener {
 		Log.v("Aeon", "New location received.");
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
-		Log.d("Aeon", origin.getLocation() == null ? "Origin location is null" : "Origin has valid location");
-		Log.d("Aeon", itineraryItems.getCount() <= 2 ? "Itinerary has 2 or fewer items" : "Itinerary has more than two items");
-		if (origin.getLocation() == null || itineraryItems.getCount() <= 2) {
-			currentDestinationIndex = 0;
-			updateOrigin();
-		}
-
-		updateTravelStatus();
 
 		if (waitingForGps) {
 			waitingForGps = false;
 		}
 	}
 
-	private void updateTravelStatus() {
-		if (traveling) { // arriving TODO: unreadable -> refactor
-			if (haveArrived()) {
-				traveling = false;
-				Log.v("Aeon", "User arrived at " + currentDestination().getName());
-				currentDestination().setAtLocation();
-				itineraryItems.notifyDataSetChanged();
-				updateArrivalTimeAndSchedules(currentDestination());
-				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
-					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
-				}
-			}
-		} else {
-			if (haveDeparted()) { // departing TODO: unreadable -> refactor
-				traveling = true;
-				cancelAlerts();
-				currentDestination().setLocationExpired();
-				updateDepartureTimeAndSchedules(currentDestination());
-				if (currentDestinationIndex < (itineraryItems.getCount() - 2)) {
-					getDirections();
-					++currentDestinationIndex;
-					sendExternalNavigationNotification();
-				}
-				// TODO: Don't set enRoute to final destination after arrival at final destination
-
-				Log.v("Aeon", "User has departed for " + currentDestination().getName());
-				currentDestination().setEnRoute();
-				itineraryItems.notifyDataSetChanged();
-			}
-		}
-	}
-
-	private void sendExternalNavigationNotification() {
-		NotificationCompat.Builder navNotiBuilder = new NotificationCompat.Builder(this);
-		navNotiBuilder.setContentTitle("Navigation");
-		String message = "Select for directions to " + currentDestination().getName();
-		navNotiBuilder.setContentText(message);
-		navNotiBuilder.setWhen(new Date().getTime());
-		navNotiBuilder.setContentInfo(currentDestination().getFormattedDistance());
-		navNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
-		navNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-		navNotiBuilder.setAutoCancel(true);
-
-		PendingIntent pendingResult = PendingIntent.getActivity(getBaseContext(), 0, getExternalNavigationIntent(), 0);
-
-		navNotiBuilder.setContentIntent(pendingResult);
-		NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notiMgr.notify(R.id.departure_reminder_notification, navNotiBuilder.build());
-	}
-
-	private void startExternalNavigation() {
-		startActivity(getExternalNavigationIntent());
-	}
-
-	private Intent getExternalNavigationIntent() {
-		try {
-			Log.v("Aeon", "Starting external navigation.");
-			String navUri = "google.navigation:ll=";
-			navUri += currentDestination().getLocation().getLatitude() + ",";
-			navUri += currentDestination().getLocation().getLongitude();
-			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-			return navIntent;
-		} catch (ActivityNotFoundException e) {
-			try {
-				Log.v("Aeon", "Navigation intent failed starting Google Maps.");
-				String navUri = "http://maps.google.com/maps?&daddr=";
-				navUri += currentDestination().getLocation().getLatitude() + ",";
-				navUri += currentDestination().getLocation().getLongitude();
-				// TODO: add the following to give a custom name to the location
-				// navUri += "(Custom name here)";
-				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-				return navIntent;
-			} catch (ActivityNotFoundException er) {
-				Log.d("Aeon", "No external navigation apps found.");
-			}
-		}
-		return null;
-	}
-
-	void updateTimes() {
-		Log.v("Aeon", "Updating times.");
-		if (currentDestination().atLocation()) {
-			if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
-				Log.v("Aeon", "Updating current destination departure time while at location.");
-				updateDepartureTime(currentDestination());
-			}
-		} else if (currentDestination().enRoute()) {
-			if (currentDestination().getSchedule().getArrivalTime().before(new Date())) {
-				Log.v("Aeon", "Updating current destination arrival time while en route.");
-				updateArrivalTime(currentDestination());
-			}
-		}
-
-		updateSchedules();
-	}
-
-	private Date nearestMinute() {
-		return nearestMinute(new Date());
-	}
-
-	private Date nearestMinute(Date date) {
-		Calendar nearestMinute = Calendar.getInstance();
-		nearestMinute.setTime(date);
-
-		// int delta = 0;
-		// if (nearestMinute.get(Calendar.SECOND) < 30) {
-		// delta = 0;
-		// } else {
-		// delta = 1;
-		// }
-		// nearestMinute.add(Calendar.MINUTE, delta);
-		nearestMinute.set(Calendar.SECOND, 0);
-
-		return nearestMinute.getTime();
-	}
-
-	private void updateDepartureTimeAndSchedules(ItineraryItem currentDestination) {
-		updateDepartureTime(currentDestination);
-		updateSchedules();
-	}
-
-	private void updateDepartureTime(ItineraryItem currentDestination) {
-		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.updateDepartureTime(nearestMinute());
-
-		if (thisSchedule.getArrivalTime() != null) {
-			thisSchedule.updateStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
-		}
-	}
-
-	private void updateArrivalTimeAndSchedules(ItineraryItem currentDestination) {
-		updateArrivalTime(currentDestination);
-		updateTravelDuration(currentDestination);
-		updateSchedules();
-	}
-
-	private void updateTravelDuration(ItineraryItem currentDestination) {
-		if (currentDestinationIndex == 0) {
-			throw new IllegalStateException();
-		}
-		ItineraryItem previousDestination = itineraryItems.getItem(currentDestinationIndex - 1);
-		currentDestination.setTravelDuration((currentDestination.getSchedule().getArrivalTime().getTime() - previousDestination.getSchedule().getDepartureTime().getTime()) / 1000);
-
-	}
-
-	private void updateArrivalTime(ItineraryItem currentDestination) {
-		Schedule thisSchedule = currentDestination.getSchedule();
-		thisSchedule.updateArrivalTime(nearestMinute());
-
-		if (thisSchedule.isDepartureTimeFlexible()) {
-			if (thisSchedule.getStayDuration() != null) {
-				Calendar newDeparture = Calendar.getInstance();
-				newDeparture.setTime(thisSchedule.getArrivalTime());
-				newDeparture.add(Calendar.SECOND, thisSchedule.getStayDuration().intValue());
-				thisSchedule.updateDepartureTime(newDeparture.getTime());
-			}
-		} else {
-			if (thisSchedule.getDepartureTime() != null) {
-				thisSchedule.updateStayDuration((thisSchedule.getDepartureTime().getTime() - thisSchedule.getArrivalTime().getTime()) / 1000);
-			}
-		}
-	}
-
-	void updateSchedules() {
-		for (int i = (currentDestinationIndex + 1); i < (itineraryItems.getCount() - 1); ++i) {
-			itineraryItems.getItem(i).updateSchedule(itineraryItems.getItem(i - 1).getSchedule().getDepartureTime());
-		}
-
-		itineraryItems.notifyDataSetChanged();
-		Log.v("Aeon", "Updating itinerary list view.");
-	}
-
-	private void getDirections() {
-		new GoogleDirectionsGiver(currentDestination().getLocation(), itineraryItems.getItem(currentDestinationIndex + 1).getLocation()) {
-			@Override
-			protected void onPostExecute(DirectionsResult result) {
-				Address destinationAddress = result.getDestination();
-				Location destinationLocation = currentDestination().getLocation();
-				if (destinationAddress != null && destinationLocation != null) {
-					float[] distance = new float[1];
-					Location.distanceBetween(destinationAddress.getLatitude(), destinationAddress.getLongitude(), destinationLocation.getLatitude(), destinationLocation.getLongitude(), distance);
-					Bundle locationExtras = new Bundle();
-					// TODO: Exception thrown when trying to unmarshal this bundle because of DirectionsResult
-					// locationExtras.putParcelable("address", result);
-					locationExtras.putFloat("distance", distance[0]);
-					destinationLocation.setExtras(locationExtras);
-					String logMsg = "Destination is " + distance[0] + " from the nearest road";
-					Log.v("Aeon", logMsg);
-				} else {
-					// TODO: Probably something to do here
-				}
-			}
-		};
-	}
-
-	private boolean isInVicinity() {
-		Bundle extras = currentDestination().getLocation().getExtras();
-		float threshold = 0.f;
-		if (extras != null) {
-			threshold = extras.getFloat("distance");
-		}
-		if (threshold < 100.f) threshold = 100.f;
-		float distance = currentLocation().distanceTo(currentDestination().getLocation());
-		Log.d("Aeon", "Vicinity threshold:" + threshold);
-		Log.d("Aeon", "Distance to destination:" + distance);
-		return (distance < threshold);
-	}
-
-	private boolean isMoving() {
-		if (!currentLocation().hasSpeed()) {
-			throw new IllegalStateException("No speed set for this location");
-		}
-		return currentLocation().getSpeed() > 5.f;
-	}
-
 	private ItineraryItem currentDestination() {
-		return itineraryItems.getItem(currentDestinationIndex);
-	}
-
-	private boolean isLoitering() {
-		if (locations.isEmpty()) {
-			throw new IllegalStateException("No locations have been received.");
-		}
-		boolean loitering = false;
-
-		Location item = null;
-		Location previousItem = null;
-		int locationCount = 0;
-		float totalTime_s = 0;
-		double totalLat = 0;
-		double totalLng = 0;
-
-		ListIterator<Location> iterator = locations.listIterator(locations.size());
-		while (iterator.hasPrevious()) {
-			item = iterator.previous();
-			if (iterator.hasPrevious()) {
-				previousItem = locations.get(iterator.previousIndex());
-
-				float d2p_m = item.distanceTo(previousItem);
-				// TODO: Use getElapsedRealtimeNanos -- but requires API 17
-				float timeDelta_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
-				float speed_m_s = (d2p_m / timeDelta_s);
-				Log.d("Aeon", "Performing loiter calculations; d2p_m=" + d2p_m + ", times_s=" + timeDelta_s + ", speed_m_s=" + speed_m_s + ", item::time=" + item.getTime() + ", previousItem::time=" + previousItem.getTime());
-				if (speed_m_s > 5) {
-					Log.v("Aeon", "Found " + locationCount + " fixes with speeds less than 5 m/s.");
-					break;
-				}
-
-				++locationCount;
-				totalLat += item.getLatitude();
-				totalLng += item.getLongitude();
-				totalTime_s += timeDelta_s;
-
-				// TODO: incorporate these stats???
-				// float d2c_m = item.distanceTo(currentLocation());
-				// float d2d_m = currentDestination().getLocation().distanceTo(item);
-			}
-		}
-
-		if (totalTime_s > 60.) {
-			Log.v("Aeon", "Speed less than 5 m/s for more than 1 minute.");
-			double averageLat = totalLat / locationCount;
-			double averageLng = totalLng / locationCount;
-			float[] distance = new float[1];
-			Log.v("Aeon", "averageLat=" + averageLat + "; averageLng=" + averageLng);
-
-			double distanceThreshold = totalTime_s;
-			Location.distanceBetween(currentLocation().getLatitude(), currentLocation().getLongitude(), averageLat, averageLng, distance);
-			Log.v("Aeon", "Distance threshold is " + distanceThreshold);
-			Log.v("Aeon", "User is " + distance[0] + " m from average loiter location.");
-			if (distance[0] < distanceThreshold) {
-				Log.d("Aeon", "User is loitering.");
-				loitering = true;
-			}
-
-			Location.distanceBetween(currentDestination().getLocation().getLatitude(), currentDestination().getLocation().getLongitude(), averageLat, averageLng, distance);
-			if (distance[0] < distanceThreshold) {
-				// assume user is loitering at intended destination
-			}
-		} else {
-			Log.v("Aeon", "User has only loitered for " + totalTime_s + " seconds.");
-		}
-
-		return loitering;
-	}
-
-	private boolean haveDeparted() {
-		// boolean departed = currentDestination().atLocation();
-		boolean departed = !traveling;
-		departed &= !isInVicinity();
-		if (currentLocation().hasSpeed()) {
-			// Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
-			departed &= isMoving();
-		} else {
-			// Log.v("Aeon", "No speed parameter for this location.");
-		}
-
-		if (departed) {
-			departed &= !isLoitering();
-		}
-
-		return departed;
-	}
-
-	private boolean haveArrived() {
-		// boolean arrived = currentDestination().enRoute();
-		boolean arrived = traveling;
-		arrived &= isInVicinity();
-		if (currentLocation().hasSpeed()) {
-			Log.v("Aeon", "Location has speed parameter. <" + currentLocation().getSpeed() + ">");
-			arrived &= !isMoving();
-		} else {
-			Log.v("Aeon", "No speed parameter for this location.");
-		}
-
-		if (!arrived && traveling) {
-			Log.v("Aeon", "Initial arrival criteria failed.  Attempting to detect loiter.");
-			if (isLoitering()) {
-				// add loiter location as unplanned stop or intended destination
-				// TODO: prompt use to inform if arrived at new location or intended destination or still traveling
-				if (currentLocation().distanceTo(currentDestination().getLocation()) < 1000) {
-					// assume intended destination with 1 km
-					// adjust destination
-					currentDestination().setLocation(currentLocation());
-					arrived = true;
-				} else {
-					// add destination
-				}
-			}
-		}
-
-		return arrived;
+		return itineraryManagerBinder.currentDestination();
 	}
 
 	@Override
@@ -795,13 +451,10 @@ public final class Itinerary extends Activity implements OnClickListener {
 		case R.id.menu_item_call_destination:
 			break;
 		case R.id.submenu_item_clear_itinerary_yes:
+			itineraryManagerBinder.clearList();
 			itineraryItems.clear();
 			currentDestinationIndex = 0;
 			traveling = false;
-			eventHandler.removeCallbacks(scheduleUpdater);
-			initializeOrigin();
-			initializeAddNewItineraryItem();
-			// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 			break;
 		case R.id.menu_item_clear_itinerary:
 		case R.id.submenu_item_clear_itinerary_no:
@@ -831,81 +484,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		startItineraryOpen.putExtra("requestCode", GET_NEW_DESTINATION);
 		startActivityForResult(startItineraryOpen, GET_NEW_DESTINATION);
 
-	}
-
-	private void updateOrigin() {
-		Log.v("Aeon", "Updating origin.");
-		if (origin.getSchedule().getDepartureTime().before(new Date())) {
-			Log.d("Aeon", "Updating origin departure time.");
-			origin.getSchedule().updateDepartureTime(nearestMinute());
-		}
-		if (currentLocation() != null) {
-			try {
-				Log.d("Aeon", "Updating origin location.");
-				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
-			} catch (NullPointerException e) {
-				// TODO Location was null
-			}
-		}
-		itineraryItems.notifyDataSetChanged();
-	}
-
-	private void initializeOrigin() {
-		origin = new ItineraryItem("My location (locating...)");
-		origin.setAtLocation();
-		Schedule departNow = new Schedule();
-		departNow.initializeFlexibleDepartureTime(nearestMinute());
-		origin.setSchedule(departNow);
-		if (currentLocation() != null) {
-			try {
-				Log.v("Aeon", "Valid location found while initializing origin.");
-				currentDestinationIndex = 0;
-				origin.updateLocation(currentLocation(), getLocationAddress(currentLocation()));
-			} catch (NullPointerException e) {
-				// TODO Location was null
-			}
-		}
-
-		insertListItem(origin, 0);
-		scheduleUpdater.run();
-	}
-
-	class ScheduleUpdater implements Runnable {
-		public void run() {
-			Log.v("Aeon", "Schedule updater is running.");
-			Calendar now = Calendar.getInstance();
-			now.setTime(new Date());
-
-			Calendar nextMinute = Calendar.getInstance();
-			nextMinute.setTime(now.getTime());
-			nextMinute.set(Calendar.MILLISECOND, 0);
-			nextMinute.set(Calendar.SECOND, 0);
-			nextMinute.add(Calendar.MINUTE, 1);
-
-			long delayMs = nextMinute.getTimeInMillis() - now.getTimeInMillis();
-
-			Itinerary.eventHandler.postDelayed(Itinerary.this.scheduleUpdater, delayMs);
-
-			doStuff();
-		}
-	}
-
-	private void doStuff() {
-		if (currentDestinationIndex >= 0) {
-			/*-THIS LOGIC MAY BE UNNECESSARY
-			if (currentDestination().getSchedule().isArrivalTime(1)) {
-				updateTimes();
-				Log.v("Aeon", "Updating itinerary to highlight stay duration.");
-			} else if (currentDestination().getSchedule().isDepartureTime()) {
-				updateTimes();
-				Log.v("Aeon", "Updating itinerary prior to departure.");
-			} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
-				updateTimes();
-				Log.v("Aeon", "Updating itinerary after departure time expiration.");
-			}
-			 */
-			updateTimes();
-		}
 	}
 
 	private Address getLocationAddress(Location location) {
@@ -1056,9 +634,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void updateListView() {
-		itineraryItems.clear();
-		itineraryItems.addAll(itineraryManagerBinder.getDestinations());
-		initializeAddNewItineraryItem();
+		if (boundToItineraryManager) {
+			itineraryItems.clear();
+			itineraryItems.addAll(itineraryManagerBinder.getDestinations());
+			initializeAddNewItineraryItem();
+		}
 	}
 
 	private void updateSchedule(ItineraryItem newDestination) {

@@ -20,18 +20,21 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class ItineraryManager extends Service {
 	private static final int GPS_UPDATE_DISTANCE_M = 0;
 	private static final int GPS_UPDATE_INTERVAL_MS = 10000;
-	static final int MSG_NEW_LOCATION = 0;
+	public static final String NEW_LOCATION = "itinerary-manager-new-location";
+	public static final String DATA_SET_CHANGED = "itinerary-manager-data-set-changed";
 
 	private LocationManager locationManager;
 	private LocationListener locationListener;
@@ -41,7 +44,7 @@ public class ItineraryManager extends Service {
 	private PendingIntent pendingReminder;
 	private PendingIntent pendingAlarm;
 
-	private ArrayList<ItineraryItem> itineraryItems;
+	private final ArrayList<ItineraryItem> itineraryItems = new ArrayList<ItineraryItem>();
 	private final ArrayList<Location> locations = new ArrayList<Location>();
 
 	private ScheduleUpdater scheduleUpdater;
@@ -77,6 +80,9 @@ public class ItineraryManager extends Service {
 		}
 
 		public void appendDestination(ItineraryItem destination) {
+			if (currentDestination().matches(finalDestination())) {
+				locationUpdater.run();
+			}
 			itineraryItems.add(destination);
 		}
 
@@ -95,15 +101,33 @@ public class ItineraryManager extends Service {
 		public void updateDestination(ItineraryItem destination) {
 			for (ItineraryItem item : itineraryItems) {
 				if (destination.matches(item)) {
-					itineraryItems.set(itineraryItems.indexOf(item), destination);
+					int itemIndex = itineraryItems.indexOf(item);
+					if (item.atLocation()) {
+						cancelAlerts();
+						setAlerts(item, itineraryItems.get(itemIndex + 1));
+					}
+					itineraryItems.set(itemIndex, destination);
+					updateSchedules();
 				}
 			}
+		}
+
+		public void clearList() {
+			itineraryItems.clear();
+			currentDestinationIndex = 0;
+			traveling = false;
+			initializeOrigin();
+			locationUpdater.run();
+		}
+
+		public ItineraryItem currentDestination() {
+			return ItineraryManager.this.currentDestination();
 		}
 	}
 
 	class LocationManagerUpdater implements Runnable {
 		public void run() {
-			Log.d("Aeon", "LocationManagerUpdater requesting updates from GPS provider");
+			Log.d("Aeon", "LocationManagerUpdater is requesting periodic updates from GPS provider");
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL_MS, GPS_UPDATE_DISTANCE_M, locationListener);
 		}
 	}
@@ -130,7 +154,7 @@ public class ItineraryManager extends Service {
 
 	private void doStuff() {
 		if (currentDestinationIndex >= 0) {
-			if (currentDestination().getSchedule().isArrivalTime(1)) {
+			/*-if (currentDestination().getSchedule().isArrivalTime(1)) {
 				updateTimes();
 				Log.v("Aeon", "Updating itinerary to highlight stay duration.");
 			} else if (currentDestination().getSchedule().isDepartureTime()) {
@@ -139,7 +163,8 @@ public class ItineraryManager extends Service {
 			} else if (currentDestination().getSchedule().getDepartureTime().before(new Date())) {
 				updateTimes();
 				Log.v("Aeon", "Updating itinerary after departure time expiration.");
-			}
+			}*/
+			updateTimes();
 		}
 	}
 
@@ -224,7 +249,7 @@ public class ItineraryManager extends Service {
 			itineraryItems.get(i).updateSchedule(itineraryItems.get(i - 1).getSchedule().getDepartureTime());
 		}
 
-		// FIX itineraryItems.notifyDataSetChanged();
+		sendLocalBroadcast(new Intent(DATA_SET_CHANGED));
 		Log.v("Aeon", "Updating itinerary list view.");
 	}
 
@@ -257,9 +282,9 @@ public class ItineraryManager extends Service {
 		if (locations.size() > 1000) locations.remove(0);
 		locations.add(location);
 
-		Intent newLocationMessage = new Intent("new-location");
+		Intent newLocationMessage = new Intent(NEW_LOCATION);
 		newLocationMessage.putExtra("location", location);
-		LocalBroadcastManager.getInstance(this).sendBroadcast(newLocationMessage);
+		sendLocalBroadcast(newLocationMessage);
 
 		if (origin.getLocation() == null || itineraryItems.size() <= 1) {
 			currentDestinationIndex = 0;
@@ -274,6 +299,7 @@ public class ItineraryManager extends Service {
 	}
 
 	private void initializeOrigin() {
+		Log.v("Aeon", "Initializing itinerary manager origin.");
 		origin = new ItineraryItem("My location (locating...)");
 		origin.setAtLocation();
 		Schedule departNow = new Schedule();
@@ -304,7 +330,8 @@ public class ItineraryManager extends Service {
 				// TODO Location was null
 			}
 		}
-		// FIX itineraryItems.notifyDataSetChanged();
+
+		sendLocalBroadcast(new Intent(DATA_SET_CHANGED));
 	}
 
 	private int getFinalDestinationIndex() {
@@ -319,7 +346,7 @@ public class ItineraryManager extends Service {
 		Log.d("Aeon", "Cancelling current location updates");
 		locationManager.removeUpdates(locationListener);
 
-		if ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation()) {
+		if (isItineraryActive()) {
 			long msDelta = 0;
 			/*- TODO: DISABLED UNTIL ITINERARY IS TRACKED BAY MANAGER
 			if (currentDestination().enRoute()) {
@@ -338,13 +365,17 @@ public class ItineraryManager extends Service {
 		}
 	}
 
+	private boolean isItineraryActive() {
+		return ((getFinalDestinationIndex() == 0) || !finalDestination().atLocation());
+	}
+
 	private void updateTravelStatus() {
 		if (traveling) { // arriving TODO: unreadable -> refactor
 			if (haveArrived()) {
 				traveling = false;
 				Log.v("Aeon", "User arrived at " + currentDestination().getName());
 				currentDestination().setAtLocation();
-				// FIX itineraryItems.notifyDataSetChanged();
+				sendLocalBroadcast(new Intent(DATA_SET_CHANGED));
 				updateArrivalTimeAndSchedules(currentDestination());
 				if (currentDestinationIndex < getFinalDestinationIndex()) {
 					setAlerts(currentDestination(), itineraryItems.get(currentDestinationIndex + 1));
@@ -362,21 +393,42 @@ public class ItineraryManager extends Service {
 				}
 				Log.v("Aeon", "User has departed for " + currentDestination().getName());
 				currentDestination().setEnRoute();
-				// FIX itineraryItems.notifyDataSetChanged();
-				// TODO: Display map
-				startExternalNavigation();
+				sendLocalBroadcast(new Intent(DATA_SET_CHANGED));
+				sendExternalNavigationNotification();
 			}
 		}
 	}
 
+	private void sendExternalNavigationNotification() {
+		NotificationCompat.Builder navNotiBuilder = new NotificationCompat.Builder(this);
+		navNotiBuilder.setContentTitle("Navigation");
+		String message = "Select for directions to " + currentDestination().getName();
+		navNotiBuilder.setContentText(message);
+		navNotiBuilder.setWhen(new Date().getTime());
+		navNotiBuilder.setContentInfo(currentDestination().getFormattedDistance());
+		navNotiBuilder.setSmallIcon(R.drawable.arrive_notification);
+		navNotiBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		navNotiBuilder.setAutoCancel(true);
+
+		PendingIntent pendingResult = PendingIntent.getActivity(getBaseContext(), 0, getExternalNavigationIntent(), 0);
+
+		navNotiBuilder.setContentIntent(pendingResult);
+		NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notiMgr.notify(R.id.departure_reminder_notification, navNotiBuilder.build());
+	}
+
 	private void startExternalNavigation() {
+		startActivity(getExternalNavigationIntent());
+	}
+
+	private Intent getExternalNavigationIntent() {
 		try {
 			Log.v("Aeon", "Starting external navigation.");
 			String navUri = "google.navigation:ll=";
 			navUri += currentDestination().getLocation().getLatitude() + ",";
 			navUri += currentDestination().getLocation().getLongitude();
 			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-			startActivity(navIntent);
+			return navIntent;
 		} catch (ActivityNotFoundException e) {
 			try {
 				Log.v("Aeon", "Navigation intent failed starting Google Maps.");
@@ -386,12 +438,12 @@ public class ItineraryManager extends Service {
 				// TODO: add the following to give a custom name to the location
 				// navUri += "(Custom name here)";
 				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-				startActivity(navIntent);
-
+				return navIntent;
 			} catch (ActivityNotFoundException er) {
 				Log.d("Aeon", "No external navigation apps found.");
 			}
 		}
+		return null;
 	}
 
 	private void getDirections() {
@@ -608,7 +660,6 @@ public class ItineraryManager extends Service {
 		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 		theGeocoder = new Geocoder(this);
 		eventHandler = new Handler();
-		itineraryItems = new ArrayList<ItineraryItem>();
 
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
@@ -632,7 +683,13 @@ public class ItineraryManager extends Service {
 		locationUpdater = new LocationManagerUpdater();
 
 		initializeOrigin();
-		// scheduleUpdater.run();
+		scheduleUpdater.run();
+		sendLocalBroadcast(new Intent(DATA_SET_CHANGED));
+	}
+
+	private void sendLocalBroadcast(Intent intent) {
+		Log.d("Aeon", "Sending local broadcast: " + intent.getAction());
+		LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 	}
 
 	@Override
