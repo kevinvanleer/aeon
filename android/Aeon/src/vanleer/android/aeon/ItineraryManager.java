@@ -104,7 +104,7 @@ public class ItineraryManager extends Service {
 					int itemIndex = itineraryItems.indexOf(item);
 					if (item.atLocation()) {
 						cancelAlerts();
-						setAlerts(item, itineraryItems.get(itemIndex + 1));
+						setAlerts(destination, itineraryItems.get(itemIndex + 1));
 					}
 					itineraryItems.set(itemIndex, destination);
 					updateSchedules();
