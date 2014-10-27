@@ -3,17 +3,13 @@ package vanleer.android.aeon;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -62,9 +58,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private Geocoder theGeocoder = null;
 	private boolean traveling = false;
 	private int currentDestinationIndex = 0;
-	private PendingIntent pendingReminder;
-	private AlarmManager alarmManager;
-	private PendingIntent pendingAlarm;
 	private ArrayList<Location> locations = new ArrayList<Location>();
 	private ItineraryManagerBinder itineraryManagerBinder;
 	private boolean boundToItineraryManager;
@@ -117,8 +110,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		currentDestinationIndex = savedInstanceState.getInt("currentDestinationIndex");
 		selectedItemPosition = savedInstanceState.getInt("selectedItemPosition");
 		locations = savedInstanceState.getParcelableArrayList("locations");
-		pendingAlarm = savedInstanceState.getParcelable("pendingAlarm");
-		pendingReminder = savedInstanceState.getParcelable("pendingReminder");
 		itineraryItems.notifyDataSetChanged();
 	}
 
@@ -139,24 +130,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		savedInstanceState.putInt("currentDestinationIndex", currentDestinationIndex);
 		savedInstanceState.putInt("selectedItemPosition", selectedItemPosition);
 		savedInstanceState.putBoolean("traveling", traveling);
-		savedInstanceState.putParcelable("pendingAlarm", pendingAlarm);
-		savedInstanceState.putParcelable("pendingReminder", pendingReminder);
-	}
-
-	@Override
-	public void onNewIntent(Intent theIntent) {
-		if (theIntent.getAction().equals("vanleer.android.aeon.delay_departure")) {
-			Object theExtra = theIntent.getExtras().get("destination");
-			if (theExtra != null) {
-				ItineraryItem update = (ItineraryItem) theExtra;
-
-				if (update.getSchedule().getArrivalTime().equals(currentDestination().getSchedule().getArrivalTime())) {
-					currentDestination().getSchedule().updateDepartureTime(update.getSchedule().getDepartureTime());
-					setAlerts(currentDestination(), itineraryItems.getItem(currentDestinationIndex + 1));
-					// updateTimes();
-				}
-			}
-		}
 	}
 
 	@Override
@@ -182,7 +155,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		startService(new Intent(this, ItineraryManager.class));
 
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			buildAlertMessageNoGps();
@@ -287,54 +259,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 		appendListItem(addNewItemItem);
 	}
 
-	private void setDepartureReminder(ItineraryItem origin, ItineraryItem destination) {
-		int reminderAdvance = 5;
-
-		Intent reminder = new Intent(this, DepartureReminder.class);
-		reminder.putExtra("vanleer.android.aeon.departureReminderOrigin", origin);
-		reminder.putExtra("vanleer.android.aeon.departureReminderDestination", destination);
-		reminder.putExtra("vanleer.android.aeon.departureReminderAdvance", reminderAdvance);
-
-		pendingReminder = PendingIntent.getService(this, R.id.departure_reminder_intent, reminder, PendingIntent.FLAG_CANCEL_CURRENT);
-
-		Calendar fiveMinutesBeforeDeparture = Calendar.getInstance();
-		fiveMinutesBeforeDeparture.setTime(origin.getSchedule().getDepartureTime());
-		fiveMinutesBeforeDeparture.add(Calendar.MINUTE, -reminderAdvance);
-		Log.d("Aeon", "Setting departure reminder from " + origin.getName() + " at " + fiveMinutesBeforeDeparture.getTime().toString());
-		alarmManager.set(AlarmManager.RTC_WAKEUP, fiveMinutesBeforeDeparture.getTimeInMillis(), pendingReminder);
-	}
-
-	private void setDepartureAlarm(ItineraryItem origin, ItineraryItem destination) {
-		Intent alarm = new Intent(this, DepartureAlarm.class);
-		alarm.putExtra("vanleer.android.aeon.departureAlarmOrigin", origin);
-		alarm.putExtra("vanleer.android.aeon.departureAlarmDestination", destination);
-		pendingAlarm = PendingIntent.getActivity(this, UPDATE_DESTINATION, alarm, PendingIntent.FLAG_CANCEL_CURRENT);
-		Log.d("Aeon", "Setting departure alarm from " + origin.getName() + " at " + origin.getSchedule().getDepartureTime().toString());
-		alarmManager.set(AlarmManager.RTC_WAKEUP, origin.getSchedule().getDepartureTime().getTime(), pendingAlarm);
-	}
-
-	public void setAlerts(ItineraryItem origin, ItineraryItem destination) {
-		Log.d("Aeon", "Setting alerts for departure from " + origin.getName());
-		setDepartureReminder(origin, destination);
-		setDepartureAlarm(origin, destination);
-	}
-
-	public void cancelAlerts() {
-		Log.d("Aeon", "Cancelling current departure alerts");
-		cancelReminder();
-		cancelAlarm();
-	}
-
-	private void cancelReminder() {
-		NotificationManager notiMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notiMgr.cancel(R.id.departure_reminder_notification);
-		alarmManager.cancel(pendingReminder);
-	}
-
-	private void cancelAlarm() {
-		alarmManager.cancel(pendingAlarm);
-	}
-
 	private void configureItineraryListViewLongClickListener() {
 		itineraryListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -414,7 +338,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 				intent.addCategory(Intent.CATEGORY_HOME);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
-				cancelAlerts();
 				stopService(new Intent(Itinerary.this, ItineraryManager.class));
 				finish();
 			}
