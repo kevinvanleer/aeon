@@ -40,19 +40,16 @@ public final class DestinationScheduleActivity extends Activity implements OnCli
 	private CheckBox checkBoxLastChecked;
 	private Button buttonDoneScheduling;
 	private ItineraryManagerBinder itineraryManagerBinder;
-	private boolean boundToInteraryManager;
 
 	private final ServiceConnection itineraryManagerConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.d("Aeon", "PlacesSearchActivity has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
-			boundToInteraryManager = true;
 		}
 
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "PlacesSearchActivity has been disconnected from itinerary manager");
-			boundToInteraryManager = false;
 		}
 	};
 

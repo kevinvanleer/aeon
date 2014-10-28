@@ -88,6 +88,7 @@ public class DirectionsResult implements Parcelable {
 		return (JSONArray) route.get("legs");
 	}
 
+	@SuppressWarnings("unused")
 	private JSONArray getSteps(JSONObject leg) {
 		if (leg == null) {
 			throw new NullPointerException();

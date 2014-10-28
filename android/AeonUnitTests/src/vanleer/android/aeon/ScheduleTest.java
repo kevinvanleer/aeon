@@ -3,7 +3,6 @@ package vanleer.android.aeon;
 import java.util.Date;
 
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import junit.framework.TestCase;

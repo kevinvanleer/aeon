@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,6 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
 	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
-	private final ItineraryItemDistanceComparator distanceCompare = new ItineraryItemDistanceComparator();
 	private final Geocoder externalGeocoder;
 	private static final ArrayList<String> placeTypes = new ArrayList<String>();
 
@@ -69,7 +68,7 @@ public final class GooglePlacesSearch {
 	private String findType(String name) {
 		String inferredType = null;
 
-		name = name.toLowerCase();
+		name = name.toLowerCase(Locale.US);
 		if (name.endsWith("es")) {
 			name = name.substring(0, (name.length() - 2));
 		}
@@ -296,8 +295,8 @@ public final class GooglePlacesSearch {
 			lngSuffix = "° W";
 		}
 
-		String latString = String.format("%1$.4f", Math.abs(location.getLatitude()));
-		String lngString = String.format("%1$.4f", Math.abs(location.getLongitude()));
+		String latString = String.format(Locale.US, "%1$.4f", Math.abs(location.getLatitude()));
+		String lngString = String.format(Locale.US, "%1$.4f", Math.abs(location.getLongitude()));
 
 		return (latString + latSuffix + ", " + lngString + lngSuffix);
 	}

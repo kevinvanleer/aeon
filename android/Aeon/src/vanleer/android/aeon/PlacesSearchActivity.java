@@ -55,11 +55,9 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private AutoCompleteTextView searchText;
 	private boolean waitingForGps = false;
 	private boolean searching = false;
-	private final Long searchRadius = (long) 50000; // the max
 	private UnfilteredArrayAdapter<String> suggestionList;
 	private Geocoder geocoder;
 	private ItineraryManagerBinder itineraryManagerBinder;
-	private boolean boundToInteraryManager;
 
 	private static Handler eventHandler;
 
@@ -79,13 +77,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.d("Aeon", "PlacesSearchActivity has been connected to itinerary manager");
 			itineraryManagerBinder = (ItineraryManagerBinder) service;
-			boundToInteraryManager = true;
 			ConfigureLocationManager();
 		}
 
 		public void onServiceDisconnected(ComponentName name) {
 			Log.d("Aeon", "PlacesSearchActivity has been disconnected from itinerary manager");
-			boundToInteraryManager = false;
 		}
 	};
 
@@ -253,6 +249,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private ArrayList<String> performAutocompleteSearch(CharSequence s) {
 		String input = s.toString();
 		ArrayList<String> results = null;

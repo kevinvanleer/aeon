@@ -89,13 +89,11 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 
 	public void delay() {
 		Calendar departureTime = Calendar.getInstance();
-		// departureTime.setTime(origin.getSchedule().getDepartureTime());
 		departureTime.add(Calendar.MINUTE, 5);
 		origin.getSchedule().updateDepartureTime(departureTime.getTime());
 		Intent delayedDeparture = new Intent();
 		delayedDeparture.putExtra("destination", origin);
 		delayedDeparture.setAction(DELAY_DEPARTURE);
-		// setResult(Activity.RESULT_OK, delayedDeparture);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(delayedDeparture);
 	}
 

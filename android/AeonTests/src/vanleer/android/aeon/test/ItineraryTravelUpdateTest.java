@@ -12,11 +12,10 @@ import android.view.View;
 import android.widget.ListView;
 
 public class ItineraryTravelUpdateTest extends ActivityInstrumentationTestCase2<Itinerary> {
-	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 
 	public ItineraryTravelUpdateTest() {
-		super(TARGET_PACKAGE_ID, Itinerary.class);
+		super(Itinerary.class);
 	}
 
 	View findView(int id) {

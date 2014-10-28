@@ -439,6 +439,7 @@ public class ItineraryManager extends Service {
 		notiMgr.notify(R.id.departure_reminder_notification, navNotiBuilder.build());
 	}
 
+	@SuppressWarnings("unused")
 	private void startExternalNavigation() {
 		startActivity(getExternalNavigationIntent());
 	}

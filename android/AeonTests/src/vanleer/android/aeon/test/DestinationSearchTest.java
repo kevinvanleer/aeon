@@ -7,16 +7,14 @@ import vanleer.android.aeon.PlacesSearchActivity;
 import vanleer.android.aeon.R;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ListView;
 
 public class DestinationSearchTest extends ActivityInstrumentationTestCase2<PlacesSearchActivity> {
-	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 	static final int TIMEOUT_MS = 20000;
 
 	public DestinationSearchTest() {
-		super(TARGET_PACKAGE_ID, PlacesSearchActivity.class);
+		super(PlacesSearchActivity.class);
 	}
 
 	@Override

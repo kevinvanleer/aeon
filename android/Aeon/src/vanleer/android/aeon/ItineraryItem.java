@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -17,11 +16,8 @@ import vanleer.util.TimeFormat;
 
 import android.location.Location;
 import android.location.Address;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public final class ItineraryItem implements Parcelable {
 	public DistanceUnit distanceUnit = DistanceUnit.MILES;

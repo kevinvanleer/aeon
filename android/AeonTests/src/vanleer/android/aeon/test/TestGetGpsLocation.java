@@ -9,11 +9,10 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
 
 public class TestGetGpsLocation extends ActivityInstrumentationTestCase2<Itinerary> {
-	private static final String TARGET_PACKAGE_ID = "vanleer.android.aeon";
 	private Solo solo;
 
 	public TestGetGpsLocation() {
-		super(TARGET_PACKAGE_ID, Itinerary.class);
+		super(Itinerary.class);
 	}
 
 	@Override

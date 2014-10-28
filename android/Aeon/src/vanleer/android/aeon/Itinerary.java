@@ -212,11 +212,11 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void buildAlertMessageNoGps() {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Arrive requires precise location tracking, would you like to enable GPS?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+			public void onClick(final DialogInterface dialog, final int id) {
 				startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+			public void onClick(final DialogInterface dialog, final int id) {
 				dialog.cancel();
 				Toast.makeText(getApplicationContext(), "You must enable GPS to use Arrive", Toast.LENGTH_LONG).show();
 				// TODO: Disable add destination/next destination
@@ -333,7 +333,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void quit() {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Your itinerary will be cleared. Would you still like to quit?").setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+			public void onClick(final DialogInterface dialog, final int id) {
 				Intent intent = new Intent(Intent.ACTION_MAIN);
 				intent.addCategory(Intent.CATEGORY_HOME);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -342,7 +342,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 				finish();
 			}
 		}).setNegativeButton("No", new DialogInterface.OnClickListener() {
-			public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+			public void onClick(final DialogInterface dialog, final int id) {
 
 			}
 		});
