@@ -267,7 +267,7 @@ public class ItineraryManager extends Service {
 	}
 
 	void updateSchedules() {
-		for (int i = (currentDestinationIndex + 1); i < (itineraryItems.size() - 1); ++i) {
+		for (int i = (currentDestinationIndex + 1); i < itineraryItems.size(); ++i) {
 			itineraryItems.get(i).updateSchedule(itineraryItems.get(i - 1).getSchedule().getDepartureTime());
 		}
 
