@@ -256,7 +256,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 		// destinationName.setTextColor(Color.BLACK);
 		// destinationName.setBackgroundColor(Color.WHITE);
 
-		appendListItem(addNewItemItem);
+		itineraryItems.add(addNewItemItem);
 	}
 
 	private void configureItineraryListViewLongClickListener() {
@@ -479,35 +479,6 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 	private ItineraryItem finalDestination() {
 		return itineraryItems.getItem(getFinalDestinationIndex());
-	}
-
-	private int getAppendDestinationIndex() {
-		if (itineraryItems.getCount() < 2) {
-			throw new IllegalStateException("The destination list has not been initialize correctly.");
-		}
-
-		return (itineraryItems.getCount() - 1);
-	}
-
-	private void appendDestination(ItineraryItem newItem) {
-		insertListItem(newItem, getAppendDestinationIndex());
-	}
-
-	private void appendListItem(ItineraryItem newItem) {
-		insertListItem(newItem, itineraryItems.getCount());
-	}
-
-	private void removeListItem(int index) {
-		itineraryItems.remove(itineraryItems.getItem(index));
-	}
-
-	private void insertListItem(ItineraryItem destination, int index) {
-		itineraryItems.insert(destination, index);
-	}
-
-	private void replaceListItem(ItineraryItem destination, int index) {
-		removeListItem(index);
-		insertListItem(destination, index);
 	}
 
 	@Override
