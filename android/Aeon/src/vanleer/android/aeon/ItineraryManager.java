@@ -104,6 +104,8 @@ public class ItineraryManager extends Service {
 		public void appendDestination(ItineraryItem destination) {
 			if (currentDestination().matches(finalDestination())) {
 				locationUpdater.run();
+				cancelAlerts();
+				setAlerts(currentDestination(), destination);
 			}
 			itineraryItems.add(destination);
 		}
@@ -124,7 +126,7 @@ public class ItineraryManager extends Service {
 			for (ItineraryItem item : itineraryItems) {
 				if (destination.matches(item)) {
 					int itemIndex = itineraryItems.indexOf(item);
-					if (item.atLocation()) {
+					if (item.atLocation() && !item.matches(finalDestination())) {
 						cancelAlerts();
 						setAlerts(destination, itineraryItems.get(itemIndex + 1));
 					}
