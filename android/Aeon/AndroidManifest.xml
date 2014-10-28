@@ -23,11 +23,7 @@
         <activity android:name=".DepartureAlarm" android:configChanges="orientation" />
         <service android:name=".DepartureReminder" />
         <service android:name=".ItineraryManager" />
-        <receiver android:name="AeonBroadcastReceiver">
-            <intent-filter>
-                <action android:name="vanleer.android.aeon.delay_departure" />
-            </intent-filter>
-        </receiver>
+        <!-- receiver android:name="AeonBroadcastReceiver" /-->
         <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyB1tUOl_uSnOhbfztoaUhMdStYd1R3U3ys"/>
     </application>
     

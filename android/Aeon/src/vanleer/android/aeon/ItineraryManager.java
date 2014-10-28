@@ -13,8 +13,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -55,6 +57,26 @@ public class ItineraryManager extends Service {
 	private boolean traveling = false;
 	private boolean waitingForGps = false;
 	private final IBinder binder = new ItineraryManagerBinder();
+
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent theIntent) {
+			Log.d("Aeon", "ItineraryManager received a broadcast");
+			if (theIntent.getAction().equals(DepartureAlarm.DELAY_DEPARTURE)) {
+				Log.d("Aeon", "ItineraryManager received a delayed departure broadcast");
+				Object theExtra = theIntent.getExtras().get("destination");
+				if (theExtra != null) {
+					ItineraryItem update = (ItineraryItem) theExtra;
+
+					if (update.getSchedule().getArrivalTime().equals(currentDestination().getSchedule().getArrivalTime())) {
+						currentDestination().getSchedule().updateDepartureTime(update.getSchedule().getDepartureTime());
+						setAlerts(currentDestination(), itineraryItems.get(currentDestinationIndex + 1));
+						updateTimes();
+					}
+				}
+			}
+		}
+	};
 
 	class ItineraryManagerBinder extends Binder {
 		ItineraryManager getService() {
@@ -661,6 +683,10 @@ public class ItineraryManager extends Service {
 		theGeocoder = new Geocoder(this);
 		eventHandler = new Handler();
 
+		IntentFilter myFilter = new IntentFilter();
+		myFilter.addAction(DepartureAlarm.DELAY_DEPARTURE);
+		LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, myFilter);
+
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
 				onNewLocation(location);
@@ -721,5 +747,6 @@ public class ItineraryManager extends Service {
 		cancelAlerts();
 		locationManager.removeUpdates(locationListener);
 		eventHandler.removeCallbacks(locationUpdater);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 	}
 }

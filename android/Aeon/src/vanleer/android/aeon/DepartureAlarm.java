@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class DepartureAlarm extends Activity implements OnClickListener {
+	public static final String DELAY_DEPARTURE = "vanleer.android.aeon.delay_departure";
 	private AudioManager audioManager;
 	private MediaPlayer alarmPlayer;
 	private ItineraryItem origin;
@@ -92,9 +94,9 @@ public class DepartureAlarm extends Activity implements OnClickListener {
 		origin.getSchedule().updateDepartureTime(departureTime.getTime());
 		Intent delayedDeparture = new Intent();
 		delayedDeparture.putExtra("destination", origin);
-		delayedDeparture.setAction("vanleer.android.aeon.delay_departure");
+		delayedDeparture.setAction(DELAY_DEPARTURE);
 		// setResult(Activity.RESULT_OK, delayedDeparture);
-		this.sendBroadcast(delayedDeparture);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(delayedDeparture);
 	}
 
 	private void endAlarm() {
