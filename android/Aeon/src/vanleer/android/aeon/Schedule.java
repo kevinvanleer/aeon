@@ -593,7 +593,7 @@ public class Schedule implements Parcelable {
 		return areSameMinute(new Date(), getDepartureTime());
 	}
 
-	static private boolean areSameMinute(Date time1, Date time2) {
+	static public boolean areSameMinute(Date time1, Date time2) {
 		if (time1 == null || time2 == null) return false;
 
 		Date time1Mod = nearestMinute(time1);
@@ -603,11 +603,11 @@ public class Schedule implements Parcelable {
 		return ((delta <= 60000) && (delta >= 0));
 	}
 
-	static private Date nearestMinute(Date date) {
+	static public Date nearestMinute(Date date) {
 		return nearestMinute(date, 0);
 	}
 
-	static private Date nearestMinute(Date date, int offset) {
+	static public Date nearestMinute(Date date, int offset) {
 		Calendar nearestMinute = Calendar.getInstance();
 		nearestMinute.setTime(date);
 		nearestMinute.set(Calendar.SECOND, 0);

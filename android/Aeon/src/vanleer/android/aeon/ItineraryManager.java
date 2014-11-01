@@ -103,9 +103,12 @@ public class ItineraryManager extends Service {
 
 		public void appendDestination(ItineraryItem destination) {
 			if (currentDestination().matches(finalDestination())) {
-				locationUpdater.run();
-				cancelAlerts();
-				setAlerts(currentDestination(), destination);
+				if (!isItineraryActive()) {
+					locationUpdater.run();
+				}
+				if (Schedule.nearestMinute(new Date(), 5).before(currentDestination().getSchedule().getDepartureTime())) {
+					setAlerts(currentDestination(), destination);
+				}
 			}
 			itineraryItems.add(destination);
 		}
