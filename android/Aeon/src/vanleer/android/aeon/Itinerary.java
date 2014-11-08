@@ -22,6 +22,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -530,7 +531,13 @@ public final class Itinerary extends Activity implements OnClickListener {
 	private void updateListView() {
 		if (boundToItineraryManager) {
 			itineraryItems.clear();
-			itineraryItems.addAll(itineraryManagerBinder.getDestinations());
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				itineraryItems.addAll(itineraryManagerBinder.getDestinations());
+			} else {
+				for (ItineraryItem destination : itineraryManagerBinder.getDestinations()) {
+					itineraryItems.add(destination);
+				}
+			}
 			initializeAddNewItineraryItem();
 		}
 	}

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,6 +26,7 @@ import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -537,8 +539,10 @@ public class ItineraryManager extends Service {
 				previousItem = locations.get(iterator.previousIndex());
 
 				float d2p_m = item.distanceTo(previousItem);
-				// TODO: Use getElapsedRealtimeNanos -- but requires API 17
-				float timeDelta_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
+				float timeDelta_s = 0;
+
+				timeDelta_s = getTimeDelta(item, previousItem);
+
 				float speed_m_s = (d2p_m / timeDelta_s);
 				Log.d("Aeon", "Performing loiter calculations; d2p_m=" + d2p_m + ", times_s=" + timeDelta_s + ", speed_m_s=" + speed_m_s + ", item::time=" + item.getTime() + ", previousItem::time=" + previousItem.getTime());
 				if (speed_m_s > 5) {
@@ -582,6 +586,17 @@ public class ItineraryManager extends Service {
 		}
 
 		return loitering;
+	}
+
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+	private float getTimeDelta(Location item, Location previousItem) {
+		float timeDelta_s;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+			timeDelta_s = ((item.getElapsedRealtimeNanos() - previousItem.getElapsedRealtimeNanos()) / (float) 1e9);
+		} else {
+			timeDelta_s = ((item.getTime() - previousItem.getTime()) / 1000.f);
+		}
+		return timeDelta_s;
 	}
 
 	private boolean haveDeparted() {
