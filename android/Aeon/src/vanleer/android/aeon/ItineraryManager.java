@@ -457,8 +457,7 @@ public class ItineraryManager extends Service {
 			String navUri = "google.navigation:ll=";
 			navUri += currentDestination().getLocation().getLatitude() + ",";
 			navUri += currentDestination().getLocation().getLongitude();
-			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-			return navIntent;
+			return new Intent(Intent.ACTION_VIEW, Uri.parse(navUri));
 		} catch (ActivityNotFoundException e) {
 			try {
 				Log.v("Aeon", "Navigation intent failed starting Google Maps.");
@@ -467,8 +466,7 @@ public class ItineraryManager extends Service {
 				navUri += currentDestination().getLocation().getLongitude();
 				// TODO: add the following to give a custom name to the location
 				// navUri += "(Custom name here)";
-				Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(navUri));
-				return navIntent;
+				return new Intent(Intent.ACTION_VIEW, Uri.parse(navUri));
 			} catch (ActivityNotFoundException er) {
 				Log.d("Aeon", "No external navigation apps found.");
 			}
