@@ -64,11 +64,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private final BroadcastReceiver itineraryManagerReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d("Aeon", "Itinerary got location update");
+		Log.d("Aeon", "Itinerary got location update");
 
-			if (currentLocation == null) {
-				makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
-			}
+		if (currentLocation == null) {
+			makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
+		}
 		}
 	};
 
@@ -86,6 +86,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	};
 
 	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		savedInstanceState.putParcelableArrayList("searchResults", searchResultsList);
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.search_destination);
@@ -98,6 +103,18 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		ConfigureSearchResultsListViewLongClickListener();
 
 		ConfigureTextWatcher();
+
+		if ((savedInstanceState != null) && !savedInstanceState.isEmpty()) {
+			rebuildFromBundle(savedInstanceState);
+		}
+	}
+
+	private void rebuildFromBundle(Bundle savedInstanceState) {
+		ArrayList<ItineraryItem> storedItems = savedInstanceState.getParcelableArrayList("searchResults");
+		for(ItineraryItem newItem : storedItems) {
+			searchResultsList.add(newItem);
+			searchResults.add(newItem);
+		}
 	}
 
 	@Override
