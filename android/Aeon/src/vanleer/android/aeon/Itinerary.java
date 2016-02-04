@@ -285,22 +285,24 @@ public final class Itinerary extends Activity implements OnClickListener {
 	}
 
 	private void waitForGps() {
-		waitSpinner = ProgressDialog.show(Itinerary.this, "", "waiting for location...", true);
-		waitingForGps = true;
-		new Thread() {
-			@Override
-			public void run() {
-				while (currentLocation() == null) {
-					try {
-						sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+		if (currentLocation() == null) {
+			waitSpinner = ProgressDialog.show(Itinerary.this, "", "waiting for location...", true);
+			waitingForGps = true;
+			new Thread() {
+				@Override
+				public void run() {
+					while (currentLocation() == null) {
+						try {
+							sleep(1);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
+					waitSpinner.dismiss();
 				}
-				waitSpinner.dismiss();
-			}
-		}.start();
+			}.start();
+		}
 	}
 
 	protected void onNewLocation(Location location) {
