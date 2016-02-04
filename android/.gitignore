@@ -1,0 +1,6 @@
+bin
+*.sw*
+*.orig
+*.cat
+*.log
+*.apk
