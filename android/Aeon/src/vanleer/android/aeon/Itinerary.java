@@ -381,6 +381,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 			itineraryItems.clear();
 			currentDestinationIndex = 0;
 			traveling = false;
+			updateListView();
 			break;
 		case R.id.menu_item_clear_itinerary:
 		case R.id.submenu_item_clear_itinerary_no:
