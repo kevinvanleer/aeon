@@ -163,6 +163,8 @@ public final class Itinerary extends Activity implements OnClickListener {
 
 		configureItineraryListViewLongClickListener();
 
+		//getActionBar().
+
 		if ((savedInstanceState == null) || savedInstanceState.isEmpty()) {
 			// initializeOrigin();
 		} else {
@@ -319,7 +321,7 @@ public final class Itinerary extends Activity implements OnClickListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.itinerary_options, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
