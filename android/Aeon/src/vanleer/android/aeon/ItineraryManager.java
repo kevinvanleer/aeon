@@ -478,6 +478,10 @@ public class ItineraryManager extends Service {
 		new GoogleDirectionsGiver(currentDestination().getLocation(), itineraryItems.get(currentDestinationIndex + 1).getLocation()) {
 			@Override
 			protected void onPostExecute(DirectionsResult result) {
+				if (result == null) {
+					Log.e("Aeon", "Unable to update travel details");
+					return;
+				}
 				Address destinationAddress = result.getDestination();
 				Location destinationLocation = currentDestination().getLocation();
 				if (destinationAddress != null && destinationLocation != null) {
