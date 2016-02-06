@@ -17,6 +17,7 @@ import org.json.simple.JSONValue;
 
 import android.location.Location;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class GoogleDirectionsGiver extends AsyncTask<String, Void, DirectionsResult> {
 	private static final String GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json";
@@ -36,8 +37,11 @@ public class GoogleDirectionsGiver extends AsyncTask<String, Void, DirectionsRes
 
 	@Override
 	protected DirectionsResult doInBackground(String... urls) {
-		// TODO: Something special when query fails
-		return new DirectionsResult(performHttpGet(urls[0]));
+		DirectionsResult result = new DirectionsResult(performHttpGet(urls[0]));
+		if (result == null) {
+			result = new DirectionsResult(performHttpGet(urls[0]));
+		}
+		return result;
 	}
 
 	private String buildGoogleDirectionsUrl(Location origin, Location destination) {
@@ -88,10 +92,12 @@ public class GoogleDirectionsGiver extends AsyncTask<String, Void, DirectionsRes
 				jsonResponse = (JSONObject) JSONValue.parse(reader);
 			}
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
+			String errorMessage = "Protocol error retrieving directions for " + url;
+			Log.e("Aeon", errorMessage);
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			String errorMessage = "IO error retrieving directions for " + url;
+			Log.e("Aeon", errorMessage);
 			e.printStackTrace();
 		}
 		return jsonResponse;
