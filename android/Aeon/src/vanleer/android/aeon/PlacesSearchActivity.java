@@ -28,27 +28,25 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-public final class PlacesSearchActivity extends Activity implements OnClickListener {
+public final class PlacesSearchActivity extends Activity {
 	private ArrayList<ItineraryItem> searchResultsList;
 	private SearchResultItemAdapter searchResults;
 	private ListView searchResultsListView;
 	private final int listViewId = R.id.listView_searchResults;
 	private final String apiKey = "AIzaSyCXMEFDyFQK2Wu0-w0dyxs-nEO3uZoXUCc";
 	private Location currentLocation = null;
-	private ImageButton searchButton;
 	private TextView locationText;
 	private ImageView locationSensorImage;
 	private GooglePlacesSearch googleSearch;
@@ -164,8 +162,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		googleSearch = new GooglePlacesSearch(geocoder, apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
 		locationText.setText(R.string.waiting_for_location);
-		searchButton = (ImageButton) findViewById(R.id.imageButton_clear);
-		searchButton.setOnClickListener(this);
 		suggestionList = new UnfilteredArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
 		searchText = (AutoCompleteTextView) findViewById(R.id.editText_searchQuery);
 		searchText.setAdapter(suggestionList);
@@ -177,6 +173,26 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				// } else {
 				// return false;
 				// }
+			}
+		});
+		searchText.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				final int DRAWABLE_LEFT = 0;
+				final int DRAWABLE_TOP = 1;
+				final int DRAWABLE_RIGHT = 2;
+				final int DRAWABLE_BOTTOM = 3;
+
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (event.getRawX() >= (searchText.getRight() - searchText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+						searchText.setText("");
+						searchResultsList.clear();
+						searchResults.clear();
+						searchResultsListView.clearChoices();
+						return true;
+					}
+				}
+				return false;
 			}
 		});
 		searchResultsList = new ArrayList<ItineraryItem>();
@@ -336,7 +352,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		}.execute();
 		if (waitingForGps) {
 			waitingForGps = false;
-			onClick(searchButton);
+			GetSearchResults();
 		}
 	}
 
@@ -376,19 +392,6 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 				waitSpinner.dismiss();
 			}
 		}.start();
-	}
-
-	public void onClick(View v) {
-		switch (v.getId()) {
-			case R.id.imageButton_clear:
-				searchText.setText("");
-				searchResultsList.clear();
-				searchResults.clear();
-				searchResultsListView.clearChoices();
-				break;
-			default:
-				break;
-		}
 	}
 
 	private void GetSearchResults() {
