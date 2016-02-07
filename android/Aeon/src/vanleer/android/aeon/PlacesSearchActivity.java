@@ -164,7 +164,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 		googleSearch = new GooglePlacesSearch(geocoder, apiKey, "");
 		locationText = (TextView) findViewById(R.id.textView_currentLocation);
 		locationText.setText(R.string.waiting_for_location);
-		searchButton = (ImageButton) findViewById(R.id.imageButton_search);
+		searchButton = (ImageButton) findViewById(R.id.imageButton_clear);
 		searchButton.setOnClickListener(this);
 		suggestionList = new UnfilteredArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
 		searchText = (AutoCompleteTextView) findViewById(R.id.editText_searchQuery);
@@ -380,8 +380,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	public void onClick(View v) {
 		switch (v.getId()) {
-			case R.id.imageButton_search:
-				GetSearchResults();
+			case R.id.imageButton_clear:
+				searchText.setText("");
+				searchResultsList.clear();
+				searchResults.clear();
+				searchResultsListView.clearChoices();
 				break;
 			default:
 				break;

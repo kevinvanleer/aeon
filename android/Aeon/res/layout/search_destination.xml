@@ -74,12 +74,13 @@
         </AutoCompleteTextView>
 
         <ImageButton
-            android:id="@+id/imageButton_search"
+            android:id="@+id/imageButton_clear"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:contentDescription="@string/destination_search_button"
-            android:src="@android:drawable/ic_menu_search" >
+            android:src="@drawable/ic_clear_search_api_holo_light"
+            android:background="#00ffffff">
         </ImageButton>
     </LinearLayout>
 
