@@ -5,6 +5,7 @@ import vanleer.util.InvalidDistanceMatrixResponseException;
 import vanleer.util.UnfilteredArrayAdapter;
 
 import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -64,11 +65,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 	private final BroadcastReceiver itineraryManagerReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-		Log.d("Aeon", "Itinerary got location update");
+			Log.d("Aeon", "Itinerary got location update");
 
-		if (currentLocation == null) {
-			makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
-		}
+			if (currentLocation == null) {
+				makeUseOfNewLocation((Location) intent.getExtras().getParcelable("location"));
+			}
 		}
 	};
 
@@ -111,7 +112,7 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	private void rebuildFromBundle(Bundle savedInstanceState) {
 		ArrayList<ItineraryItem> storedItems = savedInstanceState.getParcelableArrayList("searchResults");
-		for(ItineraryItem newItem : storedItems) {
+		for (ItineraryItem newItem : storedItems) {
 			searchResultsList.add(newItem);
 			searchResults.add(newItem);
 		}
@@ -379,11 +380,11 @@ public final class PlacesSearchActivity extends Activity implements OnClickListe
 
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.imageButton_search:
-			GetSearchResults();
-			break;
-		default:
-			break;
+			case R.id.imageButton_search:
+				GetSearchResults();
+				break;
+			default:
+				break;
 		}
 	}
 
