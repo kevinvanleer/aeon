@@ -89,10 +89,22 @@ public final class GooglePlacesSearch {
 	void performSearch(double latitude, double longitude, Double radius, String type, String name) {
 		clearSearchResults();
 
-		performPlacesSearch(latitude, longitude, radius, type, name);
+		addPlacesResults(performPlacesSearch(latitude, longitude, radius, type, name));
 
 		if (places.isEmpty()) {
-			performGeocodingSearch(name);
+			List<Address> addresses = performGeocodingSearch(name);
+			double searchLatitude = latitude;
+			double searchLongitude = longitude;
+			if (!addresses.isEmpty()) {
+				searchLatitude = addresses.get(0).getLatitude();
+				searchLongitude = addresses.get(0).getLongitude();
+			}
+			JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, types, name);
+			if (newPlaces != null) {
+				addPlacesResults(newPlaces);
+			} else {
+				addGeocodingResults(addresses);
+			}
 		}
 
 		if (!places.isEmpty()) {
@@ -220,7 +232,7 @@ public final class GooglePlacesSearch {
 	// AUTOCOMPLETE
 
 	// GEOCODING
-	private void performGeocodingSearch(String address) {
+	private List<Address> performGeocodingSearch(String address) {
 		List<Address> geocodingSearchResults = null;
 		try {
 			geocodingSearchResults = externalGeocoder.getFromLocationName(address, 10);
@@ -228,7 +240,7 @@ public final class GooglePlacesSearch {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		addGeocodingResults(geocodingSearchResults);
+		return geocodingSearchResults;
 	}
 
 	private void addGeocodingResults(List<Address> geocodingSearchResults) {
