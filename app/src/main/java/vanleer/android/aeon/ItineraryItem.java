@@ -10,9 +10,9 @@ import java.util.concurrent.TimeoutException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import vanleer.util.DistanceUnit;
-import vanleer.util.InvalidDistanceMatrixResponseException;
-import vanleer.util.TimeFormat;
+import vanleer.android.util.DistanceUnit;
+import vanleer.android.util.InvalidDistanceMatrixResponseException;
+import vanleer.android.util.TimeFormat;
 
 import android.location.Location;
 import android.location.Address;

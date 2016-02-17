@@ -23,7 +23,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import vanleer.util.InvalidDistanceMatrixResponseException;
+import vanleer.android.util.InvalidDistanceMatrixResponseException;
 
 import android.location.Address;
 import android.location.Geocoder;
@@ -286,13 +286,13 @@ public final class GooglePlacesSearch {
 	}
 
 	static String getGeodeticString(Location location) {
-		String latSuffix = "° N";
-		String lngSuffix = "° E";
+		String latSuffix = "Â° N";
+		String lngSuffix = "Â° E";
 		if (location.getLatitude() < 0) {
-			latSuffix = "° S";
+			latSuffix = "Â° S";
 		}
 		if (location.getLongitude() < 0) {
-			lngSuffix = "° W";
+			lngSuffix = "Â° W";
 		}
 
 		String latString = String.format(Locale.US, "%1$.4f", Math.abs(location.getLatitude()));

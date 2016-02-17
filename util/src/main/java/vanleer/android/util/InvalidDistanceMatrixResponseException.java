@@ -1,7 +1,7 @@
 /**
  * 
  */
-package vanleer.util;
+package vanleer.android.util;
 
 /**
  * @author Kevin Van Leer

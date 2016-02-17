@@ -8,7 +8,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import vanleer.util.TimeFormat;
+import vanleer.android.util.TimeFormat;
 
 public class Schedule implements Parcelable {
 	private final Long INVALID_DURATION = Long.valueOf(-1);

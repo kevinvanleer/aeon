@@ -1,4 +1,4 @@
-package vanleer.util;
+package vanleer.android.util;
 
 import java.util.ArrayList;
 import java.util.List;

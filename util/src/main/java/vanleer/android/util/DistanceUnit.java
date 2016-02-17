@@ -1,4 +1,4 @@
-package vanleer.util;
+package vanleer.android.util;
 
 public enum DistanceUnit {
 	INCHES, FEET, MILES,

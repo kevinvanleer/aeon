@@ -1,4 +1,4 @@
-package vanleer.util;
+package vanleer.android.util;
 
 public class TimeFormat {
 	public static final long HOURS = 0x1;

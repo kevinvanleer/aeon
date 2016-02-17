@@ -1,8 +1,8 @@
 package vanleer.android.aeon;
 
 import vanleer.android.aeon.ItineraryManager.ItineraryManagerBinder;
-import vanleer.util.InvalidDistanceMatrixResponseException;
-import vanleer.util.UnfilteredArrayAdapter;
+import vanleer.android.util.InvalidDistanceMatrixResponseException;
+import vanleer.android.util.UnfilteredArrayAdapter;
 
 import java.util.ArrayList;
 
