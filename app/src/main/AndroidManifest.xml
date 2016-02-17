@@ -1,30 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="vanleer.android.aeon"
-      android:versionCode="28"
-      android:versionName="0.4.1">
-    <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19" />    
-    <supports-screens android:largeScreens="true" android:xlargeScreens="true"/>
+    package="vanleer.android.aeon"
+    android:versionCode="28"
+    android:versionName="0.4.1" >
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="19" />
+
+    <supports-screens
+        android:largeScreens="true"
+        android:xlargeScreens="true" />
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />    
-    <application android:icon="@drawable/arrive_launcher" android:label="@string/app_name" android:vmSafeMode="true" android:allowBackup="false">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/arrive_launcher"
+        android:label="@string/app_name"
+        android:vmSafeMode="true" >
         <uses-library android:name="com.google.android.maps" />
-        <activity android:name=".Itinerary"
-            	  android:icon="@drawable/arrive_launcher"
-                  android:label="@string/app_name"
-                  android:launchMode="singleTop" >
+
+        <activity
+            android:name=".Itinerary"
+            android:icon="@drawable/arrive_launcher"
+            android:label="@string/app_name"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>        
-        <activity android:name=".PlacesSearchActivity" android:label="@string/add_destination_title" android:configChanges="orientation" />
-        <activity android:name=".DestinationScheduleActivity" android:label="@string/destination_schedule_title" android:configChanges="orientation" />
-        <activity android:name=".DepartureAlarm" android:configChanges="orientation" />
+        </activity>
+        <activity
+            android:name=".PlacesSearchActivity"
+            android:configChanges="orientation"
+            android:label="@string/add_destination_title" />
+        <activity
+            android:name=".DestinationScheduleActivity"
+            android:configChanges="orientation"
+            android:label="@string/destination_schedule_title" />
+        <activity
+            android:name=".DepartureAlarm"
+            android:configChanges="orientation" />
+
         <service android:name=".DepartureReminder" />
         <service android:name=".ItineraryManager" />
-        <!-- receiver android:name="AeonBroadcastReceiver" /-->
-        <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyB1tUOl_uSnOhbfztoaUhMdStYd1R3U3ys"/>
+        <!-- receiver android:name="AeonBroadcastReceiver" / -->
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyB1tUOl_uSnOhbfztoaUhMdStYd1R3U3ys" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
-    
+
 </manifest>
