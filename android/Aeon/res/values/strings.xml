@@ -15,13 +15,12 @@
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="login_label">Login</string>
-    <string name="places_search_title">Places Search</string>
+    <string name="places_search_title">Choose your destination</string>
     <string name="destination_schedule_title">Schedule</string>
     <string name="my_location_default">My location</string>
     <string name="destination_search_hint">Enter place or address</string>
     <string name="enter_search_query_here">Enter search query here</string>
     <string name="powered_by_google">Powered by Google</string>
-    <string name="destination_search_button">destination search button</string>
     <string name="my_location_layout">current location area</string>
     <string name="my_location_icon">My location icon</string>
     <string name="add_destination_itinerary_item">Next destination</string>

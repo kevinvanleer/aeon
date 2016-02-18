@@ -61,26 +61,19 @@
         <AutoCompleteTextView
             android:id="@+id/editText_searchQuery"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:completionThreshold="2"
             android:dropDownHeight="match_parent"
             android:dropDownWidth="match_parent"
             android:hint="@string/destination_search_hint"
             android:imeOptions="actionSearch"
-            android:inputType="textPostalAddress" >
+            android:inputType="textPostalAddress"
+            android:drawableStart="@drawable/ic_search"
+            android:drawableLeft="@drawable/ic_search"
+            android:drawableRight="@drawable/ic_clear_search_api_holo_light"
+            android:drawableEnd="@drawable/ic_clear_search_api_holo_light">
 
         </AutoCompleteTextView>
-
-        <ImageButton
-            android:id="@+id/imageButton_search"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:contentDescription="@string/destination_search_button"
-            android:src="@android:drawable/ic_menu_search" >
-        </ImageButton>
     </LinearLayout>
 
     <LinearLayout
