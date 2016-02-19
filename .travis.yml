@@ -47,4 +47,4 @@ before_script:
   - adb shell input keyevent 82 &
 
 script:
-  - ./gradlew connectedCheck -PdisablePreDex --stacktrace --debug
+  - ./gradlew connectedCheck -PdisablePreDex --stacktrace --info
