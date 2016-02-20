@@ -89,20 +89,20 @@ public final class GooglePlacesSearch {
 	void performSearch(double latitude, double longitude, Double radius, String type, String name) {
 		clearSearchResults();
 
-		addPlacesResults(performPlacesSearch(latitude, longitude, radius, type, name));
+		List<Address> newOrigins = performGeocodingSearch(name);
+		double searchLatitude = latitude;
+		double searchLongitude = longitude;
+		if (!newOrigins.isEmpty()) {
+			searchLatitude = newOrigins.get(0).getLatitude();
+			searchLongitude = newOrigins.get(0).getLongitude();
+		}
+
+		JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, type, name);
+		addPlacesResults(newPlaces);
 
 		if (places.isEmpty()) {
 			List<Address> addresses = performGeocodingSearch(name);
-			double searchLatitude = latitude;
-			double searchLongitude = longitude;
-			if (!addresses.isEmpty()) {
-				searchLatitude = addresses.get(0).getLatitude();
-				searchLongitude = addresses.get(0).getLongitude();
-			}
-			JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, types, name);
-			if (newPlaces != null) {
-				addPlacesResults(newPlaces);
-			} else {
+			if (addresses != null) {
 				addGeocodingResults(addresses);
 			}
 		}
