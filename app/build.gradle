@@ -25,6 +25,5 @@ dependencies {
     compile project(':util')
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
-    //compile 'org.apache.clerezza.ext:org.json.simple:0.4'
     compile 'com.google.android.gms:play-services-analytics:8.4.0'
 }
