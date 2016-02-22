@@ -38,9 +38,9 @@ public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json";
 	private static final String GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
 	private String apiKey = null;
-	private final ArrayList<ItineraryItem> places = new ArrayList<ItineraryItem>();
+	private final ArrayList<ItineraryItem> places = new ArrayList<>();
 	private final Geocoder externalGeocoder;
-	private static final ArrayList<String> placeTypes = new ArrayList<String>();
+	private static final ArrayList<String> placeTypes = new ArrayList<>();
 
 	GooglePlacesSearch(Geocoder geocoder, String userApiKey, String userClientId) {
 		apiKey = userApiKey;
@@ -57,9 +57,7 @@ public final class GooglePlacesSearch {
 	void performSearch(double latitude, double longitude, Double radius, String name) {
 		String type = findType(name);
 		if (type != null) {
-			String[] types = new String[1];
-			types[0] = type;
-			performSearch(latitude, longitude, radius, types);
+			performSearch(latitude, longitude, radius, type, null);
 		} else {
 			performSearch(latitude, longitude, radius, null, name);
 		}
@@ -88,14 +86,11 @@ public final class GooglePlacesSearch {
 		return inferredType;
 	}
 
-	void performSearch(double latitude, double longitude, Double radius, String[] types) {
-		performSearch(latitude, longitude, radius, types, "");
-	}
-
-	void performSearch(double latitude, double longitude, Double radius, String[] types, String name) {
+	void performSearch(double latitude, double longitude, Double radius, String type, String name) {
 		clearSearchResults();
 
-		performPlacesSearch(latitude, longitude, radius, types, name);
+		performPlacesSearch(latitude, longitude, radius, type, name);
+
 		if (places.isEmpty()) {
 			performGeocodingSearch(name);
 		}
@@ -113,17 +108,17 @@ public final class GooglePlacesSearch {
 	}
 
 	// PLACES
-	public void performPlacesSearch(double latitude, double longitude, Double radius, String[] types, String name) {
+	public JSONObject performPlacesSearch(double latitude, double longitude, Double radius, String type, String name) {
 		try {
-			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, types, name);
-			JSONObject placesSearchResults = performHttpGet(url);
-			addPlacesResults(placesSearchResults);
+			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, type, name);
+			return performHttpGet(url);
 		} catch (IllegalArgumentException e) {
 			Log.d("Aeon", "Places search failed with keyword:  \"" + name + "\"");
 		}
+		return null;
 	}
 
-	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String[] types, String keyword) {
+	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String type, String keyword) {
 
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
@@ -132,16 +127,16 @@ public final class GooglePlacesSearch {
 			url += "&radius=" + radius;
 		} else {
 			url += "&rankby=distance";
-			if ((keyword == null || keyword.isEmpty()) && (types == null || types.length == 0)) {
-				throw new IllegalArgumentException("A keywork, name or type must be provided if a search radius is not.");
+			if ((keyword == null || keyword.isEmpty()) && (type == null)) {
+				throw new IllegalArgumentException("A keyword, name or type must be provided if a search radius is not.");
 			}
 		}
 
-		if (types != null) {
-			url += "&types=" + getTypesUrlPart(types);
+		if (type != null) {
+			url += "&type=" + Uri.encode(type);
 		}
 
-		if (keyword != "") {
+		if (keyword != null && keyword.equals("")) {
 			url += "&keyword=" + Uri.encode(keyword);
 		}
 
@@ -167,17 +162,17 @@ public final class GooglePlacesSearch {
 	// PLACES
 
 	// AUTOCOMPLETE
-	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
-		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, types, offset);
+	public ArrayList<String> performPlacesAutocomplete(String input, Double latitude, Double longitude, Double radius, String type, Long offset) {
+		String url = buildGooglePlacesAutocompleteUrl(input, latitude, longitude, radius, type, offset);
 
 		JSONObject autocompleteResults = performHttpGet(url);
 		return getAutocompleteResultsList(autocompleteResults);
 	}
 
-	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String[] types, Long offset) {
+	private String buildGooglePlacesAutocompleteUrl(String input, Double latitude, Double longitude, Double radius, String type, Long offset) {
 		String url = GOOGLE_PLACES_AUTOCOMPLETE_URL;
 
-		if (input == null || input == "") {
+		if (input == null || input.equals("")) {
 			throw new IllegalArgumentException("Places autocomplete search requires an input string");
 		}
 
@@ -195,7 +190,7 @@ public final class GooglePlacesSearch {
 			url += "&radius=" + radius;
 		}
 
-		if ((offset != 0) && (offset != null)) {
+		if ((offset != null) && (offset != 0)) {
 			url += "&offset=" + offset;
 		}
 
@@ -205,7 +200,7 @@ public final class GooglePlacesSearch {
 	}
 
 	private ArrayList<String> getAutocompleteResultsList(JSONObject autocompleteResults) {
-		ArrayList<String> results = new ArrayList<String>();
+		ArrayList<String> results = new ArrayList<>();
 
 		if (autocompleteResults != null) {
 			JSONArray resultArray = (JSONArray) autocompleteResults.get("predictions");
@@ -361,7 +356,7 @@ public final class GooglePlacesSearch {
 			throw new InvalidDistanceMatrixResponseException(message);
 		}
 
-		if (resultArray != null) {
+		else {
 			for (int index = places.size() - 1; index >= 0; --index) {
 				JSONObject distance = (JSONObject) resultArray.get(index);
 				try {
@@ -381,20 +376,6 @@ public final class GooglePlacesSearch {
 
 	public int getResultCount() {
 		return places.size();
-	}
-
-	private String getTypesUrlPart(String[] types) {
-		String typesUrlPart = "";
-
-		for (int i = 0; i < types.length; ++i) {
-			if (i > 0) {
-				typesUrlPart += "|";
-			}
-
-			typesUrlPart += types[i];
-		}
-
-		return Uri.encode(typesUrlPart);
 	}
 
 	private void initializePlaceTypes() {
