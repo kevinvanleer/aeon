@@ -300,7 +300,7 @@ public final class PlacesSearchActivity extends Activity {
 
 			Long offset = (long) searchText.getSelectionStart();
 
-			results = googleSearch.performPlacesAutocomplete(input, latitude, longitude, radius, (String[]) null, offset);
+			results = googleSearch.performPlacesAutocomplete(input, latitude, longitude, radius, null, offset);
 		}
 		return results;
 	}
