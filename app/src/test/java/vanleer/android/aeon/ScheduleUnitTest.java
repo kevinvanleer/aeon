@@ -5,9 +5,13 @@ import java.util.Date;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
-import junit.framework.TestCase;
+//import junit.framework.TestCase;
 
-public class ScheduleTest extends TestCase {
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class ScheduleUnitTest {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 
@@ -15,48 +19,59 @@ public class ScheduleTest extends TestCase {
 
 	}
 
+    //@Test
 	public void testSchedule() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testWriteToParcel() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testAreTimesConstrained_FlexibleDeadline_Undefined() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_FlexibleDeadline_OnlyArrival() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_FlexibleDeadline_OnlyDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_FlexibleDeadline_OnlyDeparture() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_HardDeadline_AllDefined() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_HardDeadline_ArrivalDestination() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_HardDeadline_ArrivalDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testAreTimesConstrained_HardDeadline_DepartureDuration() {
 		fail("Not yet implemented");
 	}
 
+    @Test
 	public void testIsArrivalTimeFlexible() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -68,6 +83,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(testSchedule.isArrivalTimeFlexible());
 	}
 
+    @Test
 	public void testIsDepartureTimeFlexible() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -80,6 +96,7 @@ public class ScheduleTest extends TestCase {
 
 	}
 
+    @Test
 	public void testIsStayDurationFlexible() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -92,6 +109,7 @@ public class ScheduleTest extends TestCase {
 
 	}
 
+    @Test
 	public void testIsDateFlexible_null_argument() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -106,6 +124,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(privateAccess.isDateFlexible(validTime, validMin, null));
 	}
 
+    @Test
 	public void testIsDateFlexible_true() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -116,7 +135,7 @@ public class ScheduleTest extends TestCase {
 
 		assertTrue(privateAccess.isDateFlexible(validMin, validTime, validMax));
 	}
-
+    @Test
 	public void testIsDateFlexible_false() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -128,6 +147,7 @@ public class ScheduleTest extends TestCase {
 		assertFalse(privateAccess.isDateFlexible(validMin, validTime, validMax));
 	}
 
+    @Test
 	public void testIsDateValid_null() {
 		Schedule testSchedule = new Schedule();
 
@@ -139,11 +159,13 @@ public class ScheduleTest extends TestCase {
 		}
 	}
 
+    @Test
 	public void testIsDateValid_no_limits() {
 		Schedule testSchedule = new Schedule();
 		assertTrue(testSchedule.isDateValid(new Date(), null, null));
 	}
 
+    @Test
 	public void testIsDateValid_invalid() {
 		Schedule testSchedule = new Schedule();
 
@@ -154,6 +176,7 @@ public class ScheduleTest extends TestCase {
 		assertFalse(testSchedule.isDateValid(time, minTime, maxTime));
 	}
 
+    @Test
 	public void testIsDateValid_flexible() {
 		Schedule testSchedule = new Schedule();
 
@@ -164,6 +187,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(testSchedule.isDateValid(time, minTime, maxTime));
 	}
 
+    @Test
 	public void testIsDateValid_hard() {
 		Schedule testSchedule = new Schedule();
 
@@ -174,6 +198,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(testSchedule.isDateValid(time, minTime, maxTime));
 	}
 
+    @Test
 	public void testIsArrivalTimeValid_invalid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -185,6 +210,7 @@ public class ScheduleTest extends TestCase {
 		assertFalse(testSchedule.isArrivalTimeValid());
 	}
 
+    @Test
 	public void testIsArrivalTimeValid_flexible() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -196,6 +222,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(testSchedule.isArrivalTimeValid());
 	}
 
+    @Test
 	public void testIsArrivalTimeValid_hard() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -207,26 +234,31 @@ public class ScheduleTest extends TestCase {
 		assertTrue(testSchedule.isArrivalTimeValid());
 	}
 
+    //@Test
 	public void testIsDepartureTimeValid() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testIsDurationValid() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testIsStayDurationValid() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testValidate() {
 		fail("Not yet implemented");
 
 	}
 
+    @Test
 	public void testUpdate() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -241,72 +273,87 @@ public class ScheduleTest extends TestCase {
 		assertTrue(arrivalTime == (departureTime - stayDurationMs));
 	}
 
+    //@Test
 	public void testGetArrivalTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMinArrivalTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMaxArrivalTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetDepartureTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMinDepartureTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMaxDepartureTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetStayDuration() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMinStayDuration() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetMaxStayDuration() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testGetArrivalTimeString() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testGetDepartureTimeString() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testGetStayDurationClockFormat() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testGetStayDurationLongFormat() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetArrivalTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    @Test
 	public void testSetHardArrivalTime() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -319,32 +366,39 @@ public class ScheduleTest extends TestCase {
 		assertFalse(testSchedule.isArrivalTimeFlexible());
 	}
 
+    //@Test
 	public void testSetHardArrivalTime_Invalid() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testSetMinArrivalTime() {
 		fail("Not yet implemented");
 		// original
 	}
 
+    //@Test
 	public void testOverrideMinArrivalTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetMaxArrivalTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testOverrideMaxArrivalTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetDepartureTime() {
 		fail("Not yet implemented");
 	}
 
+    @Test
 	public void testSetHardDepartureTime() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -357,26 +411,32 @@ public class ScheduleTest extends TestCase {
 		assertFalse(testSchedule.isDepartureTimeFlexible());
 	}
 
+    //@Test
 	public void testSetMinDepartureTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testOverrideMinDepartureTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetMaxDepartureTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testOverrideMaxDepartureTime() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetStayDuration() {
 		fail("Not yet implemented");
 	}
 
+    @Test
 	public void testSetHardStayDuration() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -389,26 +449,32 @@ public class ScheduleTest extends TestCase {
 		assertFalse(testSchedule.isStayDurationFlexible());
 	}
 
+    //@Test
 	public void testSetMinStayDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testOverrideMinStayDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testSetMaxStayDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testOverrideMaxStayDuration() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testDescribeContents() {
 		fail("Not yet implemented");
 	}
 
+    @Test
 	public void testIsDateInBounds_throw() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -421,6 +487,7 @@ public class ScheduleTest extends TestCase {
 		}
 	}
 
+    @Test
 	public void testIsDateInBounds_no_min_no_max() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -428,6 +495,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(privateAccess.isDateInBounds(new Date(1), null, null));
 	}
 
+    @Test
 	public void testIsDateInBounds_only_max_valid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -435,6 +503,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(privateAccess.isDateInBounds(new Date(1), null, new Date(2)));
 	}
 
+    @Test
 	public void testIsDateInBounds_only_max_invalid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -442,6 +511,7 @@ public class ScheduleTest extends TestCase {
 		assertFalse(privateAccess.isDateInBounds(new Date(3), null, new Date(2)));
 	}
 
+    @Test
 	public void testIsDateInBounds_only_min_valid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -449,6 +519,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(privateAccess.isDateInBounds(new Date(2), new Date(1), null));
 	}
 
+    @Test
 	public void testIsDateInBounds_only_min_invalid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -456,6 +527,7 @@ public class ScheduleTest extends TestCase {
 		assertFalse(privateAccess.isDateInBounds(new Date(3), new Date(4), null));
 	}
 
+    @Test
 	public void testIsDurationInBounds_valid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -463,6 +535,7 @@ public class ScheduleTest extends TestCase {
 		assertTrue(privateAccess.isDateInBounds(new Date(6), new Date(4), new Date(8)));
 	}
 
+    @Test
 	public void testIsDurationInBounds_invalid() {
 		Schedule testSchedule = new Schedule();
 		Schedule.PrivateTests privateAccess = testSchedule.new PrivateTests();
@@ -470,14 +543,17 @@ public class ScheduleTest extends TestCase {
 		assertFalse(privateAccess.isDateInBounds(new Date(3), new Date(4), new Date(8)));
 	}
 
+    //@Test
 	public void testIsDurationInBounds_less_than_min() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testIsDurationInBounds_greater_than_max() {
 		fail("Not yet implemented");
 	}
 
+    //@Test
 	public void testIsDurationInBounds_in_bounds() {
 		fail("Not yet implemented");
 	}
