@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.Pair;
 
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
@@ -51,19 +52,53 @@ public final class GooglePlacesSearch {
 	}
 
 	void performSearch(double latitude, double longitude, String keyword) {
-		performSearch(latitude, longitude, null, null, keyword);
+		performSearch(latitude, longitude, null, keyword);
 	}
 
-	void performSearch(double latitude, double longitude, Double radius, String name) {
-		String type = findType(name);
-		if (type != null) {
-			performSearch(latitude, longitude, radius, type, null);
-		} else {
-			performSearch(latitude, longitude, radius, null, name);
+	void performSearch(double latitude, double longitude, Double radius, String keyword) {
+		Pair<String, String> typePair = findType(keyword);
+		performSearch(latitude, longitude, radius, typePair.first, typePair.second);
+	}
+
+	static private Pair<String,String> findType(String keyword) {
+		String type = null;
+
+		String theType = _findType(keyword);
+		if(theType != null) {
+			return new Pair<>(theType, null);
 		}
+
+		String[] words = keyword.split(" ");
+		String remove = "";
+		String remaining = keyword;
+
+		for(int i = 0; i < words.length; ++i) {
+			for(int j = 0; j < words.length; ++j) {
+				String query = "";
+				if((i + j) < (words.length - 1)) {
+					for (int k = 0; k < j; ++k) {
+						if(query != "") {
+							query += " ";
+						}
+						query += words[i + k];
+					}
+					theType = _findType(query);
+					if(theType != null) {
+						type = theType;
+						remove = query;
+					}
+				}
+			}
+		}
+
+		if(!remove.isEmpty()) {
+			remaining = keyword.replace(remove, "").replace("  ", " ").trim();
+		}
+
+		return new Pair<>(type, remaining);
 	}
 
-	private String findType(String name) {
+	static private String _findType(String name) {
 		String inferredType = null;
 
 		name = name.toLowerCase(Locale.US);
@@ -90,6 +125,9 @@ public final class GooglePlacesSearch {
 		clearSearchResults();
 
 		List<Address> newOrigins = performGeocodingSearch(name);
+
+		// determine if result is a specific address or general location
+
 		double searchLatitude = latitude;
 		double searchLongitude = longitude;
 		if (!newOrigins.isEmpty()) {
@@ -125,13 +163,12 @@ public final class GooglePlacesSearch {
 			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, type, name);
 			return performHttpGet(url);
 		} catch (IllegalArgumentException e) {
-			Log.d("Aeon", "Places search failed with keyword:  \"" + name + "\"");
+			Log.d("Aeon", "Places search failed to find \"" + name + "\"");
 		}
 		return null;
 	}
 
 	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String type, String keyword) {
-
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
 		url += "?location=" + latitude + "," + longitude;
@@ -539,5 +576,15 @@ public final class GooglePlacesSearch {
 		}
 
 		return jsonResponse;
+	}
+
+	public final class PrivateTests {
+		public android.util.Pair<String,String> findType(String keyword) {
+			Pair<String,String> result = GooglePlacesSearch.findType(keyword);
+			return result;
+		}
+		public String _findType(String keyword) {
+			return GooglePlacesSearch._findType(keyword);
+		}
 	}
 }
