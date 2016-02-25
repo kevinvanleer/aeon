@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -56,63 +57,29 @@ public final class GooglePlacesSearch {
 	}
 
 	void performSearch(double latitude, double longitude, Double radius, String keyword) {
-		Pair<String, String> typePair = findType(keyword);
-		performSearch(latitude, longitude, radius, typePair.first, typePair.second);
+		String type = findType(keyword);
+		performSearch(latitude, longitude, radius, type, remainingQuery(type, keyword));
 	}
 
-	static private Pair<String,String> findType(String keyword) {
-		String type = null;
+    static private String remainingQuery(String type, String keyword) {
+        if(type == null || type.isEmpty()) {
+            return keyword;
+        }
 
-		String theType = _findType(keyword);
-		if(theType != null) {
-			return new Pair<>(theType, null);
-		}
+        if(type.equals(keyword)) {
+            return null;
+        }
 
-		String[] words = keyword.split(" ");
-		String remove = "";
-		String remaining = keyword;
+        return keyword.replace(type.replace("_", " "), "").replace("  ", " ").trim();
+    }
 
-		for(int i = 0; i < words.length; ++i) {
-			for(int j = 0; j < words.length; ++j) {
-				String query = "";
-				if((i + j) < (words.length - 1)) {
-					for (int k = 0; k < j; ++k) {
-						if(query != "") {
-							query += " ";
-						}
-						query += words[i + k];
-					}
-					theType = _findType(query);
-					if(theType != null) {
-						type = theType;
-						remove = query;
-					}
-				}
-			}
-		}
-
-		if(!remove.isEmpty()) {
-			remaining = keyword.replace(remove, "").replace("  ", " ").trim();
-		}
-
-		return new Pair<>(type, remaining);
-	}
-
-	static private String _findType(String name) {
+	static private String findType(String name) {
 		String inferredType = null;
-
-		name = name.toLowerCase(Locale.US);
-		if (name.endsWith("es")) {
-			name = name.substring(0, (name.length() - 2));
-		}
-		if (name.endsWith("s")) {
-			name = name.substring(0, (name.length() - 1));
-		}
 
 		Iterator<String> itr = placeTypes.iterator();
 		while (itr.hasNext()) {
 			String type = itr.next();
-			if (name.compareTo(type.replace("_", " ")) == 0) {
+			if (name.contains(type.replace("_", " "))) {
 				inferredType = type;
 				break;
 			}
@@ -579,12 +546,11 @@ public final class GooglePlacesSearch {
 	}
 
 	public final class PrivateTests {
-		public android.util.Pair<String,String> findType(String keyword) {
-			Pair<String,String> result = GooglePlacesSearch.findType(keyword);
-			return result;
-		}
-		public String _findType(String keyword) {
-			return GooglePlacesSearch._findType(keyword);
-		}
+		public String findType(String keyword) {
+            return GooglePlacesSearch.findType(keyword);
+        }
+        public String remainingQuery(String type, String keyword) {
+            return GooglePlacesSearch.remainingQuery(type, keyword);
+        }
 	}
 }
