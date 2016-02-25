@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--kml xmlns="http://www.opengis.net/kml/2.2"-->
+<kml xmlns="http://earth.google.com/kml/2.2">
+      <Placemark>
+         <name>Home</name>
+         <Point>
+            <coordinates>-91.051562,38.477548,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>BB/Stonehenge</name>
+         <Point>
+            <coordinates>-91.046040,38.478126,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>BB/A</name>
+         <Point>
+            <coordinates>-91.043894,38.482120,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Voss</name>
+         <Point>
+            <coordinates>-91.188497,38.420915,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Mom's</name>
+         <Point>
+            <coordinates>-91.159457,38.442181,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Krakow Store</name>
+         <Point>
+            <coordinates>-91.045503,38.497900,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>St Gertrude School</name>
+         <Point>
+            <coordinates>-91.046384,38.497378,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Clearview Elementary</name>
+         <Point>
+            <coordinates>-91.022136,38.477748,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Burger Park</name>
+         <Point>
+            <coordinates>-90.98595,38.539638,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Burger Park Parking</name>
+         <Point>
+            <coordinates>-90.986154,38.540272,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Union QuikTrip</name>
+         <Point>
+            <coordinates>-90.992107,38.442264,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Work intersection</name>
+         <Point>
+            <coordinates>-90.348860,38.759770,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Work guard shack</name>
+         <Point>
+            <coordinates>-90.350558,38.756074,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Work parking</name>
+         <Point>
+            <coordinates>-90.351562,38.755339,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Work door</name>
+         <Point>
+            <coordinates>-90.350842,38.754595,0</coordinates>
+         </Point>
+      </Placemark>
+      <Placemark>
+         <name>Work lab</name>
+         <Point>
+            <coordinates>-90.350443,38.754545,0</coordinates>
+         </Point>
+      </Placemark>
+</kml>
+
