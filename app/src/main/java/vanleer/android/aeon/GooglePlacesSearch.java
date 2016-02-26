@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +33,7 @@ import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.Pair;
 
 public final class GooglePlacesSearch {
 	private static final String GOOGLE_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
@@ -51,33 +53,33 @@ public final class GooglePlacesSearch {
 	}
 
 	void performSearch(double latitude, double longitude, String keyword) {
-		performSearch(latitude, longitude, null, null, keyword);
+		performSearch(latitude, longitude, null, keyword);
 	}
 
-	void performSearch(double latitude, double longitude, Double radius, String name) {
-		String type = findType(name);
-		if (type != null) {
-			performSearch(latitude, longitude, radius, type, null);
-		} else {
-			performSearch(latitude, longitude, radius, null, name);
-		}
+	void performSearch(double latitude, double longitude, Double radius, String keyword) {
+		String type = findType(keyword);
+		performSearch(latitude, longitude, radius, type, remainingQuery(type, keyword));
 	}
 
-	private String findType(String name) {
+    static private String remainingQuery(String type, String keyword) {
+        if(type == null || type.isEmpty()) {
+            return keyword;
+        }
+
+        if(type.equals(keyword)) {
+            return null;
+        }
+
+        return keyword.replace(type.replace("_", " "), "").replace("  ", " ").trim();
+    }
+
+	static private String findType(String name) {
 		String inferredType = null;
-
-		name = name.toLowerCase(Locale.US);
-		if (name.endsWith("es")) {
-			name = name.substring(0, (name.length() - 2));
-		}
-		if (name.endsWith("s")) {
-			name = name.substring(0, (name.length() - 1));
-		}
 
 		Iterator<String> itr = placeTypes.iterator();
 		while (itr.hasNext()) {
 			String type = itr.next();
-			if (name.compareTo(type.replace("_", " ")) == 0) {
+			if (name.contains(type.replace("_", " "))) {
 				inferredType = type;
 				break;
 			}
@@ -89,10 +91,42 @@ public final class GooglePlacesSearch {
 	void performSearch(double latitude, double longitude, Double radius, String type, String name) {
 		clearSearchResults();
 
-		performPlacesSearch(latitude, longitude, radius, type, name);
+        List<Address> newOrigins = null;
+        double searchLatitude = latitude;
+        double searchLongitude = longitude;
+        String keyword = name;
+
+        if(keyword != null) {
+            newOrigins = performGeocodingSearch(keyword);
+        }
+
+		// determine if result is a specific address or general location
+        // that is, are feature and locality the same --> general location
+        // is there only one result --> high certainty???
+        // are there less than three address lines --> general location
+
+        if (newOrigins != null && newOrigins.size() > 0) {
+            if ((newOrigins.get(0).getFeatureName().equals(newOrigins.get(0).getLocality()) ||
+                    newOrigins.get(0).getFeatureName().equals(newOrigins.get(0).getPostalCode())) &&
+                    newOrigins.get(0).getMaxAddressLineIndex() <= 1) {
+                searchLatitude = newOrigins.get(0).getLatitude();
+                searchLongitude = newOrigins.get(0).getLongitude();
+                if (type != null) {
+                    keyword = null;
+                }
+            } else {
+                // specific address found, maybe ???
+                // was a type specified as well?
+            }
+        } else {
+            // what now?
+        }
+
+		JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, type, keyword);
+		addPlacesResults(newPlaces);
 
 		if (places.isEmpty()) {
-			performGeocodingSearch(name);
+            addGeocodingResults(newOrigins);
 		}
 
 		if (!places.isEmpty()) {
@@ -113,13 +147,12 @@ public final class GooglePlacesSearch {
 			String url = buildGooglePlacesSearchUrl(latitude, longitude, radius, type, name);
 			return performHttpGet(url);
 		} catch (IllegalArgumentException e) {
-			Log.d("Aeon", "Places search failed with keyword:  \"" + name + "\"");
+			Log.d("Aeon", "Places search failed to find \"" + name + "\"");
 		}
 		return null;
 	}
 
 	private String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String type, String keyword) {
-
 		String url = GOOGLE_PLACES_SEARCH_URL;
 
 		url += "?location=" + latitude + "," + longitude;
@@ -136,7 +169,7 @@ public final class GooglePlacesSearch {
 			url += "&type=" + Uri.encode(type);
 		}
 
-		if (keyword != null && keyword.equals("")) {
+		if (keyword != null && !keyword.isEmpty()) {
 			url += "&keyword=" + Uri.encode(keyword);
 		}
 
@@ -220,7 +253,7 @@ public final class GooglePlacesSearch {
 	// AUTOCOMPLETE
 
 	// GEOCODING
-	private void performGeocodingSearch(String address) {
+	private List<Address> performGeocodingSearch(String address) {
 		List<Address> geocodingSearchResults = null;
 		try {
 			geocodingSearchResults = externalGeocoder.getFromLocationName(address, 10);
@@ -228,7 +261,7 @@ public final class GooglePlacesSearch {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		addGeocodingResults(geocodingSearchResults);
+		return geocodingSearchResults;
 	}
 
 	private void addGeocodingResults(List<Address> geocodingSearchResults) {
@@ -528,4 +561,16 @@ public final class GooglePlacesSearch {
 
 		return jsonResponse;
 	}
+
+	public final class PrivateTests {
+		public String findType(String keyword) {
+            return GooglePlacesSearch.findType(keyword);
+        }
+        public String remainingQuery(String type, String keyword) {
+            return GooglePlacesSearch.remainingQuery(type, keyword);
+        }
+        public String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String type, String keyword) {
+            return GooglePlacesSearch.this.buildGooglePlacesSearchUrl(latitude, longitude, radius, type, keyword);
+        }
+    }
 }
