@@ -91,25 +91,42 @@ public final class GooglePlacesSearch {
 	void performSearch(double latitude, double longitude, Double radius, String type, String name) {
 		clearSearchResults();
 
-		List<Address> newOrigins = performGeocodingSearch(name);
+        List<Address> newOrigins = null;
+        double searchLatitude = latitude;
+        double searchLongitude = longitude;
+        String keyword = name;
+
+        if(keyword != null) {
+            newOrigins = performGeocodingSearch(keyword);
+        }
 
 		// determine if result is a specific address or general location
+        // that is, are feature and locality the same --> general location
+        // is there only one result --> high certainty???
+        // are there less than three address lines --> general location
 
-		double searchLatitude = latitude;
-		double searchLongitude = longitude;
-		if (!newOrigins.isEmpty()) {
-			searchLatitude = newOrigins.get(0).getLatitude();
-			searchLongitude = newOrigins.get(0).getLongitude();
-		}
+        if (newOrigins != null && newOrigins.size() > 0) {
+            if ((newOrigins.get(0).getFeatureName().equals(newOrigins.get(0).getLocality()) ||
+                    newOrigins.get(0).getFeatureName().equals(newOrigins.get(0).getPostalCode())) &&
+                    newOrigins.get(0).getMaxAddressLineIndex() <= 1) {
+                searchLatitude = newOrigins.get(0).getLatitude();
+                searchLongitude = newOrigins.get(0).getLongitude();
+                if (type != null) {
+                    keyword = null;
+                }
+            } else {
+                // specific address found, maybe ???
+                // was a type specified as well?
+            }
+        } else {
+            // what now?
+        }
 
-		JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, type, name);
+		JSONObject newPlaces = performPlacesSearch(searchLatitude, searchLongitude, radius, type, keyword);
 		addPlacesResults(newPlaces);
 
 		if (places.isEmpty()) {
-			List<Address> addresses = performGeocodingSearch(name);
-			if (addresses != null) {
-				addGeocodingResults(addresses);
-			}
+            addGeocodingResults(newOrigins);
 		}
 
 		if (!places.isEmpty()) {
@@ -152,7 +169,7 @@ public final class GooglePlacesSearch {
 			url += "&type=" + Uri.encode(type);
 		}
 
-		if (keyword != null && keyword.equals("")) {
+		if (keyword != null && !keyword.isEmpty()) {
 			url += "&keyword=" + Uri.encode(keyword);
 		}
 
@@ -552,5 +569,8 @@ public final class GooglePlacesSearch {
         public String remainingQuery(String type, String keyword) {
             return GooglePlacesSearch.remainingQuery(type, keyword);
         }
-	}
+        public String buildGooglePlacesSearchUrl(double latitude, double longitude, Double radius, String type, String keyword) {
+            return GooglePlacesSearch.this.buildGooglePlacesSearchUrl(latitude, longitude, radius, type, keyword);
+        }
+    }
 }

@@ -93,7 +93,6 @@ public class GooglePlacesSearchUnitTest {
         assertEquals("some place", remaining);
     }
 
-
     @Test
     public void remainingQuery_two_words() {
         GooglePlacesSearch testSearch = new GooglePlacesSearch(null, "","");
@@ -102,4 +101,23 @@ public class GooglePlacesSearchUnitTest {
         String remaining = privateAccess.remainingQuery("test_type", "test type the place");
         assertEquals("the place", remaining);
     }
+
+    /* This needs to be instrumented
+    @Test
+    public void buildGooglePlacesSearchUrl() {
+        GooglePlacesSearch testSearch = new GooglePlacesSearch(null, "","");
+        GooglePlacesSearch.PrivateTests privateAccess = testSearch.new PrivateTests();
+
+        double latitude = 1;
+        double longitude = 2;
+        Double radius = null;
+        String type = null;
+        String keyword = "testKeyword";
+
+        String url = privateAccess.buildGooglePlacesSearchUrl(latitude, longitude, radius, type, keyword);
+        assertTrue(url.contains("keyword=testKeyword"));
+        assertTrue(url.contains("location=1,2"));
+        assertTrue(!url.contains("radius"));
+        assertTrue(!url.contains("type"));
+    }*/
 }
